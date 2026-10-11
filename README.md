@@ -57,7 +57,7 @@ The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163
 | `GET /api/health/db` | Read-only DB connectivity | Public health signal (no secrets) |
 | `GET /api/episodes` | Published editorial indexes | Published-only |
 | `GET /api/episodes/:slug` | Published episode index | Published-only |
-| `GET/POST/PUT/PATCH/DELETE /api/auth/*` | Neon Managed Auth session routes | Neon Auth session |
+| `GET/POST /api/auth/*` | Allowlisted Neon Managed Auth session routes | Neon Auth session |
 | `GET /api/editor/session` | Current editor role and allowlist status | Own session only |
 | `POST /api/editor/drafts` | Draft + immutable first revision + audit | Same-origin Neon Auth admin session and server allowlist |
 | `POST /api/editor/revisions` | Append immutable revision + audit | Same-origin Neon Auth admin session and server allowlist |

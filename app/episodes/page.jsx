@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { getDatabase } from "../../db/client";
 import { stories } from "../../db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function EpisodesPage() {
+  await connection();
   let episodes = [];
   let connectionIssue = false;
   try {
@@ -22,7 +24,7 @@ export default async function EpisodesPage() {
       <h1 style={{fontSize:"clamp(38px,6vw,76px)",margin:"12px 0"}}>THE EPISODE ARCHIVE</h1>
       <p style={{maxWidth:700}}>MoonWitness stories, The Batteries absurd comedy, witness journeys and AETHERION. Each entry below is an editorial index; full original scripts and comic pages are still being recovered.</p>
     </header>
-    {connectionIssue?<section style={{padding:25,background:"#382535",marginTop:28}}>Archive database is temporarily unavailable. No private drafts are displayed.</section>:
+    {connectionIssue?<section role="alert" style={{padding:25,background:"#382535",marginTop:28}}><h2>THE VAULT IS TAKING A BREATHER</h2><p>Archive database is temporarily unavailable. No private drafts are displayed.</p><Link href="/episodes" style={{display:"inline-block",padding:"12px 18px",background:"#c6ff5b",color:"#101529",fontWeight:900}}>TRY AGAIN ↻</Link></section>:
     <><p style={{color:"#c6ff5b",marginTop:26}}>{episodes.length} INDEXED EPISODES • DEVELOPMENT VAULT</p>
     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:18,marginTop:22}}>
       {episodes.map((e,i)=><article key={e.slug} style={{border:"2px solid #5de8ef",background:"#202b43",padding:20,boxShadow:"5px 5px #ff79bb"}}>
@@ -30,6 +32,7 @@ export default async function EpisodesPage() {
         <h2 style={{fontSize:24,lineHeight:1.2}}>{e.title}</h2>
         <p style={{lineHeight:1.6}}>{e.synopsis}</p>
         <small style={{color:"#a0b9ca"}}>ORIGINAL SOURCE: {e.originalSourceStatus?.replaceAll("_"," ").toUpperCase()}</small>
+        <p><Link href={`/episodes/${encodeURIComponent(e.slug)}`} style={{display:"inline-block",marginTop:18,color:"#70edee",fontWeight:800}}>OPEN INDEX ENTRY →</Link></p>
       </article>)}
     </div></>}
     <footer style={{padding:"50px 0",marginTop:45,borderTop:"2px solid #444",textAlign:"center"}}>

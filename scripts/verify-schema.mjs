@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
+import { selectSchemaSnapshot } from "../lib/schema-snapshot-selection.js";
 
 const args = process.argv.slice(2);
 const baselineReconciliation = args.length === 1 && args[0] === "--baseline-reconciliation";
@@ -19,7 +20,8 @@ if (!uri) {
 
 const db = neon(uri);
 const root = fileURLToPath(new URL("..", import.meta.url));
-const snapshotFile = baselineReconciliation ? "0000_snapshot.json" : "0001_snapshot.json";
+const journal = JSON.parse(await readFile(join(root, "drizzle", "meta", "_journal.json"), "utf8"));
+const snapshotFile = selectSchemaSnapshot({ baselineReconciliation, migrationEntries: journal.entries });
 const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", snapshotFile), "utf8"));
 const expectedTables = snapshot.tables;
 const schemas = [...new Set(Object.values(expectedTables).map((table) => table.schema))].sort();

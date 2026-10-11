@@ -1,10 +1,11 @@
 import {getAuth,isAuthConfigured} from "../../../../lib/auth.js";
-import {isAuthPathAllowed} from "../../../../lib/auth-policy.js";
+import {isAuthMethodAllowed,isAuthPathAllowed} from "../../../../lib/auth-policy.js";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
 async function dispatch(method,request,context){
+ if(!isAuthMethodAllowed(method))return Response.json({error:"Authentication method unavailable"},{status:405,headers:{Allow:"GET, POST"}});
  if(!isAuthConfigured())return Response.json({error:"Authentication is not configured"},{status:503});
  const path=(await context?.params)?.path;
  const authPath=Array.isArray(path)?path.join("/"):"";

@@ -49,7 +49,7 @@
 ## Suggested fastest remaining order
 1. Confirm the encrypted Preview DB branch mapping and owner-controlled test identity. Before editor onboarding, verify provider-side role assignment and determine whether direct provider signups can receive roles; Neon currently documents no restricted-signup switch. Configure the verified Neon user ID in the Preview-only `EDITOR_ADMIN_USER_IDS` variable. If invite-only registration is mandatory, select an auth provider that supports it (and MFA).
 2. After separate owner approval and exact target confirmation, rehearse the pending migrations on a disposable app-connected branch, then test authenticated draft/revision/audit and route-level concurrency with disposable content.
-3. Decide whether to approve a paid Neon plan for the selected daily/30-day schedule; set RPO/RTO and test representative-data restore.
+3. Keep Neon on Free as selected; daily/30-day retention is unmet. Define RPO/RTO, identify a no-cost backup destination if available, and test representative-data restore.
 4. Choose an MFA-capable production editor identity, complete source/rights review, and prepare rollback evidence.
 5. Review and integrate PR #4, which now contains the tested merge of `main`; then recheck PR #2 mergeability from `dev` to `main`.
 6. Deploy only after every gate passes and the owner explicitly approves promotion.

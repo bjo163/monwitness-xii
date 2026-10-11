@@ -37,7 +37,7 @@ This mode compares live schema structure with `drizzle/meta/0000_snapshot.json` 
 3. Obtain explicit owner approval to stamp this exact target. The approval must name the development branch and acknowledge that stamping records existing schema as migration `0000`; it does not execute the baseline SQL.
 4. Create the `drizzle` schema and standard `drizzle.__drizzle_migrations` table if absent, then insert exactly the `0000` hash and timestamp shown above. Stop if any ledger already exists or if the recorded baseline does not match.
 5. Apply the reviewed `0001` retention migration and then `0002` editor-write-limits migration in journal order. Do not apply the `0000` baseline SQL to this populated database.
-6. Run normal `npm run db:verify`, confirm the latest ledger row is `0002`, FK is `RESTRICT`, the `system.editor_write_limits` table exists, stories remain 15, and no draft/revision/audit data changed unexpectedly.
+6. Run normal `npm run db:verify`, which selects the snapshot matching the highest journal index; confirm the latest ledger row is `0002`, FK is `RESTRICT`, the `system.editor_write_limits` table exists, stories remain 15, and no draft/revision/audit data changed unexpectedly.
 7. Keep production separate. Its current root branch has no application tables; it needs a separately reviewed initial-schema and content rollout plan, not a populated-dev baseline stamp.
 
 No step in this document grants approval to write to persistent dev or production. The explicit owner approval and exact branch identity remain required.
