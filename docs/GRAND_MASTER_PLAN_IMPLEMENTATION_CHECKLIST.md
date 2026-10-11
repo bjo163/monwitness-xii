@@ -8,7 +8,7 @@
 
 **Latest local-only follow-up (2026-10-12, HEAD `d38c9f8`):** Neon Auth paths now enforce their SDK-defined HTTP methods. `npm test` passes 67/67, `npm run db:check`, production build, full `npm audit` (0 findings), and `actionlint` pass; loopback smoke passes 24/24 on port 3005. Mismatched methods return 405 with route-specific `Allow`; signup remains denied with 404. Current Archive visual: `http://localhost:3005/episodes`. No push or deploy was made; production remains NO-GO pending live release gates.
 
-Both smoke profiles now assert exact `Allow` headers for mismatched Auth path/method pairs and a no-store 401 for signed-out token requests (or the unconfigured-auth 503 in local mode). Contract tests require these checks in both profiles; latest local smoke count is 26.
+Both smoke profiles now assert exact `Allow` headers for mismatched Auth path/method pairs and a no-store 401 for signed-out token requests (or the unconfigured-auth 503 in local mode). Contract tests require these checks in both profiles; latest local smoke count is 25.
 
 **Latest verification update (2026-10-12, implementation commit `2904dea`):** 68/68 tests and 25/25 loopback smoke checks pass. The configured local Auth provider rejects signed-out token retrieval with 401/no-store; DB health and Archive remain safe 503s without the local database URL. No push or deployment occurred.
 
