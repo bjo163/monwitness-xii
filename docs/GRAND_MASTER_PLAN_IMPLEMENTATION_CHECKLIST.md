@@ -67,3 +67,9 @@ The repository contains the V11 handover, finalization release plan, V11.1 fast-
 - GitHub Issue #3 remains open; PR #2 remains open and `mergeable: false` (queried 2026-10-11). No migration apply or production deployment was run.
 
 - Final local verification after the new progress cases: npm test passed 26/26; npm run db:check passed; npm audit --omit=dev found 0 production vulnerabilities; npm run build passed; git diff --check passed. http://localhost:3000/ returned 200 and the refreshed page announced YOUR JOURNEY 0 / 33 LEVELS CLEARED plus device-local progress saving. Hero and four crew WebPs all returned 200.
+
+## Latest integration verification — 2026-10-12
+
+- Commit `e5eff67a2cc5186f85fe593fbe4d91a40d6ee895` merges `main` (`7daffea`) into the review branch and resolves source conflicts while retaining the V11 homepage/art, auth/schema, and migrations. Existing `app/[slug]` modules and universe data are restored; navigation exposes Story Archive, Throwing Dice, Four Books, and Aetherion.
+- Exact-head CI [38165821216](https://github.com/bjo163/monwitness-xii/actions/runs/38165821216) passed; Vercel Preview `dpl_HCuUTFQgX4QCBXGYJ1PB3mBtGVGr` is READY. Authorized HTTP fetches returned 200 for `/`, `/team`, `/throwing-dice`, `/four-books`, `/aetherion`, `/witness-log`, `/the-lab`, `/episodes`, `/api/health`, `/api/health/db`, `/api/episodes` (15 metadata-only indexes), and a known story detail. Local `npm run build`, `npm test` (30/30), and `npm run db:check` passed. `db:verify` could not query the database because this shell has no `DATABASE_URL`; no credentials were inspected or copied.
+- PR #4 remains a draft to `dev`; PR #2 remains open/dirty pending PR #4 review/integration. Production stays NO-GO. The user selected daily/30-day snapshots, but Neon does not permit schedule creation on the current plan; no billing, production database, or production deployment change occurred.

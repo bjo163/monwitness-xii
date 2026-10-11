@@ -4,7 +4,7 @@
 
 ## Current architecture
 - GitHub: `dev` (ongoing) → `main` (production). PR #2 remains open with merge conflicts.
-- Vercel project: `monwitness-xii`; latest app-code preview `dpl_J13Gm5pc8eXrpoiEKdRqx75QP8pE` is READY for commit `b05826a`. Authorized fetch verified `/`, `/api/health`, `/api/health/db` (connected), and `/api/episodes` (15 metadata-only entries) with HTTP 200. This does not verify protected editor routes or writes.
+- Vercel project: `monwitness-xii`; Preview `dpl_HCuUTFQgX4QCBXGYJ1PB3mBtGVGr` is READY for integration SHA `e5eff67`. Authorized fetch returned 200 for homepage, restored universe pages, liveness, DB readiness, and 15 metadata-only archive entries. This does not verify protected editor routes or authenticated writes.
 - Neon project `proud-surf-04547637`; branch `br-green-butterfly-b51kp4b1` (`mw-v11-development`). 9 app schemas, 16 tables; 15 published editorial indexes, zero drafts/revisions/audits as last observed. Managed Better Auth is provisioned on this development branch only; production branch `br-dark-sea-b5iws5uf` was untouched.
 - Vercel metadata labels `DATABASE_URL` as Preview/dev and has a separate Production variable. Its encrypted value prevents confirming the exact Preview hostname/branch mapping. Production settings were not changed.
 
@@ -43,7 +43,7 @@
 - [ ] Resolve existing-schema migration ledger strategy. Migrations `0001` and `0002` were rehearsed on an approved disposable Neon branch only; they are not applied to persistent dev/Preview.
 - [ ] Backups: manual production snapshot restored to an isolated branch for the empty app-database state. Owner selected daily/30-day automated snapshots, but the current Neon plan rejects schedule creation; no billing change was made. Define RPO/RTO and prove recovery with representative app data.
 - [x] GitHub Actions run [38164622428](https://github.com/bjo163/monwitness-xii/actions/runs/38164622428) passed on docs-only review head `a42c10e`; app-code head `b05826a` passed [38164298570](https://github.com/bjo163/monwitness-xii/actions/runs/38164298570).
-- [ ] Resolve PR #2 conflicts; it is open, `mergeable_state=dirty`, head `dev` (`c03e977`) → base `main` (`7daffea`). PR #4 is still a draft targeting `dev`; neither was merged. Obtain explicit approval before promotion.
+- [ ] Integrate the conflict-resolution branch: commit `e5eff67` merges `main` (`7daffea`) into PR #4 while preserving V11 work. PR #2 remains open/dirty (`dev` → `main`) until this lands in `dev`; PR #4 is still a draft. Neither PR was merged. Obtain explicit approval before production promotion.
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
 
 ## Suggested fastest remaining order
@@ -51,7 +51,7 @@
 2. After separate owner approval and exact target confirmation, rehearse the pending migrations on a disposable app-connected branch, then test authenticated draft/revision/audit and route-level concurrency with disposable content.
 3. Decide whether to approve a paid Neon plan for the selected daily/30-day schedule; set RPO/RTO and test representative-data restore.
 4. Choose an MFA-capable production editor identity, complete source/rights review, and prepare rollback evidence.
-5. Resolve PR #2 conflicts in a reviewable branch and rerun checks; review PR #4 separately.
+5. Review and integrate PR #4, which now contains the tested merge of `main`; then recheck PR #2 mergeability from `dev` to `main`.
 6. Deploy only after every gate passes and the owner explicitly approves promotion.
 
 ## Rollback / secret hygiene
