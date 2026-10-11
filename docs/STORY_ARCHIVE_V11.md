@@ -9,7 +9,7 @@ Drafts, original materials, revision bodies, evidence and personal witness logs 
 
 ## Editor identity and private writes (development integration)
 - Neon Managed Better Auth is enabled only on the isolated development branch; production Auth is untouched.
-- `/editor/login` is sign-in only. Public account creation is disabled; the project owner must provision and assign the `admin` role to an editor account in Neon Auth.
+- `/editor/login` is sign-in only, and this app's auth proxy rejects public signup routes. Neon provider config still reports `allow_sign_up=true`; current Neon docs say restricted signups are not yet supported, so direct provider registration is not proven blocked. The project owner must verify provider-side role assignment and keep `admin` assignment owner-controlled before enabling editors.
 - The server rechecks the session and admin role on every write. API calls without a session receive 401; signed-in users without the admin role receive 403; missing Auth configuration fails closed with 503.
 - Writes require an exact same-origin `Origin` and reject `Sec-Fetch-Site: cross-site`.
 - Both endpoints atomically map the Neon Auth subject to `identity.users` and write its user id to `system.audit_events.actor_id` with the manuscript change.
