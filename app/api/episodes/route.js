@@ -1,7 +1,7 @@
 import { getDatabase } from "../../../db/client";
 import { stories } from "../../../db/schema";
 import { desc, eq } from "drizzle-orm";
-import { PUBLIC_ARCHIVE_NOTICE } from "../../../lib/source-provenance.js";
+import { createPublicEpisodesResponse } from "../../../lib/public-archive-response.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export async function GET() {
       slug: stories.slug, title: stories.title, season: stories.season,
       synopsis: stories.synopsis, experienceType: stories.experienceType,
     }).from(stories).where(eq(stories.status, "published")).orderBy(desc(stories.createdAt)).limit(100);
-    return Response.json({ episodes: rows, notice: PUBLIC_ARCHIVE_NOTICE }, { headers: { "Cache-Control": "no-store" } });
+    return createPublicEpisodesResponse(rows);
   } catch {
     return Response.json({ error: "Archive unavailable" }, { status: 503 });
   }

@@ -1,7 +1,7 @@
 import { getDatabase } from "../../../../db/client";
 import { stories } from "../../../../db/schema";
 import { and, eq } from "drizzle-orm";
-import { PUBLIC_ARCHIVE_NOTICE } from "../../../../lib/source-provenance.js";
+import { createPublicEpisodeResponse } from "../../../../lib/public-archive-response.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export async function GET(_request, context) {
       synopsis: stories.synopsis, experienceType: stories.experienceType,
     }).from(stories).where(and(eq(stories.slug, slug), eq(stories.status, "published"))).limit(1);
     if (!episode) return Response.json({ error: "Not found" }, { status: 404 });
-    return Response.json({ episode, notice: PUBLIC_ARCHIVE_NOTICE }, { headers: { "Cache-Control": "no-store" } });
+    return createPublicEpisodeResponse(episode);
   } catch {
     return Response.json({ error: "Archive unavailable" }, { status: 503 });
   }
