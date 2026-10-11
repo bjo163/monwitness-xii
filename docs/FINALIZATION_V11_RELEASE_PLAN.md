@@ -13,7 +13,8 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [x] Development Story Archive includes 15 **editorial index entries**, not source-complete manuscripts.
 - [x] GET published-only episodes API, /episodes UI, homepage link, DB health probe implemented.
 - [x] Neon Managed Auth provisioned on isolated dev branch only; production untouched.
-- [x] Local admin-only sign-in and session authorization are implemented; public account creation is disabled.
+- [x] Local admin-only sign-in and session authorization are implemented; the application auth proxy denies public sign-up routes.
+- [ ] Disable provider-level Neon Auth `allow_sign_up` on development: read-only Auth config currently reports `true`, although the app proxy returns 404 for public signup. Verify setting false before provisioning an editor account.
 - [x] Anonymous HTTP checks: auth session proxy `200 null`, editor session `401`, draft POST `401`.
 - [x] Unit tests cover admin RBAC, origin rejection, invalid identities and actor mapping contract.
 - [x] Append-only draft/revision SQL + audit-event CTE committed (not E2E proven).

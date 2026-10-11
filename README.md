@@ -34,7 +34,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Add your *development-only* `DATABASE_URL`, `NEON_AUTH_BASE_URL`, and a newly generated `NEON_AUTH_COOKIE_SECRET` to `.env.local` (never commit secrets). The homepage works without a database; `/episodes` and `/api/health/db` require one. `/editor/login` requires Auth configuration and an owner-provisioned admin account. Public sign-up is disabled.
+Add your *development-only* `DATABASE_URL`, `NEON_AUTH_BASE_URL`, and a newly generated `NEON_AUTH_COOKIE_SECRET` to `.env.local` (never commit secrets). The homepage works without a database; `/episodes` and `/api/health/db` require one. `/editor/login` requires Auth configuration and an owner-provisioned admin account. The app auth proxy blocks public sign-up routes (404); also disable the provider-level Neon Auth `allow_sign_up` setting before provisioning editor accounts.
 
 ```bash
 npm test
@@ -62,7 +62,7 @@ The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163
 | `POST /api/editor/drafts` | Draft + immutable first revision + audit | Same-origin Neon Auth admin session |
 | `POST /api/editor/revisions` | Append immutable revision + audit | Same-origin Neon Auth admin session |
 
-Editor writes require a same-origin Neon Auth session with the `admin` role; audit records attribute each write to the mapped application user. Authentication is fail-closed if configuration or the provider is unavailable. Sign-in is invite/provision-only: there is no public account creation. The limiter passed PGlite tests and an isolated Neon SQL concurrency rehearsal; authenticated application-route writes, owner-admin sign-in, and route-level concurrency remain unverified before accepting drafts. Neon Managed Auth currently does not provide MFA in this configuration.
+Editor writes require a same-origin Neon Auth session with the `admin` role; audit records attribute each write to the mapped application user. Authentication is fail-closed if configuration or the provider is unavailable. The application auth proxy only forwards session, sign-in, sign-out, and token routes; public sign-up requests are rejected with 404. Neon Auth currently reports provider-level `allow_sign_up=true`; disable it in the development Auth settings before provisioning editor accounts. The limiter passed PGlite tests and an isolated Neon SQL concurrency rehearsal; authenticated application-route writes, owner-admin sign-in, and route-level concurrency remain unverified before accepting drafts. Neon Managed Auth currently does not provide MFA in this configuration.
 
 ## Release rules
 - Keep **`dev`** for development, **`main`** for production. No forced merge.

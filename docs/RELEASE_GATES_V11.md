@@ -23,7 +23,8 @@ This snapshot supersedes the older SHA/status references below; the original gat
 
 ## Security and editor
 - [x] Neon Managed Better Auth enabled on isolated development branch only; production Auth unchanged.
-- [x] Local sign-in-only UI; public sign-up disabled; editor routes require an `admin` session.
+- [x] Application sign-in-only UI/auth proxy; sign-up endpoint is denied with 404; editor routes require an `admin` session.
+- [ ] Disable Neon Auth provider-level email/password `allow_sign_up` on the development branch (read-only config currently reports `true`); verify it reads back false before provisioning editor accounts. App route allowlisting is an additional defense, not proof the provider setting is off.
 - [x] Anonymous HTTP verification: Auth proxy session `200 null`, editor session `401`, draft POST `401`.
 - [x] Same-origin and cross-site request policy has regression tests; writes map Auth subjects to `identity.users` and attribute audit rows.
 - [ ] Provision owner account and verify sign-in, admin role, sign-out and session restoration end-to-end.

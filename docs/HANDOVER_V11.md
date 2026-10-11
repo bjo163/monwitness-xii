@@ -30,7 +30,7 @@
 - [x] Vercel dev builds READY for previous commits.
 - [x] 9/16 database schema inventory, 15 editorial indices on dev.
 - [x] Neon Managed Auth provisioned on isolated development branch; production untouched.
-- [x] Sign-in-only editor entry and admin-only, same-origin server authorization implemented; public signup disabled.
+- [x] Sign-in-only editor entry and admin-only, same-origin server authorization implemented; public signup route denied by the application proxy; Neon Auth provider-level `allow_sign_up` still requires disabling on the dev branch.
 - [x] Local anonymous HTTP returns auth proxy 200/null, editor session 401, and draft POST 401.
 - [x] Exact baseline and retention migration SQL replayed in a blank isolated Neon rehearsal database; 9 schemas/16 tables verified; `RESTRICT` behavior and rollback to `CASCADE` exercised; source dev branch remained unchanged.
 - [ ] Owner-provisioned admin sign-in, logout, session restoration and protected write E2E tests.
@@ -47,7 +47,7 @@
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
 
 ## Suggested fastest remaining order
-1. Confirm the encrypted Preview DB branch mapping and provide an owner-controlled test identity; keep public signup off.
+1. Confirm the encrypted Preview DB branch mapping and provide an owner-controlled test identity; disable Neon Auth provider-level `allow_sign_up` and verify it reads back false.
 2. After separate owner approval and exact target confirmation, rehearse the pending migrations on a disposable app-connected branch, then test authenticated draft/revision/audit and route-level concurrency with disposable content.
 3. Decide whether to approve a paid Neon plan for the selected daily/30-day schedule; set RPO/RTO and test representative-data restore.
 4. Choose an MFA-capable production editor identity, complete source/rights review, and prepare rollback evidence.
