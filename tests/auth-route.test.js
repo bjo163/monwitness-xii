@@ -34,6 +34,16 @@ test("Auth dispatcher hides every non-allowlisted path regardless of provider co
   }
 });
 
+test("POST signup and admin routes are denied before provider access", async () => {
+  const { handlers, providerCalls } = makeHandlers({ configured: true });
+  for (const path of [["sign-up", "email"], ["admin", "create-user"]]) {
+    const response = await handlers.POST(request("POST", path), context(path));
+    assert.equal(response.status, 404, `POST ${path.join("/")}`);
+    assert.deepEqual(await response.json(), { error: "Authentication route unavailable" });
+  }
+  assert.equal(providerCalls(), 0);
+});
+
 test("unsupported Auth methods are rejected before configuration or provider access", async () => {
   const { handlers, providerCalls } = makeHandlers({ configured: true });
   for (const [method, handler] of [["PUT", handlers.PUT], ["PATCH", handlers.PATCH], ["DELETE", handlers.DELETE]]) {
