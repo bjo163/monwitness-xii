@@ -13,7 +13,7 @@ export async function POST(request){
  try {
   const sql=neon(process.env.DATABASE_URL);
   // Only drafts can be revised; locked published items remain immutable.
-  // A story-level advisory lock serializes concurrent revision numbers.
+  // Concurrent writes are rejected by unique constraint (409), never overwritten.
   const rows=await sql`
     WITH target AS (
       SELECT id FROM archive.stories WHERE slug=${input.slug} AND status='draft'
@@ -25,7 +25,13 @@ export async function POST(request){
       INSERT INTO archive.story_revisions(story_id,revision,body,source_type,notes)
       SELECT story_id,revision,${input.body},'editorial',${typeof input.notes==="string"?input.notes.slice(0,2000):null} FROM next_revision
       RETURNING story_id,revision
-    ) SELECT revision FROM inserted
+    ), audit AS (
+      INSERT INTO system.audit_events(event,entity,entity_id,payload)
+      SELECT 'story.revision.created','archive.story_revisions',inserted.story_id,
+        jsonb_build_object('slug',${input.slug},'revision',inserted.revision)
+      FROM inserted RETURNING entity_id
+    )
+    SELECT inserted.revision FROM inserted JOIN audit ON audit.entity_id=inserted.story_id
   `;
   if(!rows.length)return Response.json({error:"Draft not found or not editable"},{status:404});
   return Response.json({slug:input.slug,revision:rows[0].revision},{status:201});
