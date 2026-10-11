@@ -32,10 +32,10 @@ if(profile==="preview"){
  await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/editor/login",(r)=>r.status===200&&r.headers.get("cache-control")==="no-store");
- await check("/api/auth/get-session",(r,b)=>r.status===200&&b===null);
+ await check("/api/auth/get-session",(r,b)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&b===null);
  await check("/api/auth/sign-up/email",(r)=>r.status===404);
  await check("/api/auth/get-session",(r)=>r.status===405,"PUT");
- await check("/api/editor/session",(r,b)=>r.status===401&&b?.authenticated===false);
+ await check("/api/editor/session",(r,b)=>r.status===401&&r.headers.get("cache-control")==="no-store"&&b?.authenticated===false);
  await check("/api/editor/drafts",(r)=>r.status===405);
 }else{
  await check("/",(r)=>r.status===200&&r.headers.get("x-content-type-options")==="nosniff"&&r.headers.get("x-frame-options")==="DENY"&&r.headers.get("referrer-policy")==="strict-origin-when-cross-origin"&&r.headers.get("permissions-policy")==="camera=(), microphone=(), geolocation=()"&&(process.env.SMOKE_EXPECT_CSP!=="1"||Boolean(r.headers.get("content-security-policy"))));

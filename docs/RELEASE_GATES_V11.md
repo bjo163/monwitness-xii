@@ -9,6 +9,8 @@ Local verification at the current local-only checkpoint: `npm test` 64/64, inclu
 
 Follow-up runtime inspection exposed Next static generation overriding the editor login no-store header. `/editor/login` is now force-dynamic; a rebuilt local production server on `localhost:3002` confirmed `Cache-Control: no-store` on login, Auth session, editor session, and editor API responses. Local test suite is 64/64; build and 21/21 smoke checks pass with production CSP required. This is local evidence only, with no remote Actions run, deployment, or push; port 3000 was left untouched.
 
+Preview smoke also requires no-store on login, signed-out Auth session, and editor session responses. These checks have not been run against an authorized Preview after the change.
+
 All 15 development stories remain published metadata with `original_source_status='source_needed'`. Neon production automatic snapshot schedule is empty and unavailable on the selected Free plan; requested daily/30-day retention and representative-data recovery remain unmet. Owner/admin onboarding, direct-provider signup behavior, effective sign-in attempt limits, MFA, authenticated editor write/audit E2E, and persistent-dev migration-ledger strategy remain open. No production DB, Auth, billing, or deployment change occurred.
 
 ## Historical release evidence snapshots — 2026-10-12
