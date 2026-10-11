@@ -29,7 +29,7 @@ Requirements: Node.js 22+ and npm.
 git clone https://github.com/bjo163/monwitness-xii.git
 cd monwitness-xii
 git switch dev
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```

@@ -2,7 +2,7 @@
 
 **As of:** 2026-10-12 • **Owner repository:** bjo163/monwitness-xii • **Release verdict:** NO-GO for production promotion.
 
-> **Live status:** this handover preserves the detailed historical evidence below. For current review state, use [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3), [release gates](./RELEASE_GATES_V11.md), and [finalization plan](./FINALIZATION_V11_RELEASE_PLAN.md). At review head `b4a2bf9`, exact-head Actions [38174607348](https://github.com/bjo163/monwitness-xii/actions/runs/38174607348) passed. PR #4 remains draft and unmerged; PR #2 remains open/unmergeable. Neon remains Free by owner choice; daily/30-day retention is unmet, and no backup destination is approved or configured. Production promotion remains NO-GO.
+> **Live status:** this handover preserves the detailed historical evidence below. For current review state, use [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3), [release gates](./RELEASE_GATES_V11.md), and [finalization plan](./FINALIZATION_V11_RELEASE_PLAN.md). At review head `eb85af7`, exact-head Actions [38175035910](https://github.com/bjo163/monwitness-xii/actions/runs/38175035910) passed, including the Drizzle migrator regression test. PR #4 remains draft and unmerged; PR #2 remains open/unmergeable. Neon remains Free by owner choice; daily/30-day retention is unmet, and no backup destination is approved or configured. Production promotion remains NO-GO.
 
 ## Current architecture
 - GitHub: `dev` (ongoing) → `main` (production). PR #2 remains open with merge conflicts.
@@ -45,7 +45,7 @@
 - [ ] Owner-provisioned admin sign-in, session lifecycle, actor-attributed writes/audit, and authenticated application concurrency remain unverified.
 - [ ] Resolve existing-schema migration ledger strategy. Migrations `0001` and `0002` were rehearsed on an approved disposable Neon branch only; they are not applied to persistent dev/Preview.
 - [ ] Backups: manual production snapshot restored to an isolated branch for the empty app-database state. Owner selected daily/30-day backups and chose to stay on Free. Neon Free allows only 6 hours of PITR history; the automatic snapshot schedule remains empty. S3-based `pg_dump` automation adds separate cost and is not configured. GitHub Actions artifacts on this public repository are downloadable by readers; only client-side encrypted dumps could be considered, with 500 MB included storage shared with Packages and possible overage charges. No destination, workflow, size cap, or hard-stop budget is approved/configured. Define RPO/RTO and prove recovery with representative app data.
-- [x] Latest exact-head Actions run [38174607348](https://github.com/bjo163/monwitness-xii/actions/runs/38174607348) passed on review head `b4a2bf9`.
+- [x] Latest exact-head Actions run [38175035910](https://github.com/bjo163/monwitness-xii/actions/runs/38175035910) passed on review head `eb85af7`; the official Drizzle migrator test applies all three journaled migrations, verifies its ledger and final FK, and reruns without ledger duplication.
 - [ ] Integrate the conflict-resolution branch: commit `e5eff67` merges `main` (`7daffea`) into PR #4 while preserving V11 work. PR #2 remains open/dirty (`dev` → `main`) until this lands in `dev`; PR #4 is still a draft. Neither PR was merged. Obtain explicit approval before production promotion.
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
 
