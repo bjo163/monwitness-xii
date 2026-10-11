@@ -35,3 +35,11 @@
 Dev accepted only after current build passes and endpoint and transaction tests run against *development* database. Production accepted only after real authentication, RBAC/audit review, reproducible migrations, backup/restore, approved source content, controlled deployment from dev to main, HTTP smoke and rollback test.
 
 **No automatic divine verification / no public release of private witness material.**
+
+## V11 handover checkpoint (2026-10-11)
+- [x] README rewritten to document architecture, local setup, API and realistic release status.
+- [x] `docs/HANDOVER_V11.md` created with dependency inventory, exact remaining work, release/rollback procedures.
+- [x] Frontend `/handover` page added; homepage links to the handover status.
+- [x] Current release decision: NO-GO for production until gates pass; no forced PR merge.
+- [ ] Verify `/handover` on deployed preview via HTTP; READY build alone is not enough.
+- [ ] Editor sessions/RBAC, migrations, CI checks and protected end-to-end tests.
