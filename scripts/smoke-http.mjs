@@ -40,6 +40,12 @@ if(profile==="preview"){
 }else{
  await check("/",(r)=>r.status===200);
  await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/crew/${name}.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6);
+ for(const route of ["/throwing-dice","/four-books","/aetherion","/witness-log","/the-lab"]){
+  await check(route,(r)=>r.status===200);
+ }
+ for(const asset of ["/characters/hero/eclipse-walker.webp","/characters/crew/four-lah.webp","/characters/crew/whalterwhite.webp","/characters/crew/isrockfeel.webp","/characters/crew/rock-soul.webp"]){
+  await check(asset,(r)=>r.status===200&&r.headers.get("content-type")?.startsWith("image/webp"));
+ }
  await check("/api/health",(r,b)=>r.status===200&&b?.status==="ok"&&b?.service==="moonwitness-xii");
  await check("/api/health/db",(r,b)=>(r.status===200&&b?.status==="ok"&&b?.database==="connected")||(r.status===503&&b?.status==="error"&&b?.database==="unavailable"));
  await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
