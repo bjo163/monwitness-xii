@@ -44,4 +44,4 @@ jobs:
             cat /tmp/moonwitness-next.log
             exit 1
           fi
-          SMOKE_PROFILE=local SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke:http
+          SMOKE_PROFILE=local SMOKE_BASE_URL=http://127.0.0.1:3000 SMOKE_EXPECT_CSP=1 npm run smoke:http

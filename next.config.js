@@ -5,13 +5,30 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+const productionContentSecurityPolicy = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  "frame-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
+    const pageHeaders = process.env.NODE_ENV === "production"
+      ? [...securityHeaders, { key: "Content-Security-Policy", value: productionContentSecurityPolicy }]
+      : securityHeaders;
     return [
       {
         source: "/:path*",
-        headers: securityHeaders,
+        headers: pageHeaders,
       },
       {
         source: "/api/:path*",

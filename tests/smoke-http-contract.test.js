@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 
 const script = fileURLToPath(new URL("../scripts/smoke-http.mjs", import.meta.url));
 const nextConfig = await readFile(new URL("../next.config.js", import.meta.url), "utf8");
+const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.meta.url), "utf8");
 
 function runSmoke(env) {
   return spawnSync(process.execPath, [script], {
@@ -41,4 +42,10 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /Permissions-Policy["']?,\s*value:\s*["']camera=\(\), microphone=\(\), geolocation=\(\)/);
   assert.match(nextConfig, /source:\s*["']\/api\/:path\*["'][\s\S]*?Cache-Control["']?,\s*value:\s*["']no-store/);
   assert.match(nextConfig, /source:\s*["']\/editor\/:path\*["'][\s\S]*?Cache-Control["']?,\s*value:\s*["']no-store/);
+  assert.match(nextConfig, /Content-Security-Policy/);
+  assert.match(nextConfig, /process\.env\.NODE_ENV === "production"/);
+  assert.match(nextConfig, /fonts\.googleapis\.com/);
+  assert.match(nextConfig, /fonts\.gstatic\.com/);
+  assert.match(smokeScript, /SMOKE_EXPECT_CSP/);
+  assert.doesNotMatch(nextConfig, /unsafe-eval/);
 });
