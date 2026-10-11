@@ -17,7 +17,7 @@ The repository contains the V11 handover, finalization release plan, V11.1 fast-
 | FND-02 | Runtime | Install dependencies and establish clean build | P0 | [x] DONE | FND-01 | `npm install --no-audit --no-fund` | `npm run build` passed on Node v26.5.0 / npm 11.17.0 | Local-only | CI uses Node 22; rerun there |
 | FND-03 | QA | Restore portable test command and verify existing unit suite | P0 | [x] DONE | FND-02 | `package.json` now uses Node's native `--test` runner | `npm test` passed: 10 tests | Local changes | Route-level and database integration tests remain unimplemented |
 | FND-04 | QA | Exercise HTTP contract and expected archive count | P0 | [x] DONE | Authorized preview URL and access | `scripts/smoke-http.mjs` checks health, 15 rows, slug shape, POST-only method | Protected preview on SHA `4e72818`: health 200/connected; list 200/15 entries; known slug 200; editor GET 405 | `4e72818` | Preview uses development config only; editor POST authorization still needs runtime checks |
-| FND-05 | CI | Confirm GitHub Actions green on current review branch | P0 | [ ] IN PROGRESS | Push/CI access | `.github/workflows/quality.yml` uses lockfile-based `npm ci` and PR checks target `dev`/`main` | Run 38149000704 on SHA `99a97df` completed success; locked install, tests, build all green. Current source edits require another run | `99a97df` | Latest source changes still need CI result |
+| FND-05 | CI | Confirm GitHub Actions green on current review branch | P0 | [x] DONE | Push/CI access | `.github/workflows/quality.yml` uses lockfile-based `npm ci` and PR checks target `dev`/`main` | Run 38149409282 on SHA `020214d` completed success; locked install, 20 tests, and build all green | `020214d` | Documentation-only changes after this SHA are pending a routine CI rerun |
 
 ## Story Archive, identity, and data integrity
 
@@ -44,5 +44,5 @@ The repository contains the V11 handover, finalization release plan, V11.1 fast-
 - Baseline: `npm install --no-audit --no-fund` completed; Node v26.5.0; npm 11.17.0.
 - Baseline test command failed because `--experimental-default-type=module` is not accepted by Node 26. The native runner `node --test tests/*.test.js` passed the original 10 tests.
 - After changes: `npm test` passed 18/18; `npm run db:check` passed; `npm run build` passed; `git diff --check` passed.
-- GitHub Issue #3 remains open; PR #2 remains open and `mergeable: false`. Actions run 38149000704 passed for SHA `99a97df`; source edits since then need a fresh CI result.
+- GitHub Issue #3 remains open; PR #2 remains open and `mergeable: false`. Actions run 38149409282 passed for SHA `020214d` (locked install, tests, production build).
 - Authenticated preview verified health 200, list 200/15, known slug 200, editor GET 405 on the review deployment for `f128776`. The local shell has no DB credentials; no migration apply or production deployment was run.

@@ -29,6 +29,7 @@
 - `npm run build` — **PASS** after edits.
 - `npm run db:check` — **PASS**, local structural checks only.
 - GitHub Actions run [38148501998](https://github.com/bjo163/monwitness-xii/actions/runs/38148501998) — **PASS** on `f12877655ede097505d003be3ed41a62e49bca9f`; locked install, tests, and build all green on Node 22.
+- GitHub Actions run [38149409282](https://github.com/bjo163/monwitness-xii/actions/runs/38149409282) — **PASS** on `020214d171fe8061784024d8ec2c00975b31dd9a`; locked install, 20 tests, and build all green on Node 22.
 - Authenticated protected-preview fetch on review SHA `f12877655ede097505d003be3ed41a62e49bca9f` — **PASS**: database health 200/connected; published archive list 200 with 15 entries; `tick-tock-on-the-clock` 200; GET draft endpoint 405. Preview alias is `https://monwitness-xii-git-codex-v11-release-readiness-bjo163s-projects.vercel.app`.
 - Read-only Neon connector on project `proud-surf-04547637`, branch `mw-v11-development` — **PASS** for inventory: 9 schemas, 16 tables, selected columns match Drizzle; 15 published stories, 0 drafts, 0 revisions, 0 audit events. Live `archive.story_revisions` FK is `ON DELETE CASCADE` and named `story_revisions_story_id_fkey`; migration now drops that exact constraint and recreates it as `RESTRICT`.
 - `git diff --check` — **PASS**.
@@ -38,7 +39,7 @@
 - `npm run smoke:http` raw Node call is blocked by Vercel Authentication (302); the authenticated Vercel connector successfully fetched all four smoke paths and verified expected responses.
 - GitHub Actions run [38149000704](https://github.com/bjo163/monwitness-xii/actions/runs/38149000704) — **PASS** on `99a97df9385f1007b228a7de49e354becdb88bf6` (locked install, tests, build). Follow-up source changes after that SHA require a new run.
 - GitHub Issue #3 is open. PR #2 is open and unmergeable. Draft PR #4 targets `dev` and is mergeable. It has not been merged.
-- Commits `1e1760d`, `80e8205`, `e269ffb` are ancestors from the local work; review branch commits include `4e72818`, `f128776`, `e9ccb38`, and `99a97df`. The review branch is pushed. Primary `dev` remains unchanged.
+- Commits `1e1760d`, `80e8205`, `e269ffb` are ancestors from the local work; review branch commits include `4e72818`, `f128776`, `e9ccb38`, `99a97df`, and `020214d`. The review branch is pushed. Primary `dev` remains unchanged.
 - Migrations, backups/restores, production env, and deployment — **NOT TOUCHED**.
 
 ## Blockers and next actions

@@ -11,7 +11,7 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
 - [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
 - [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
-- [Grand Plan implementation checklist](docs/FAST_TRACK_CHECKLIST_V11_1.md)
+- [Grand Plan implementation checklist](docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md)
 - [Release gates](docs/RELEASE_GATES_V11.md)
 - [Go / No-Go](docs/FINALIZATION_V11_RELEASE_PLAN.md)
 - [Handover runbook](docs/HANDOVER_V11.md)
@@ -43,7 +43,9 @@ npm run db:verify # read-only, needs DATABASE_URL
 SMOKE_BASE_URL=https://your-authorized-preview.example npm run smoke:http
 ```
 
-`npm run db:generate` and `npm run db:migrate` exist, but migration files and drift testing are still release blockers. **Do not run migrations against production without review and approval.**
+`npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are under review; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping and disposable-branch rehearsal remain release blockers. **Do not run migrations against production without review and approval.**
+
+The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), targeting `dev`. They have not been merged or released. See [CHANGELOG.md](CHANGELOG.md) for this review's changes and outstanding gates.
 
 ## API surface
 | Route | Purpose | Security |
