@@ -71,3 +71,8 @@ test("local and Preview smoke enforce route-specific OPTIONS and HEAD behavior",
   assert.equal((smokeScript.match(/api\/auth\/sign-in\/email",\(r\)=>r\.status===204&&r\.headers\.get\("allow"\)==="POST","OPTIONS"/g) ?? []).length, 2);
   assert.equal((smokeScript.match(/api\/auth\/get-session",\(r\)=>r\.status===405&&r\.headers\.get\("allow"\)==="GET","HEAD"/g) ?? []).length, 2);
 });
+
+test("local smoke checks public Archive detail projection and invalid-slug handling", () => {
+  assert.match(smokeScript, /api\/episodes\/tick-tock-on-the-clock",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===200&&b\?\.episode\?\.slug==="tick-tock-on-the-clock"&&b\?\.notice===PUBLIC_ARCHIVE_NOTICE&&JSON\.stringify\(Object\.keys\(b\.episode\)\.sort\(\)\)===JSON\.stringify\(\["experienceType","season","slug","synopsis","title"\]\)\)\|\|\(r\.status===503&&b\?\.error==="Archive unavailable"\)\)\)/);
+  assert.match(smokeScript, /api\/episodes\/INVALID%21",\(r,b\)=>r\.status===400&&r\.headers\.get\("cache-control"\)==="no-store"&&b\?\.error==="Invalid slug"/);
+});
