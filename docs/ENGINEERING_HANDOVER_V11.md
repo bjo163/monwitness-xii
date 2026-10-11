@@ -25,12 +25,13 @@
 - `npm test` — **PASS**, 18/18 unit and SQL contract tests.
 - `npm run build` — **PASS** after edits.
 - `npm run db:check` — **PASS**, local structural checks only.
+- Authenticated protected-preview fetch on review SHA `4e72818394aa59ab2285c74f9369ed6026ece940` — **PASS**: database health 200/connected; published archive list 200 with 15 entries; `tick-tock-on-the-clock` 200; GET draft endpoint 405. Preview alias is `https://monwitness-xii-git-codex-v11-release-readiness-bjo163s-projects.vercel.app`.
 - `git diff --check` — **PASS**.
 - `npm run db:check` — **PASS**, 16-table schema migration artifacts regenerate identically.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
 - `npm run db:verify` — **NOT RUN**; no development `DATABASE_URL` was provided.
 - `npm run smoke:http` — **NOT RUN**; requires an authorized preview URL.
-- GitHub Issue #3 is open; PR #2 is open and reported `mergeable: false`. The latest GitHub Actions `verify` job passed on remote commit `c03e977`, before this local work.
+- GitHub Issue #3 is open; PR #2 is open and reported `mergeable: false`. No Actions run existed for PR #4 because PR triggers excluded base `dev`; the workflow now includes `dev`, and rerun is pending after push.
 - Local commits from this work: `1e1760d` (portable verification and handover) and `80e8205` (migration artifacts, revision serialization, and lockfile). Both are on local `dev`, ahead of `origin/dev`; they have not been pushed.
 - Migrations, backups/restores, production env, and deployment — **NOT TOUCHED**.
 
