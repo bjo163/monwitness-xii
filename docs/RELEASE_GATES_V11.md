@@ -3,7 +3,9 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
-Auth proxy methods are now restricted per installed Neon Auth SDK route contract. Local `npm test` passes 66/66, `npm run build` succeeds, and the fresh production server on port 3005 passes 22/22 loopback HTTP smoke checks plus direct checks for method-specific 405/`Allow` and blocked signup. The app remains local at `http://localhost:3005/episodes`; owner direction is no push and no deployment. Live provider sign-in, effective throttling, owner/admin onboarding, MFA, and authenticated write/audit E2E remain release gates. Production remains NO-GO.
+Auth proxy methods are now restricted per installed Neon Auth SDK route contract. Local `npm test` passes 67/67, `npm run build` succeeds, and the fresh production server on port 3005 passes 24/24 loopback HTTP smoke checks, including exact method-specific 405/`Allow` assertions and blocked signup. The app remains local at `http://localhost:3005/episodes`; owner direction is no push and no deployment. Live provider sign-in, effective throttling, owner/admin onboarding, MFA, and authenticated write/audit E2E remain release gates. Production remains NO-GO.
+
+Both local and Preview smoke profiles additionally assert exact per-route Auth method rejection (`POST` session and `GET` sign-in return 405 with `Allow: GET` and `Allow: POST` respectively); a script contract test prevents profile drift. The rebuilt local smoke now contains 24 checks.
 
 ## Live release checkpoint — 2026-10-12
 

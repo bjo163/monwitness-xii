@@ -6,7 +6,9 @@
 **Release decision:** NO-GO for production promotion.  
 **Evidence policy:** DONE requires implementation plus recorded verification. “Verified” in older handover material is historical evidence and is not a substitute for rerunning checks on this checkout.
 
-**Latest local-only follow-up (2026-10-12):** Neon Auth paths now enforce their SDK-defined HTTP methods. `npm test` passes 66/66, production build passes, and loopback smoke passes 22/22 on port 3005. Mismatched methods return 405 with route-specific `Allow`; signup remains denied with 404. Current Archive visual: `http://localhost:3005/episodes`. No push or deploy was made; production remains NO-GO pending live release gates.
+**Latest local-only follow-up (2026-10-12):** Neon Auth paths now enforce their SDK-defined HTTP methods. `npm test` passes 67/67, production build passes, and loopback smoke passes 24/24 on port 3005. Mismatched methods return 405 with route-specific `Allow`; signup remains denied with 404. Current Archive visual: `http://localhost:3005/episodes`. No push or deploy was made; production remains NO-GO pending live release gates.
+
+Both smoke profiles now assert exact `Allow` headers for mismatched Auth path/method pairs. The contract test requires these checks in Preview and local profiles; latest local smoke count is 24.
 
 ## Source documents and scope
 
