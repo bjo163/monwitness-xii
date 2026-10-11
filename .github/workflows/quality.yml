@@ -27,3 +27,21 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
+      - name: Local HTTP and visual asset smoke
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/moonwitness-next.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/api/health > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/moonwitness-next.log
+            exit 1
+          fi
+          SMOKE_PROFILE=local SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke:http
