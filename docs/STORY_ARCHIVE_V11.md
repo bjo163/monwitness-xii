@@ -1,12 +1,12 @@
 # MoonWitness XII — Story Archive API (V11 development)
 
 ## Public read endpoints
-- `GET /api/episodes`: lists published story metadata only (limit 100).
-- `GET /api/episodes/:slug`: a published story only; validates URL slug.
+- `GET /api/episodes`: lists published story metadata only (limit 100) and includes a static provenance notice in the response envelope.
+- `GET /api/episodes/:slug`: a published story only; validates URL slug and includes the same provenance notice.
 - `/episodes/:slug`: editorial index detail page; includes a retry action on database failures and never exposes revision bodies or source materials.
 - `GET /api/health/db`: read-only database connectivity probe.
 
-Drafts, original materials, revision bodies, evidence and personal witness logs are **not** returned by public endpoints.
+Drafts, original materials, revision bodies, evidence and personal witness logs are **not** returned by public endpoints. The notice says a published index is public metadata only; it does not verify original sources, credits, or reuse rights. The API still does not expose per-story internal source-status fields or source records.
 
 ## Editor identity and private writes (development integration)
 - Neon Managed Better Auth is enabled only on the isolated development branch; production Auth is untouched.

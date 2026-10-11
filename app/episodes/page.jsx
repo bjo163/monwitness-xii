@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import { getDatabase } from "../../db/client";
 import { stories } from "../../db/schema";
 import { desc, eq } from "drizzle-orm";
-import { getSourceProvenanceNotice } from "../../lib/source-provenance.js";
+import { getSourceProvenanceNotice, PUBLIC_ARCHIVE_NOTICE } from "../../lib/source-provenance.js";
 import styles from "./archive.module.css";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +30,7 @@ export default async function EpisodesPage() {
       <p className={styles.intro}>MoonWitness stories, The Batteries absurd comedy, witness journeys, and AETHERION. Each public entry is an editorial index; original scripts and comic pages are not reproduced here.</p>
       <aside className={styles.provenanceNotice} role="note" aria-label="Archive source and rights status">
         <span className={styles.noticeMark} aria-hidden="true">!</span>
-        <div><strong>PUBLIC INDEX DOES NOT MEAN SOURCE VERIFIED</strong><p>“Published” means this index is listed in the archive. Original material, attribution, and usage rights still need their own evidence and review.</p></div>
+        <div><strong>PUBLIC INDEX DOES NOT MEAN SOURCE VERIFIED</strong><p>{PUBLIC_ARCHIVE_NOTICE}</p></div>
       </aside>
     </header>
     {connectionIssue?<section className={styles.retry} role="alert"><h2>THE VAULT IS TAKING A BREATHER</h2><p>Archive database is temporarily unavailable. No private drafts are displayed.</p><Link href="/episodes" className={styles.entryLink}>TRY AGAIN ↻</Link></section>:

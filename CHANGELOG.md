@@ -12,7 +12,9 @@ This file records user-visible and operational changes for MoonWitness XII.
 - The later docs-only Preview attempt for `06e2a11` hit quota. Owner directed local-only continuation with no further push or deploy; the local app remains available at `http://localhost:3000/team`.
 - Refreshed local review evidence: 47/47 unit tests, schema/migration consistency, production build, and all 11 loopback HTTP smoke checks pass; `/`, `/team`, and `/episodes` respond 200. The local smoke correctly reports database-backed API endpoints unavailable without a local `DATABASE_URL`.
 - Refreshed the Story Archive's local presentation with a clear source-and-rights notice on the archive and detail pages. Each entry's status explains that a published index is not proof of source provenance or reuse permission; local tests cover missing and non-verified statuses.
-- Local commit `d194867` is three commits beyond the last pushed checkpoint. It has no CI/Preview result because the owner requested local-only work.
+- Added the same static provenance notice to public archive list/detail API response envelopes, without exposing per-story internal source status or source records.
+- Current local review passes 48/48 tests, `npm run db:check`, production build, and 11/11 loopback HTTP smoke checks. The archive notice is visible at `http://localhost:3000/episodes`; story cards and connected API responses cannot be validated locally because this checkout has no `DATABASE_URL`.
+- Local review commits remain unpushed and have no CI/Preview result because the owner requested local-only work. Do not deploy or push this branch.
 - Preserved all 15 Archive entries as `source-needed` until original material, credits, and rights evidence are supplied.
 
 ### Release state

@@ -1,5 +1,7 @@
 // Preview checks require SMOKE_BASE_URL and optional deployment-protection bypass.
 // Local checks default to localhost and never require a database credential.
+import { PUBLIC_ARCHIVE_NOTICE } from "../lib/source-provenance.js";
+
 const profile=process.env.SMOKE_PROFILE??"preview";
 if(!["preview","local"].includes(profile)){console.error("SMOKE_PROFILE must be preview or local");process.exit(2)}
 const base=process.env.SMOKE_BASE_URL??(profile==="local"?"http://localhost:3000":undefined);
@@ -27,8 +29,8 @@ async function check(path,accept,method="GET"){
 if(profile==="preview"){
  await check("/api/health/db",(r,b)=>r.status===200&&b?.status==="ok"&&b?.database==="connected");
  await check("/api/health",(r,b)=>r.status===200&&b?.status==="ok"&&b?.service==="moonwitness-xii");
- await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15);
- await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock");
+ await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
+ await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/editor/login",(r)=>r.status===200);
  await check("/api/auth/get-session",(r,b)=>r.status===200&&b===null);
  await check("/api/auth/sign-up/email",(r)=>r.status===404);
@@ -40,7 +42,7 @@ if(profile==="preview"){
  await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/crew/${name}.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6);
  await check("/api/health",(r,b)=>r.status===200&&b?.status==="ok"&&b?.service==="moonwitness-xii");
  await check("/api/health/db",(r,b)=>(r.status===200&&b?.status==="ok"&&b?.database==="connected")||(r.status===503&&b?.status==="error"&&b?.database==="unavailable"));
- await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15)||(r.status===503&&b?.error==="Archive unavailable"));
+ await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
  await check("/editor/login",(r)=>r.status===200);
  await check("/api/auth/get-session",(r,b)=>(r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured"));
  await check("/api/auth/sign-up/email",(r,b)=>r.status===404&&b?.error==="Authentication route unavailable");
