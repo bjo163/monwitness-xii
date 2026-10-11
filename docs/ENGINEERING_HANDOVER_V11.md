@@ -5,6 +5,14 @@
 **Starting commit:** `c03e977`  
 **Release decision:** **NO-GO for production promotion.**
 
+## 2026-10-12 latest exact-head recheck
+
+- Review head `3b70c661093a0a84f0f8438879917b46162f0054` passed Actions [38171319647](https://github.com/bjo163/monwitness-xii/actions/runs/38171319647). App implementation `09624ca60ccfdada2ea5a8190d78beb10451067f` passed Actions [38171011483](https://github.com/bjo163/monwitness-xii/actions/runs/38171011483); Preview [dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb](https://vercel.com/bjo163s-projects/monwitness-xii/dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb) is READY.
+- Authenticated Vercel fetch of that Preview returned DB health `200 connected/development`, `/api/episodes` `200` with 15 metadata-only entries, Auth session `200 null`, editor session `401`, app signup path `404`, and `200` for the archive index and representative editorial detail. This verifies signed-out app behavior; it does not identify the encrypted DB URL’s exact branch.
+- Local `.env.local` has no `DATABASE_URL`. Local DB health `503` and archive retry pages reflect missing local configuration, not a confirmed remote Neon outage. No database secret was read or copied.
+- CUA checked nine routes at 390×844; each document measured 375px wide. Build, 34 tests, migration check, dependency audit (0 vulnerabilities), and diff check passed on the tested app worktree.
+- User chose to remain on Neon Free. Daily snapshots/30-day retention, representative-data restore and RPO/RTO remain open; no billing/production change. Auth onboarding/direct provider signup behavior, MFA, owner-admin write E2E, exact Preview DB branch mapping, and source/rights review remain open. Production stays NO-GO.
+
 
 ## 2026-10-12 latest follow-up — Free-plan backup limits, exact-head preview, and auth limitation
 
