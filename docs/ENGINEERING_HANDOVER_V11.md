@@ -37,7 +37,7 @@
 - Authenticated protected-preview fetch on review SHA `f12877655ede097505d003be3ed41a62e49bca9f` — **PASS**: database health 200/connected; published archive list 200 with 15 entries; `tick-tock-on-the-clock` 200; GET draft endpoint 405. Preview alias is `https://monwitness-xii-git-codex-v11-release-readiness-bjo163s-projects.vercel.app`.
 - Refreshed authenticated smoke on deployment `dpl_HrL8RQgNq6MnK8imqM9ovMqszUJx` — **PASS**: Vercel reports source SHA `8460d2477837467036903990767bf09699d91295`; health 200/connected, published list 200 with 15 entries, known slug 200, editor draft GET 405. This is development preview evidence only; no authenticated POST was sent.
 - Added public-archive route contract tests for published-only filtering, explicit metadata projection, list bounds, and slug validation. Local suite and CI now pass 23/23.
-- Migration regeneration check passed locally; `.github/workflows/quality.yml` now runs `npm run db:check` alongside tests, audit, and build. CI for this workflow change is pending.
+- Migration regeneration check passed locally; `.github/workflows/quality.yml` now runs `npm run db:check` alongside tests, audit, and build. CI run [38150833675](https://github.com/bjo163/monwitness-xii/actions/runs/38150833675) passed for SHA `f58f8dc`.
 - Read-only Neon connector on project `proud-surf-04547637`, branch `mw-v11-development` — **PASS** for inventory: 9 schemas, 16 tables, selected columns match Drizzle; 15 published stories, 0 drafts, 0 revisions, 0 audit events. Live `archive.story_revisions` FK is `ON DELETE CASCADE` and named `story_revisions_story_id_fkey`; migration now drops that exact constraint and recreates it as `RESTRICT`.
 - `git diff --check` — **PASS**.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
@@ -59,4 +59,4 @@
 
 See [the implementation checklist](GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md) for task IDs, statuses, dependencies, evidence, and risk tracking.
 
-- Final verified CI: run [38150466832](https://github.com/bjo163/monwitness-xii/actions/runs/38150466832) on SHA `c84a6ee` passed, including locked install, 23 tests, production dependency audit, and build.
+- Final verified CI: run [38150833675](https://github.com/bjo163/monwitness-xii/actions/runs/38150833675) on SHA `f58f8dc` passed, including locked install, 23 tests, migration regeneration check, production dependency audit, and build.
