@@ -36,6 +36,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 - Extended both local and Preview HTTP smoke profiles to assert route-specific Auth method handling (`405` plus the exact `Allow` header); smoke-script contract tests enforce coverage in each profile.
 - Latest full local checkpoint after those smoke changes: 67/67 tests, `db:check`, production build, full `npm audit` (0 findings), `actionlint`, and 24/24 loopback HTTP smoke checks pass. No remote CI was run because the branch remains local-only.
 - A signed-out local `GET /api/auth/token` returns 401 with `Cache-Control: no-store`; local and Preview smoke profiles now enforce this token boundary (or the expected unconfigured-auth 503 for local environments without provider config).
+- Latest test/smoke checkpoint at `2904dea`: 68/68 tests and 25/25 production loopback smoke checks pass, including signed-out token denial.
 
 ### Release state
 
