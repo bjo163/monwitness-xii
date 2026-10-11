@@ -3,6 +3,8 @@ import { connection, notFound } from "next/server";
 import { getDatabase } from "../../../db/client";
 import { stories } from "../../../db/schema";
 import { and, eq } from "drizzle-orm";
+import { getSourceProvenanceNotice } from "../../../lib/source-provenance.js";
+import styles from "../archive.module.css";
 
 export const runtime = "nodejs";
 
@@ -25,26 +27,30 @@ export default async function EpisodeIndexEntry({ params }) {
       .limit(1);
     episode = row;
   } catch {
-    return <main style={{minHeight:"100vh",padding:"40px max(20px,5vw)",background:"#101529",color:"#f8fbff",fontFamily:"system-ui"}}>
-      <p role="alert" style={{padding:24,background:"#382535",maxWidth:700}}>
+    return <main className={styles.page}>
+      <p className={styles.retry} role="alert">
         <strong>THE VAULT IS TAKING A BREATHER</strong>
         <span style={{display:"block",margin:"12px 0"}}>The index entry could not be loaded. No private drafts are displayed.</span>
-        <Link href={`/episodes/${encodeURIComponent(slug)}`} style={{color:"#70edee",fontWeight:800}}>TRY AGAIN ↻</Link>
+        <Link href={`/episodes/${encodeURIComponent(slug)}`} className={styles.entryLink}>TRY AGAIN ↻</Link>
       </p>
-      <Link href="/episodes" style={{color:"#70edee"}}>← BACK TO THE ARCHIVE</Link>
+      <Link href="/episodes" className={styles.homeLink}>← BACK TO THE ARCHIVE</Link>
     </main>;
   }
   if (!episode) notFound();
+  const provenance=getSourceProvenanceNotice(episode.originalSourceStatus);
 
-  return <main style={{minHeight:"100vh",padding:"40px max(20px,5vw)",background:"#101529",color:"#f8fbff",fontFamily:"system-ui"}}>
-    <nav aria-label="Breadcrumb"><Link href="/episodes" style={{color:"#70edee"}}>← THE EPISODE ARCHIVE</Link></nav>
-    <article style={{maxWidth:850,margin:"60px auto",padding:"clamp(24px,6vw,64px)",border:"2px solid #5de8ef",background:"#202b43",boxShadow:"8px 8px #ff79bb"}}>
-      <p style={{color:"#ffe05c",fontWeight:800}}>{episode.season || "MOONWITNESS"} • EDITORIAL INDEX</p>
-      <h1 style={{fontSize:"clamp(38px,7vw,76px)",lineHeight:1.05,margin:"16px 0"}}>{episode.title}</h1>
-      <p style={{color:"#a0b9ca",fontWeight:800}}>{episode.experienceType.replaceAll("_", " ").toUpperCase()}</p>
-      <p lang={episode.synopsis ? "id" : "en"} style={{fontSize:18,lineHeight:1.8}}>{episode.synopsis || "No editorial synopsis is available yet."}</p>
-      <p style={{padding:16,background:"#151b2d",lineHeight:1.7}}><strong>ORIGINAL SOURCE: {episode.originalSourceStatus.replaceAll("_", " ").toUpperCase()}</strong><br/>This page contains an editorial index only. It does not reproduce an original script or comic page.</p>
-      <Link href="/episodes" style={{display:"inline-block",marginTop:18,color:"#70edee",fontWeight:800}}>← BACK TO ALL EPISODES</Link>
+  return <main className={styles.page}>
+    <nav className={styles.topbar} aria-label="Breadcrumb"><Link href="/episodes" className={styles.homeLink}>← THE EPISODE ARCHIVE</Link><span className={styles.issueTag}>EDITORIAL INDEX · {episode.experienceType.replaceAll("_", " ").toUpperCase()}</span></nav>
+    <article className={styles.detail}>
+      <p className={styles.eyebrow}><span className={styles.spark} aria-hidden="true">✳</span>{episode.season || "MOONWITNESS"} · INDEX ENTRY</p>
+      <h1 className={styles.cardTitle}>{episode.title}</h1>
+      <p lang={episode.synopsis ? "id" : "en"} className={styles.detailSynopsis}>{episode.synopsis || "No editorial synopsis is available yet."}</p>
+      <aside className={styles.provenanceNotice} role="note" aria-label="Original source and rights status">
+        <span className={styles.noticeMark} aria-hidden="true">!</span>
+        <div><strong>{provenance.label}</strong><p>{provenance.description}</p></div>
+      </aside>
+      <p className={styles.noticeText}>This page is an editorial index. It does not reproduce an original script, comic page, or private witness record.</p>
+      <Link href="/episodes" className={styles.entryLink}>← BACK TO ALL EPISODES</Link>
     </article>
   </main>;
 }
