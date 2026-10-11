@@ -50,9 +50,9 @@ if(profile==="preview"){
  await check("/api/health/db",(r,b)=>(r.status===200&&b?.status==="ok"&&b?.database==="connected")||(r.status===503&&b?.status==="error"&&b?.database==="unavailable"));
  await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
  await check("/editor/login",(r)=>r.status===200);
- await check("/api/auth/get-session",(r,b)=>(r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured"));
+ await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/sign-up/email",(r,b)=>r.status===404&&b?.error==="Authentication route unavailable");
  await check("/api/auth/get-session",(r)=>r.status===405,"PUT");
- await check("/api/editor/session",(r,b)=>(r.status===401&&b?.authenticated===false)||(r.status===503&&b?.error==="Editor authentication is not configured"));
+ await check("/api/editor/session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401&&b?.authenticated===false)||(r.status===503&&b?.error==="Editor authentication is not configured")));
  await check("/api/editor/drafts",(r)=>r.status===405);
 }

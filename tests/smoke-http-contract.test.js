@@ -39,4 +39,6 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /X-Frame-Options["']?,\s*value:\s*["']DENY/);
   assert.match(nextConfig, /Referrer-Policy["']?,\s*value:\s*["']strict-origin-when-cross-origin/);
   assert.match(nextConfig, /Permissions-Policy["']?,\s*value:\s*["']camera=\(\), microphone=\(\), geolocation=\(\)/);
+  assert.match(nextConfig, /source:\s*["']\/api\/:path\*["'][\s\S]*?Cache-Control["']?,\s*value:\s*["']no-store/);
+  assert.match(nextConfig, /source:\s*["']\/editor\/:path\*["'][\s\S]*?Cache-Control["']?,\s*value:\s*["']no-store/);
 });
