@@ -1,6 +1,6 @@
 # MoonWitness XII V11 — local engineering handover
 
-**Date:** 2026-10-11 (Asia/Jakarta)  
+**Date:** 2026-10-12 (Asia/Jakarta)
 **Branch at start:** `dev`; review work is on `codex/v11-release-readiness`
 **Starting commit:** `c03e977`  
 **Release decision:** **NO-GO for production promotion.**
@@ -14,10 +14,10 @@
 - User chose to remain on Neon Free. Daily snapshots/30-day retention, representative-data restore and RPO/RTO remain open; no billing/production change. Auth onboarding/direct provider signup behavior, MFA, owner-admin write E2E, exact Preview DB branch mapping, and source/rights review remain open. Production stays NO-GO.
 
 
-## 2026-10-12 latest follow-up — Free-plan backup limits, exact-head preview, and auth limitation
+## Archived 2026-10-12 follow-up — Free backup limits and auth state
 
 - User selected daily/30-day backups and explicitly chose to remain on Free. The production branch `br-dark-sea-b5iws5uf` remains ready/default with `schedule: []`; Neon Free caps PITR history at 6 hours/1 GB, while 30 days requires Scale. S3-based `pg_dump` automation is an alternative with separate storage/transfer costs and is not configured. No plan, billing, database, or production deployment change occurred.
-- Latest review head `312eb2da63630adac4ac1cd8d250891c4d537cd6` adds a fail-closed server-side editor identity allowlist. Exact-head Actions run [38169593224](https://github.com/bjo163/monwitness-xii/actions/runs/38169593224) passed; Vercel Preview [dpl_3mn2tCvawK2PmhipJ1yiDyZWgMjL](https://vercel.com/bjo163s-projects/monwitness-xii/dpl_3mn2tCvawK2PmhipJ1yiDyZWgMjL) is READY for that commit. Draft PR #4 tracks this branch; production remains NO-GO.
+- At that checkpoint, review head `312eb2da63630adac4ac1cd8d250891c4d537cd6` adds a fail-closed server-side editor identity allowlist. Exact-head Actions run [38169593224](https://github.com/bjo163/monwitness-xii/actions/runs/38169593224) passed; Vercel Preview [dpl_3mn2tCvawK2PmhipJ1yiDyZWgMjL](https://vercel.com/bjo163s-projects/monwitness-xii/dpl_3mn2tCvawK2PmhipJ1yiDyZWgMjL) is READY for that commit. Draft PR #4 tracks this branch; production remains NO-GO.
 - Read-only project usage for the current consumption period (2026-10-11T13:08:19Z through 2026-11-01T00:00:00Z): 369,215 data-transfer bytes, 2,135 compute seconds, 8,364 active seconds, 0 written bytes, and 0 storage byte-hours. These are usage counters, not an invoice or cost forecast.
 - Current docs head before this follow-up was `ef24c5bc2b07f646691da2e305d58360e637a66c`, pushed to the review branch. Actions [38167363669](https://github.com/bjo163/monwitness-xii/actions/runs/38167363669) passed on this exact SHA; Vercel Preview `dpl_9XXnoCWHJuERjAPn4JLp8V1VNGxn` is READY for the same head. Authorized fetch verified `/` 200, `/api/auth/get-session` 200/null and `/api/auth/sign-up/email` 404. The earlier exact app SHA `1b35249` also passed CI [38166661179](https://github.com/bjo163/monwitness-xii/actions/runs/38166661179), health 200, DB health 200 (`database=connected`, development), archive 200/15 metadata-only entries; local build, 30/30 tests, and `db:check` passed. The homepage HTML includes the faceless traveler and four Batteries portraits.
 - This docs-only follow-up reconciles auth recommendations with Neon’s current documentation: provider config reads `allow_sign_up=true`; Neon says restricted signups are not yet supported. The application proxy rejects signup routes with 404, and write handlers require role `admin`, but we have not proven direct provider signup is impossible or that provider settings cannot grant roles. Treat identity onboarding as an open security/release gate; do not label provider signup “disabled.” [Neon authentication flow](https://github.com/neondatabase/website/blob/main/content/docs/auth/authentication-flow.md) · [Managed Auth API](https://github.com/neondatabase/website/blob/main/content/docs/auth/guides/manage-auth-api.md) · [Neon CLI Auth](https://github.com/neondatabase/website/blob/main/content/docs/cli/neon-auth.md).
