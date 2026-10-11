@@ -3,7 +3,11 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
+Neon's Oct 2 Free-plan update increased storage to 1 GB/project; the published plan summary still lists a six-hour Instant Restore window. This project's automatic snapshot schedule remains empty and schedule creation remains disabled. The daily/30-day target is unmet. See the current [backup runbook](./BACKUP_RESTORE_RUNBOOK_V11.md) for corrected plan facts; older quota figures below are historical.
+
 Auth proxy methods are now restricted per installed Neon Auth SDK route contract. At local commit `964a520`, `npm test` passes 71/71, `npm run db:check`, production build, full `npm audit` (0 findings), `actionlint`, and 29/29 loopback HTTP smoke pass. Smoke covers method-specific 405/`Allow`, route-specific `OPTIONS`, rejected `HEAD`, signed-out token denial, blocked signup, and Archive detail safe error/projection checks. The actual detail handler also passes an isolated PGlite test with published, private-draft, revision, evidence, and media fixtures. The app remains local at `http://localhost:3005/episodes`; owner direction is no push and no deployment. Live provider sign-in, effective throttling, owner/admin onboarding, MFA, authenticated write/audit E2E, and connected Neon HTTP success remain release gates. Production remains NO-GO.
+
+Fresh rerun at source head `9e27739` (documentation changes only): `npm test` 71/71, `npm run db:check`, `npm audit` 0 findings, `npm run build`, and production loopback smoke 29/29 on `127.0.0.1:3011` with CSP required. Visual pages and character assets returned 200; signed-out token was 401, signup 404, unsupported Auth methods 405. Local DB/Archive returned expected 503 because the checkout has no `DATABASE_URL`. This provides local evidence only; there is no remote CI, push, deployment, or database change.
 
 Both local and Preview smoke profiles additionally assert exact per-route Auth method rejection (`POST` session and `GET` sign-in return 405 with `Allow: GET` and `Allow: POST` respectively), route-specific `OPTIONS`, rejected `HEAD`, plus no-store denial on signed-out token retrieval. Local smoke additionally checks slug detail errors and the five-field response projection. A script contract test prevents profile drift. The rebuilt local smoke now contains 29 checks.
 
