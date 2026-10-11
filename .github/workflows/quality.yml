@@ -1,0 +1,25 @@
+name: MoonWitness V11 Quality Gates
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Auth security regression tests
+        run: npm test
+      - name: Next.js production build (without DB secret)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
