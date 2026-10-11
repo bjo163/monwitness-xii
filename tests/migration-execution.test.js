@@ -69,6 +69,31 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
     entity_id:authored.rows[0].id,body:"Original words",
   });
 
+  const publicStory = await db.query(`
+    INSERT INTO archive.stories(slug,title,season,synopsis,status,experience_type,original_source_status)
+    VALUES ($1,$2,$3,$4,'published','comic','source_needed') RETURNING slug
+  `, ["public-editorial-index", "Public Index", "Season 1", "A short public synopsis."]);
+  const privateStory = await db.query(`
+    INSERT INTO archive.stories(slug,title,synopsis,status,original_source_status)
+    VALUES ($1,$2,$3,'draft','source_needed') RETURNING id,slug
+  `, ["private-draft-fixture", "Private Draft Secret", "Unpublished private synopsis."]);
+  await db.query(
+    "INSERT INTO archive.story_revisions(story_id,revision,body,source_type,notes) VALUES ($1,1,$2,'user_original',$3)",
+    [privateStory.rows[0].id, "Confidential original source text.", "Private author notes."],
+  );
+  const publicList = await db.query(`
+    SELECT slug,title,season,synopsis,experience_type FROM archive.stories
+    WHERE status='published' ORDER BY created_at DESC LIMIT 100
+  `);
+  assert.deepEqual(publicList.rows.map((row) => row.slug), [publicStory.rows[0].slug]);
+  assert.deepEqual(Object.keys(publicList.rows[0]).sort(), ["experience_type","season","slug","synopsis","title"]);
+  assert.doesNotMatch(JSON.stringify(publicList.rows), /Private Draft Secret|Confidential original|Private author notes/);
+  const privatePublicDetail = await db.query(
+    "SELECT slug,title,season,synopsis,experience_type FROM archive.stories WHERE slug=$1 AND status='published' LIMIT 1",
+    [privateStory.rows[0].slug],
+  );
+  assert.equal(privatePublicDetail.rows.length, 0);
+
   const restrictedStory = await db.query(
     "INSERT INTO archive.stories(slug,title) VALUES ($1,$2) RETURNING id",
     ["pglite-restrict-test", "Restriction test"],
