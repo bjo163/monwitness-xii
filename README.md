@@ -10,7 +10,7 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 ## Quick links
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
 - [Latest READY remote review visual: The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team) — protected Preview for checkpoint `d6c884b`; local unpushed changes are not included.
-- [Local Story Archive visual](http://localhost:3000/episodes) — available while the local review server is running; archive rows require a development-only database connection.
+- [Local Story Archive visual](http://localhost:3004/episodes) — available while the latest local review server is running; archive rows require a development-only database connection.
 - [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
 - [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
 - [Grand Plan implementation checklist](docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md)
@@ -52,7 +52,7 @@ For populated-development baseline preflight only, also set `EXPECTED_DATABASE_H
 
 For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
 
-The latest local production build is available at [http://localhost:3002/](http://localhost:3002/). The database-backed Archive currently shows its safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; the security and visual shell remain viewable.
+The latest local production build's [Story Archive page](http://localhost:3004/episodes) is running. It shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible.
 
 The current local review includes an Archive notice explaining that a published index does not establish source provenance or reuse rights. Without a local development `DATABASE_URL`, the notice is visible but the database-backed episode cards show the safe retry state. This local review change is not in the remote Preview.
 

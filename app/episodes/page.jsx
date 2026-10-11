@@ -22,7 +22,7 @@ export default async function EpisodesPage() {
   return <main className={styles.page}>
     <nav className={styles.topbar} aria-label="Main navigation">
       <Link href="/" className={styles.homeLink}>← MOONWITNESS XII</Link>
-      <span className={styles.issueTag}>ARCHIVE FILES · ISSUE 001</span>
+      <span className={styles.issueTag}>PUBLIC EDITORIAL INDEX · ISSUE 001</span>
     </nav>
     <header className={styles.hero}>
       <p className={styles.eyebrow}><span className={styles.spark} aria-hidden="true">✳</span> FIND LIGHT IN DARKNESS · STORY VAULT</p>
@@ -34,7 +34,7 @@ export default async function EpisodesPage() {
       </aside>
     </header>
     {connectionIssue?<section className={styles.retry} role="alert"><h2>THE VAULT IS TAKING A BREATHER</h2><p>Archive database is temporarily unavailable. No private drafts are displayed.</p><Link href="/episodes" className={styles.entryLink}>TRY AGAIN ↻</Link></section>:
-    <><p className={styles.countLine}><strong>{episodes.length}</strong> INDEXED EPISODES <span>· DEVELOPMENT VAULT</span></p>
+    <><p className={styles.countLine}><strong>{episodes.length}</strong> INDEXED EPISODES</p>
     <div className={styles.grid}>
       {episodes.map((e,i)=>{
         const provenance=getSourceProvenanceNotice(e.originalSourceStatus);

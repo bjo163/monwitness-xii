@@ -8,6 +8,7 @@ const script = fileURLToPath(new URL("../scripts/smoke-http.mjs", import.meta.ur
 const nextConfig = await readFile(new URL("../next.config.js", import.meta.url), "utf8");
 const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.meta.url), "utf8");
 const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", import.meta.url), "utf8");
+const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 
 function runSmoke(env) {
   return spawnSync(process.execPath, [script], {
@@ -46,6 +47,9 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /source:\s*["']\/editor\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(editorLoginPage, /export const dynamic\s*=\s*["']force-dynamic["']/);
   assert.match(smokeScript, /\/editor\/login",\(r\)=>r\.status===200&&r\.headers\.get\("cache-control"\)==="no-store"/);
+  assert.match(archivePage, /PUBLIC EDITORIAL INDEX/);
+  assert.doesNotMatch(archivePage, /DEVELOPMENT VAULT/);
+  assert.match(smokeScript, /\/episodes",\(r,b,t\)=>r\.status===200&&t\.includes\("PUBLIC EDITORIAL INDEX"\)&&t\.includes\(PUBLIC_ARCHIVE_NOTICE\)/);
   assert.match(nextConfig, /Content-Security-Policy/);
   assert.match(nextConfig, /process\.env\.NODE_ENV === "production"/);
   assert.match(nextConfig, /fonts\.googleapis\.com/);
