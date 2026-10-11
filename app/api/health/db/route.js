@@ -1,4 +1,4 @@
-import { getDatabase } from "../../../db/client";
+import { getDatabase } from "../../../../db/client";
 import { sql } from "drizzle-orm";
 
 export const runtime = "nodejs";
