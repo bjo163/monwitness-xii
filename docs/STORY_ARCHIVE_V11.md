@@ -6,7 +6,7 @@
 - `/episodes/:slug`: editorial index detail page; includes a retry action on database failures and never exposes revision bodies or source materials.
 - `GET /api/health/db`: read-only database connectivity probe.
 
-Drafts, original materials, revision bodies, evidence and personal witness logs are **not** returned by public endpoints. The notice says a published index is public metadata only; it does not verify original sources, credits, or reuse rights. The API still does not expose per-story internal source-status fields or source records.
+Drafts, original materials, revision bodies, evidence and personal witness logs are **not** returned by public endpoints. The notice says a published index is public metadata only; it does not verify original sources, credits, or reuse rights. The API still does not expose per-story internal source-status fields or source records. Response builders project every row onto an explicit allowlist (`slug`, `title`, `season`, `synopsis`, `experienceType`) as a second boundary after the database query; runtime tests verify the list/detail JSON envelopes and `no-store` header.
 
 ## Editor identity and private writes (development integration)
 - Neon Managed Better Auth is enabled only on the isolated development branch; production Auth is untouched.
