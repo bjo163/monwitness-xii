@@ -5,7 +5,7 @@
 MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG. Its development release contains a database-backed Story Archive, four recurring fictional characters, and an AETHERION 100-level conceptual interface.
 
 > **Handover status (12 October 2026): DEVELOPMENT AUTH INTEGRATION IN PROGRESS — NOT PRODUCTION-READY.**
-> Neon Managed Auth is enabled on the isolated development branch. A local sign-in flow and admin-only draft routes are being wired and must pass live session/write tests before editor access is enabled. Production Auth, migrations and release have not been changed.
+> Neon Managed Auth is enabled on the isolated development branch. The sign-in flow and admin-only draft routes are implemented, but owner-admin session and authenticated-write E2E tests remain unverified. Production Auth, migrations and release have not been changed.
 
 ## Quick links
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
@@ -62,7 +62,7 @@ The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163
 | `POST /api/editor/drafts` | Draft + immutable first revision + audit | Same-origin Neon Auth admin session |
 | `POST /api/editor/revisions` | Append immutable revision + audit | Same-origin Neon Auth admin session |
 
-Editor writes require a same-origin Neon Auth session with the `admin` role; audit records attribute each write to the mapped application user. Authentication is fail-closed if configuration or the provider is unavailable. Sign-in is invite/provision-only: there is no public account creation. A live development write and concurrency rehearsal remain required before accepting drafts. Neon Managed Auth currently does not provide MFA in this configuration.
+Editor writes require a same-origin Neon Auth session with the `admin` role; audit records attribute each write to the mapped application user. Authentication is fail-closed if configuration or the provider is unavailable. Sign-in is invite/provision-only: there is no public account creation. The limiter passed PGlite tests and an isolated Neon SQL concurrency rehearsal; authenticated application-route writes, owner-admin sign-in, and route-level concurrency remain unverified before accepting drafts. Neon Managed Auth currently does not provide MFA in this configuration.
 
 ## Release rules
 - Keep **`dev`** for development, **`main`** for production. No forced merge.

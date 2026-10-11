@@ -1,6 +1,17 @@
 # MoonWitness XII V11 — Fast-track production gates
 _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
+## Current review snapshot — 2026-10-12
+
+This snapshot supersedes the older SHA/status references below; the original gate narrative is retained as historical context.
+
+- Review head `a42c10e6da3311d8922a7d4e61f8c4531bdaec47` targets `dev` via draft PR #4 (open, mergeable); CI [38164622428](https://github.com/bjo163/monwitness-xii/actions/runs/38164622428) passed. App-code head `b05826a4f75a046256cfe38d525405cc69540c5d` passed CI [38164298570](https://github.com/bjo163/monwitness-xii/actions/runs/38164298570); Preview `dpl_J13Gm5pc8eXrpoiEKdRqx75QP8pE` is READY, with authorized HTTP 200 checks for home, liveness, DB readiness, and 15 metadata-only archive entries.
+- PR #2 remains open and `mergeable_state=dirty`, from `dev` (`c03e977`) to `main` (`7daffea`). No PR was merged; production remains **NO-GO**.
+- Editor limiter (30 writes per authenticated actor per 15 minutes) passed PGlite tests and an approved disposable Neon SQL concurrency rehearsal (35 reservations: 30 allowed, 5 denied). No authenticated application-route write or owner-admin sign-in has been verified; migrations `0001`/`0002` remain unapplied to persistent dev/Preview.
+- This limiter protects authenticated draft/revision writes; rate limiting repeated sign-in/credential attempts remains a separate unverified control.
+- Owner selected daily snapshots with 30-day retention. Neon rejects schedule creation on the current project plan; production schedule reads `[]`. No billing or production database change was made. A manual snapshot restore was verified only for the empty app-database state; RPO/RTO and representative-data recovery remain open.
+- Preview DB host/branch mapping is not independently verified, app-level editor-session HTTP response is obscured by Vercel Deployment Protection, no MFA-capable production editor identity is configured, and source/credit/rights review remains open.
+
 ## Database and app
 - [x] Neon development branch isolated; 9 schemas/16 tables verified.
 - [x] 15 editorial indices published in development, each original source still needed.

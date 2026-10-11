@@ -46,6 +46,21 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [ ] Mizan/semantic engine human review, CAB, AETHERION persistent progression and remaining V11 modules.
 - [ ] Optional local LLM adapter for self-hosted inference (not a database replacement).
 
+## Current evidence snapshot — 2026-10-12
+
+This snapshot supersedes earlier “current”/“latest” references above; those bullets preserve the history of prior verification passes.
+
+- Review branch `codex/v11-release-readiness` is at `a42c10e6da3311d8922a7d4e61f8c4531bdaec47`, targeting `dev` through draft PR #4. PR #4 is open and mergeable; PR #2 remains open and unmergeable (`dev` → `main`, head `c03e977`). Neither PR was merged.
+- CI run [38164622428](https://github.com/bjo163/monwitness-xii/actions/runs/38164622428) passed on the documentation-only review head. App code remains at `b05826a4f75a046256cfe38d525405cc69540c5d`; Vercel Preview deployment `dpl_J13Gm5pc8eXrpoiEKdRqx75QP8pE` is READY for that app-code SHA. The authorized preview fetch returned 200 for `/`, `/api/health`, `/api/health/db` (connected), and `/api/episodes` (15 metadata-only entries). Direct smoke remains blocked by Deployment Protection; the protected fetch's 401 is from the deployment layer and does not verify the app's `/api/editor/session` response.
+- Rate limiting is implemented for both editor write routes (30 writes per authenticated actor per 15 minutes, atomic database reservation, 429 with `Retry-After`, fail-closed 503). Local tests and PGlite cover policy, concurrency, and reset. On the approved disposable Neon branch, 35 concurrent SQL upserts admitted 30 and rejected 5; the counter was 30. The test data/table were removed. This is database-level concurrency evidence only; no authenticated route-level write has been sent.
+- The editor-write limiter does not cover sign-in/password-attempt throttling; that control remains unverified.
+- Migration `0002_editor_write_limits` and the retention migration were rehearsed on an isolated branch, but neither is applied to persistent dev or Preview. Dev still needs a positively mapped application connection and a reviewed ledger-stamping/migration decision. No production migration or deployment was made.
+- A manual production snapshot was restored to an isolated branch successfully for the then-empty application database. Owner selected a daily schedule with 30-day retention; the current production branch still reads `schedule: []`. Neon rejected schedule creation because the current project plan does not enable it. No plan/billing change was made. RPO/RTO and recovery of representative application data remain open.
+- The 15 existing dev records are public editorial indexes only: all are `source_verified=false`, `editorial_index_only`, and `source_needed`. Media, evidence, and revision tables were empty in the recorded read-only inventory. Source provenance, credits, and rights remain unreviewed.
+- No owner admin account exists for authenticated E2E; Neon Managed Auth does not provide MFA in this configuration. Choose an MFA-capable production identity, verify actor-attributed writes and audit events on a properly isolated app-connected DB, resolve PR #2 and the listed content/backup gates, then seek separate explicit approval for production promotion.
+
+**Release decision: NO-GO for production.**
+
 ## Definition of DONE
 A checked item requires real evidence (commit SHA, SQL output, test result, deployment URL and HTTP response). **READY build ≠ production complete.** Until security gates pass, use dev only and do not accept real user drafts via public web clients.
 

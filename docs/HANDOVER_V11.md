@@ -4,9 +4,9 @@
 
 ## Current architecture
 - GitHub: `dev` (ongoing) → `main` (production). PR #2 remains open with merge conflicts.
-- Vercel project: `monwitness-xii`; development builds have returned READY, but runtime response assertions are not yet verified.
+- Vercel project: `monwitness-xii`; latest app-code preview `dpl_J13Gm5pc8eXrpoiEKdRqx75QP8pE` is READY for commit `b05826a`. Authorized fetch verified `/`, `/api/health`, `/api/health/db` (connected), and `/api/episodes` (15 metadata-only entries) with HTTP 200. This does not verify protected editor routes or writes.
 - Neon project `proud-surf-04547637`; branch `br-green-butterfly-b51kp4b1` (`mw-v11-development`). 9 app schemas, 16 tables; 15 published editorial indexes, zero drafts/revisions/audits as last observed. Managed Better Auth is provisioned on this development branch only; production branch `br-dark-sea-b5iws5uf` was untouched.
-- `DATABASE_URL` is configured in Vercel Preview only for this branch. Production holds a separate sensitive variable; endpoint identity not validated here.
+- Vercel metadata labels `DATABASE_URL` as Preview/dev and has a separate Production variable. Its encrypted value prevents confirming the exact Preview hostname/branch mapping. Production settings were not changed.
 
 ## File map
 | Path | Responsibility |
@@ -36,20 +36,23 @@
 - [ ] Owner-provisioned admin sign-in, logout, session restoration and protected write E2E tests.
 - [ ] Live actor-attributed audit, revision concurrency and database transaction tests.
 - [x] Frontend homepage and archive exist on dev.
-- [ ] End-to-end HTTP and database transaction tests with evidence.
-- [ ] Live editor session, RBAC write, and actor-attributed audit E2E tests (policy and SQL contract are implemented and unit-tested).
-- [ ] Resolve existing-schema migration ledger strategy; configure an approved snapshot schedule/retention and define RPO/RTO. A manual production-root snapshot restored to an isolated branch with matching DB tree/size, but production contains no app tables and app-data restore is unverified.
-- [ ] GitHub Actions green on the exact current review head; latest pre-fix audit failed on esbuild and is being corrected.
-- [ ] Resolve PR conflicts; authorize prod connection and promotion.
+- [x] Public preview HTTP checks on the latest app-code head: homepage, liveness, database readiness, and published metadata archive return expected 200 responses.
+- [ ] Direct smoke is blocked by Vercel Deployment Protection (302); authorized fetch reports a deployment-auth 401 before the app can verify `/api/editor/session`. Local Vercel CLI is logged out.
+- [x] Atomic editor write limiter implemented: 30 per authenticated actor per 15-minute window; PGlite tests and real Neon SQL concurrency rehearsal passed (35 concurrent reservations → 30 accepted, 5 rejected). This is not authenticated application-route concurrency proof.
+- [ ] Owner-provisioned admin sign-in, session lifecycle, actor-attributed writes/audit, and authenticated application concurrency remain unverified.
+- [ ] Resolve existing-schema migration ledger strategy. Migrations `0001` and `0002` were rehearsed on an approved disposable Neon branch only; they are not applied to persistent dev/Preview.
+- [ ] Backups: manual production snapshot restored to an isolated branch for the empty app-database state. Owner selected daily/30-day automated snapshots, but the current Neon plan rejects schedule creation; no billing change was made. Define RPO/RTO and prove recovery with representative app data.
+- [x] GitHub Actions run [38164622428](https://github.com/bjo163/monwitness-xii/actions/runs/38164622428) passed on docs-only review head `a42c10e`; app-code head `b05826a` passed [38164298570](https://github.com/bjo163/monwitness-xii/actions/runs/38164298570).
+- [ ] Resolve PR #2 conflicts; it is open, `mergeable_state=dirty`, head `dev` (`c03e977`) → base `main` (`7daffea`). PR #4 is still a draft targeting `dev`; neither was merged. Obtain explicit approval before promotion.
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
 
 ## Suggested fastest remaining order
-1. Provision an owner-controlled admin user on dev Auth and verify login/logout/session restore; keep public signup off.
-2. Run authenticated draft/revision/audit and concurrent-write tests on dev with disposable content; verify actor IDs and public read isolation.
-3. Run CI for the patched dependency lockfile; continue migration-ledger baseline planning (the disposable Neon apply/rollback rehearsal is complete).
-4. Rehearse backup/restore; rate limiting is implemented and tested in review code but still needs the reviewed migration on the intended dev target; choose an MFA-capable production editor identity (Managed Auth lacks MFA here).
-5. Resolve PR #2 conflicts against `main`, re-run checks; verify production DB mapping, source/rights and explicit release approval.
-6. Deploy only after every gate passes; verify checks and rehearse rollback.
+1. Confirm the encrypted Preview DB branch mapping and provide an owner-controlled test identity; keep public signup off.
+2. After separate owner approval and exact target confirmation, rehearse the pending migrations on a disposable app-connected branch, then test authenticated draft/revision/audit and route-level concurrency with disposable content.
+3. Decide whether to approve a paid Neon plan for the selected daily/30-day schedule; set RPO/RTO and test representative-data restore.
+4. Choose an MFA-capable production editor identity, complete source/rights review, and prepare rollback evidence.
+5. Resolve PR #2 conflicts in a reviewable branch and rerun checks; review PR #4 separately.
+6. Deploy only after every gate passes and the owner explicitly approves promotion.
 
 ## Rollback / secret hygiene
 - On deployment error: roll back the Vercel deployment to last known stable production version; never delete tables as an improvised rollback.
