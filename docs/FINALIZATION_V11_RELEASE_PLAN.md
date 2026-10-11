@@ -19,13 +19,13 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [x] Append-only draft/revision SQL + audit-event CTE committed (not E2E proven).
 - [x] Shared payload validation and unit test files committed.
 - [x] GitHub Actions workflow + DB inventory and HTTP smoke test scripts committed.
-- [x] Latest review-head CI run [38161807514](https://github.com/bjo163/monwitness-xii/actions/runs/38161807514) passed all quality gates on `25c42e62f30a98e282625bc5f8d2613affff9249` (locked install, 28 tests, migration reproducibility, production audit, build).
-- [x] Latest review-head Vercel deployment `dpl_E3Pj56uNgCej5YwsSaMvigEdwT9c` is READY for `25c42e6`; alias smoke: liveness 200, DB connected 200, archive list 200/15 metadata-only entries, signed-out Auth session 200/null.
+- [x] Prior exact-head CI run [38162078569](https://github.com/bjo163/monwitness-xii/actions/runs/38162078569) passed all quality gates on `41221a438442edd0bf0bcba24283226f6139efe1` (locked install, 28 tests, migration reproducibility, production audit, build). The subsequent baseline-reconciliation verifier update passes locally and is awaiting a new CI run.
+- [x] Prior review-head Vercel deployment `dpl_CA8SrdHx5kQzb8EEgqbjXkbQAvGu` is READY for `41221a4`; alias smoke: liveness 200, DB connected 200, archive list 200/15 metadata-only entries, signed-out Auth session 200/null. The new verifier mode has not been deployed yet.
 
 ## Not DONE [ ] — release blockers ranked
 ### P0: security and tests
 - [ ] Confirm exact Preview database branch mapping and editor session behavior. Current smoke: DB health 200, public list 200/15, known story 200, Auth signed-out session 200/null and public signup 404. Vercel environment metadata labels the Preview DB value for isolated development but does not expose its encrypted host; connector retry prevents observing `/api/editor/session`'s expected 401.
-- [x] Confirm GitHub Actions pipeline status; latest review-head CI run `38161807514` is green on `25c42e6`.
+- [ ] Confirm GitHub Actions is green on the current verifier change; previous exact-head run `38162078569` passed on `41221a4`.
 - [ ] Provision owner admin identity and complete live sign-in/session/logout restoration checks.
 - [ ] Verify authenticated write + revision + actor-attributed audit and concurrency on isolated dev database.
 - [ ] Add rate limiting and choose MFA-capable identity for production editor access; Neon Managed Auth currently does not expose MFA.

@@ -4,6 +4,13 @@ import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
 
+const args = process.argv.slice(2);
+const baselineReconciliation = args.length === 1 && args[0] === "--baseline-reconciliation";
+if (args.length > 0 && !baselineReconciliation) {
+  console.error("Usage: node scripts/verify-schema.mjs [--baseline-reconciliation]");
+  process.exit(2);
+}
+
 const uri = process.env.DATABASE_URL;
 if (!uri) {
   console.error("DATABASE_URL missing; verification not run");
@@ -12,7 +19,8 @@ if (!uri) {
 
 const db = neon(uri);
 const root = fileURLToPath(new URL("..", import.meta.url));
-const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", "0001_snapshot.json"), "utf8"));
+const snapshotFile = baselineReconciliation ? "0000_snapshot.json" : "0001_snapshot.json";
+const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", snapshotFile), "utf8"));
 const expectedTables = snapshot.tables;
 const schemas = [...new Set(Object.values(expectedTables).map((table) => table.schema))].sort();
 
@@ -204,6 +212,8 @@ const storyCounts = actualTableNames.has("archive.stories")
   : { total: null, drafts: null };
 
 const result = {
+  verificationMode: baselineReconciliation ? "baseline-reconciliation" : "current-schema",
+  schemaSnapshot: snapshotFile,
   expectedTables: Object.keys(expectedTables).length,
   actualTables: actualTableNames.size,
   missingTables,
@@ -232,4 +242,4 @@ const result = {
   drafts: storyCounts.drafts,
 };
 console.log(JSON.stringify(result, null, 2));
-if (hasSchemaDrift(result)) process.exit(1);
+if (hasSchemaDrift(result, { requireLedger: !baselineReconciliation })) process.exit(1);
