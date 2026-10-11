@@ -5,6 +5,15 @@
 **Starting commit:** `c03e977`  
 **Release decision:** **NO-GO for production promotion.**
 
+
+## 2026-10-12 latest follow-up — backup budget and exact-head preview
+
+- User selected a daily Neon automatic snapshot schedule with 30-day retention. The production branch `br-dark-sea-b5iws5uf` remains ready/default with `schedule: []`; the project reports Free (`free_v3`) and Neon rejected schedule creation. The monthly paid-plan spending ceiling has not yet been supplied. No plan, billing, database, or production deployment change occurred.
+- Read-only project usage for the current consumption period (2026-10-11T13:08:19Z through 2026-11-01T00:00:00Z): 369,215 data-transfer bytes, 2,135 compute seconds, 8,364 active seconds, 0 written bytes, and 0 storage byte-hours. These are usage counters, not an invoice or cost forecast.
+- Documentation-only head `1b35249e6ee5a1af33a2a461cf48ed21a122e271` is pushed to the review branch. Vercel Preview `dpl_HKHQzEK9dXCeNFLV1N3RowhEVdXZ` is READY for this exact SHA. Authorized fetch verified `/` 200, `/api/health` 200, `/api/health/db` 200 (`database=connected`, migration=development), and `/api/episodes` 200 with 15 metadata-only entries. The homepage HTML includes the faceless traveler and four Batteries portraits.
+- Exact-head GitHub Actions run [38166661179](https://github.com/bjo163/monwitness-xii/actions/runs/38166661179) completed successfully for this SHA. The previous code SHA `0b5edcd9b5cf2c27a18af3de9d39f6f77182d45d` also has passing CI and local build, 30/30 tests, and `db:check`. No production gates were closed by this documentation update.
+- Production remains **NO-GO** pending budget authorization for paid backup scheduling, representative-data recovery/RPO/RTO, verified auth/database mapping and authenticated-write E2E, MFA-capable identity, archive source/rights review, PR #2 conflict recheck, rollback review, and explicit promotion approval.
+
 ## Work completed in this handover pass
 
 - 2026-10-11 visual and Codex follow-up: installed a coherent set of one faceless traveler cover illustration plus four full-body Batteries character portraits in `public/characters/`. The canonical character direction and variant naming are described in `public/characters/character-guide.txt`; the earlier vector explorations remain available under `public/characters/styles/vector/`. The AETHERION Codex now saves the selected level, checklist, and cleared early-access levels in browser-local storage only, with range checks and a visible journey counter. This local progress is not an authenticated or synchronized account record.
