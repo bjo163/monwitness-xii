@@ -42,10 +42,11 @@ npm run db:check # regenerates migration SQL and validates the committed migrati
 npm audit --omit=dev
 npm run build
 npm run db:verify # read-only, needs DATABASE_URL
-SMOKE_BASE_URL=https://your-authorized-preview.example npm run smoke:http
 ```
 
 `npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
+
+For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
 
 `npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are reproducible and were replayed against an isolated Neon rehearsal database; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping remains a release blocker. **Do not run migrations against production without review and approval.**
 
