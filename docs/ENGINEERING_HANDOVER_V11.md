@@ -5,9 +5,9 @@
 **Starting commit:** `c03e977`  
 **Release decision:** **NO-GO for production promotion.**
 
-## 2026-10-12 latest exact-head recheck
+## 2026-10-12 application-head and Preview checkpoint
 
-- Review head `3b70c661093a0a84f0f8438879917b46162f0054` passed Actions [38171319647](https://github.com/bjo163/monwitness-xii/actions/runs/38171319647). App implementation `09624ca60ccfdada2ea5a8190d78beb10451067f` passed Actions [38171011483](https://github.com/bjo163/monwitness-xii/actions/runs/38171011483); Preview [dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb](https://vercel.com/bjo163s-projects/monwitness-xii/dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb) is READY.
+- Review snapshot `3b70c661093a0a84f0f8438879917b46162f0054` passed Actions [38171319647](https://github.com/bjo163/monwitness-xii/actions/runs/38171319647). App implementation `09624ca60ccfdada2ea5a8190d78beb10451067f` passed Actions [38171011483](https://github.com/bjo163/monwitness-xii/actions/runs/38171011483); Preview [dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb](https://vercel.com/bjo163s-projects/monwitness-xii/deployments/dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb) is READY. The live review SHA and latest CI status are tracked in PR #4 and Issue #3.
 - Authenticated Vercel fetch of that Preview returned DB health `200 connected/development`, `/api/episodes` `200` with 15 metadata-only entries, Auth session `200 null`, editor session `401`, app signup path `404`, and `200` for the archive index and representative editorial detail. Sanitized Preview environment metadata labels its DB/Auth configuration for isolated dev; a read-only query on Neon dev branch `br-green-butterfly-b51kp4b1` exactly matches all 15 Preview `slug/title` pairs. This is strong data-mapping evidence, but the encrypted DB URL hostname was not read, so direct host/branch verification remains open.
 - Local `.env.local` has no `DATABASE_URL`. Local DB health `503` and archive retry pages reflect missing local configuration, not a confirmed remote Neon outage. No database secret was read or copied.
 - CUA checked nine routes at 390×844; each document measured 375px wide. Build, 34 tests, migration check, dependency audit (0 vulnerabilities), and diff check passed on the tested app worktree.
