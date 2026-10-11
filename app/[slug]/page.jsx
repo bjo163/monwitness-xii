@@ -1,10 +1,11 @@
 'use client';
 import {useState} from 'react';
+import {useParams} from 'next/navigation';
 import Link from 'next/link';
 import {menu,crew,episodes,books} from '../universe-data';
 const routeNames=['episodes','team','throwing-dice','four-books','aetherion','witness-log','the-lab'];
 const titles={episodes:'EPISODE ARCHIVE',team:'THE BATTERIES', 'throwing-dice':'THROWING DICE', 'four-books':'FOUR BOOKS',aetherion:'AETHERION WORLD', 'witness-log':'WITNESS LOG', 'the-lab':'THE LAB'};
-export default function UniversePage({params}){const slug=params.slug; const [dice,setDice]=useState('99:7');const [entry,setEntry]=useState(0);const [filter,setFilter]=useState('ALL'); const [log,setLog]=useState('');if(!routeNames.includes(slug))return <div className="universePage"><Link href="/">← HOME</Link><h1>404 · UNKNOWN PORTAL</h1></div>;
+export default function UniversePage(){const params=useParams();const slug=params.slug; const [dice,setDice]=useState('99:7');const [entry,setEntry]=useState(0);const [filter,setFilter]=useState('ALL'); const [log,setLog]=useState('');if(!routeNames.includes(slug))return <div className="universePage"><Link href="/">← HOME</Link><h1>404 · UNKNOWN PORTAL</h1></div>;
  const [surah,verse]=dice.split(':').map(x=>Number(x.trim()));const eligible=Number.isInteger(surah)&&Number.isInteger(verse)&&surah>=1&&surah<=114&&verse>=1;
  const sources=episodes.filter(x=>filter==='ALL'||x[2]===filter);
  return <main className="universePage"><nav className="universeNav"><Link href="/">◀ MOONWITNESS XII</Link><div>{menu.map(([href,name])=><Link className={href==='/' + slug?'active':''} key={href} href={href}>{name}</Link>)}</div></nav><header className="universeHeader"><span>THE BATTERIES UNIVERSE / {slug.toUpperCase()}</span><h1>{titles[slug]}</h1><p>FUNKY MANGA LINES • FACELESS EDITION • SERIOUS HEART, ABSURD ADVENTURE</p></header>
