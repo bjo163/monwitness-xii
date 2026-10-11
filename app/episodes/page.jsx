@@ -30,15 +30,15 @@ export default async function EpisodesPage() {
       {episodes.map((e,i)=><article key={e.slug} style={{border:"2px solid #5de8ef",background:"#202b43",padding:20,boxShadow:"5px 5px #ff79bb"}}>
         <div style={{fontSize:13,color:"#ffe05c",fontWeight:800}}>{e.season||"MOONWITNESS"} • #{i+1}</div>
         <h2 style={{fontSize:24,lineHeight:1.2}}>{e.title}</h2>
-        <p style={{lineHeight:1.6}}>{e.synopsis}</p>
+        <p lang="id" style={{lineHeight:1.6}}>{e.synopsis}</p>
         <small style={{color:"#a0b9ca"}}>ORIGINAL SOURCE: {e.originalSourceStatus?.replaceAll("_"," ").toUpperCase()}</small>
         <p><Link href={`/episodes/${encodeURIComponent(e.slug)}`} style={{display:"inline-block",marginTop:18,color:"#70edee",fontWeight:800}}>OPEN INDEX ENTRY →</Link></p>
       </article>)}
     </div></>}
     <footer style={{padding:"50px 0",marginTop:45,borderTop:"2px solid #444",textAlign:"center"}}>
       <h2 style={{color:"#ffe05c"}}>COMEDY ON. SHALAWAT ON.</h2>
-      <p>Pelan-pelan ya, gue juga masih belajar. • Mercy First. Humanity First. Ego Last.</p>
-      <p style={{fontSize:28,color:"#6aeaf0"}}>Cahaya bulan menerangi AKUUU... 🌙</p>
+      <p><span lang="id">Pelan-pelan ya, gue juga masih belajar.</span> • Mercy First. Humanity First. Ego Last.</p>
+      <p lang="id" style={{fontSize:28,color:"#6aeaf0"}}>Cahaya bulan menerangi AKUUU... 🌙</p>
     </footer>
   </main>;
 }

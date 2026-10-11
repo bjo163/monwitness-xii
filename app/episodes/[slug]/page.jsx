@@ -42,7 +42,7 @@ export default async function EpisodeIndexEntry({ params }) {
       <p style={{color:"#ffe05c",fontWeight:800}}>{episode.season || "MOONWITNESS"} • EDITORIAL INDEX</p>
       <h1 style={{fontSize:"clamp(38px,7vw,76px)",lineHeight:1.05,margin:"16px 0"}}>{episode.title}</h1>
       <p style={{color:"#a0b9ca",fontWeight:800}}>{episode.experienceType.replaceAll("_", " ").toUpperCase()}</p>
-      <p style={{fontSize:18,lineHeight:1.8}}>{episode.synopsis || "No editorial synopsis is available yet."}</p>
+      <p lang={episode.synopsis ? "id" : "en"} style={{fontSize:18,lineHeight:1.8}}>{episode.synopsis || "No editorial synopsis is available yet."}</p>
       <p style={{padding:16,background:"#151b2d",lineHeight:1.7}}><strong>ORIGINAL SOURCE: {episode.originalSourceStatus.replaceAll("_", " ").toUpperCase()}</strong><br/>This page contains an editorial index only. It does not reproduce an original script or comic page.</p>
       <Link href="/episodes" style={{display:"inline-block",marginTop:18,color:"#70edee",fontWeight:800}}>← BACK TO ALL EPISODES</Link>
     </article>
