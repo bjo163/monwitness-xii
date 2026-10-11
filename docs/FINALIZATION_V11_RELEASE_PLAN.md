@@ -19,13 +19,13 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [x] Append-only draft/revision SQL + audit-event CTE committed (not E2E proven).
 - [x] Shared payload validation and unit test files committed.
 - [x] GitHub Actions workflow + DB inventory and HTTP smoke test scripts committed.
-- [x] Exact review-head CI run `38159605857` passed all quality gates on `470aa3c` (tests, migration reproducibility, production audit, build).
-- [x] Exact review-head Vercel deployment `dpl_CJd7u86ufju4Dws5o9jiexoViSL6` is READY; home, editor login and archive pages return 200.
+- [x] Exact review-head CI run `38160413791` passed all quality gates on `5d2700d` (tests, migration reproducibility, production audit, build).
+- [x] Exact review-head Vercel deployment `dpl_QkfyuHErdauTHsbM396Gj3Yq9z7Q` is READY; home, health, DB, list and known story API, editor login, and Auth signed-out session smoke passed.
 
 ## Not DONE [ ] — release blockers ranked
 ### P0: security and tests
-- [ ] Configure preview database and confirm runtime HTTP results: /api/health/db=200, /api/episodes=200 with 15 entries, known story slug=200, signed-out auth responses expected. Branch-scoped Auth variables and trusted domain are now configured for review Preview; a new deployment is needed to verify signed-out responses. DB remains intentionally unconfigured until a least-privilege role is established.
-- [x] Confirm GitHub Actions pipeline status; exact review-head CI run `38159605857` is green.
+- [ ] Confirm exact Preview database branch mapping and editor session behavior. Current smoke: DB health 200, public list 200/15, known story 200, Auth signed-out session 200/null and public signup 404. Vercel environment metadata labels the Preview DB value for isolated development but does not expose its encrypted host; connector retry prevents observing `/api/editor/session`'s expected 401.
+- [x] Confirm GitHub Actions pipeline status; exact review-head CI run `38160413791` is green.
 - [ ] Provision owner admin identity and complete live sign-in/session/logout restoration checks.
 - [ ] Verify authenticated write + revision + actor-attributed audit and concurrency on isolated dev database.
 - [ ] Add rate limiting and choose MFA-capable identity for production editor access; Neon Managed Auth currently does not expose MFA.
