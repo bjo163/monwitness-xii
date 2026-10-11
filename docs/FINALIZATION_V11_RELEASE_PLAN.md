@@ -19,13 +19,13 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [x] Append-only draft/revision SQL + audit-event CTE committed (not E2E proven).
 - [x] Shared payload validation and unit test files committed.
 - [x] GitHub Actions workflow + DB inventory and HTTP smoke test scripts committed.
-- [x] Exact review-head CI run `38160413791` passed all quality gates on `5d2700d` (tests, migration reproducibility, production audit, build).
-- [x] Exact review-head Vercel deployment `dpl_QkfyuHErdauTHsbM396Gj3Yq9z7Q` is READY; home, health, DB, list and known story API, editor login, and Auth signed-out session smoke passed.
+- [x] Latest review-head CI run [38161232758](https://github.com/bjo163/monwitness-xii/actions/runs/38161232758) passed all quality gates on `52140679745e2728b269d94e5c0a6ee76e49f021` (locked install, 28 tests, migration reproducibility, production audit, build).
+- [x] Latest review-head Vercel deployment `dpl_DmqYbKeqH7BqjPAHrLQmyfLu3B8a` is READY for `5214067`; alias smoke: liveness 200, DB connected 200, archive list 200/15 metadata-only entries, signed-out Auth session 200/null.
 
 ## Not DONE [ ] — release blockers ranked
 ### P0: security and tests
 - [ ] Confirm exact Preview database branch mapping and editor session behavior. Current smoke: DB health 200, public list 200/15, known story 200, Auth signed-out session 200/null and public signup 404. Vercel environment metadata labels the Preview DB value for isolated development but does not expose its encrypted host; connector retry prevents observing `/api/editor/session`'s expected 401.
-- [x] Confirm GitHub Actions pipeline status; exact review-head CI run `38160413791` is green.
+- [x] Confirm GitHub Actions pipeline status; latest review-head CI run `38161232758` is green on `5214067`.
 - [ ] Provision owner admin identity and complete live sign-in/session/logout restoration checks.
 - [ ] Verify authenticated write + revision + actor-attributed audit and concurrency on isolated dev database.
 - [ ] Add rate limiting and choose MFA-capable identity for production editor access; Neon Managed Auth currently does not expose MFA.
