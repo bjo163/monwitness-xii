@@ -1,7 +1,13 @@
 # MoonWitness XII V11 — Fast-track production gates
 _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
-## Release gate snapshot — 2026-10-12
+## Live release checkpoint — 2026-10-12
+
+Review branch `codex/v11-release-readiness` is at `f784d6f4b9cd7e28f1f5bb11d717554f9f84eec9`; exact-head CI [38178873798](https://github.com/bjo163/monwitness-xii/actions/runs/38178873798) passed. Exact-head Preview `dpl_FDRYLViByQDj4xb3KmRAk1d7Syum` is READY. Read-only smoke returned 200 for homepage, `/team`, `/episodes`, 15-row `/api/episodes`, development DB health, and `/api/auth/get-session` (`null`); app signup path returned 404. The protected fetcher could not verify `/api/editor/session` because deployment protection intercepted after redirect. Exact Preview DB branch mapping remains unverified. GitHub API reports PR #4 open, draft, unmerged, mergeable with no submitted reviews; PR #2 open and not mergeable. Production remains NO-GO.
+
+All 15 development stories remain published metadata with `original_source_status='source_needed'`. Neon production automatic snapshot schedule is empty and unavailable on the selected Free plan; requested daily/30-day retention and representative-data recovery remain unmet. Owner/admin onboarding, direct-provider signup behavior, effective sign-in attempt limits, MFA, authenticated editor write/audit E2E, and persistent-dev migration-ledger strategy remain open. No production DB, Auth, billing, or deployment change occurred.
+
+## Historical release evidence snapshots — 2026-10-12
 
 The live review branch SHA, PR state, and latest exact-head CI run are tracked in [PR #4](https://github.com/bjo163/monwitness-xii/pull/4) and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3). This file records release gates based on application/Preview verification, while retaining older SHA-specific evidence below as historical context. Verified app implementation `09624ca60ccfdada2ea5a8190d78beb10451067f` passed CI [38171011483](https://github.com/bjo163/monwitness-xii/actions/runs/38171011483), and exact-code Preview [dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb](https://vercel.com/bjo163s-projects/monwitness-xii/deployments/dpl_92zBVvnTpRMtVVKHrPfZaJmMMKeb) is READY. Review snapshot `3b70c661093a0a84f0f8438879917b46162f0054` passed CI [38171319647](https://github.com/bjo163/monwitness-xii/actions/runs/38171319647). Its Vercel deployment hit the build-rate limit; app code is unchanged from the verified deployment.
 

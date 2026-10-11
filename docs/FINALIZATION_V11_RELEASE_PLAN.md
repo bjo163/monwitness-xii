@@ -47,9 +47,18 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [ ] Mizan/semantic engine human review, CAB, AETHERION persistent progression and remaining V11 modules.
 - [ ] Optional local LLM adapter for self-hosted inference (not a database replacement).
 
-## Current evidence snapshot — 2026-10-12
+## Live review checkpoint — 2026-10-12
 
-This section is the current checkpoint. Earlier SHA-specific bullets and the archived log below are historical evidence and must not be read as the latest branch state.
+- Review checkout and remote PR #4 head are `f784d6f4b9cd7e28f1f5bb11d717554f9f84eec9` on `codex/v11-release-readiness`; worktree clean. Exact-head Actions [38178873798](https://github.com/bjo163/monwitness-xii/actions/runs/38178873798) passed auth regressions, Drizzle migration reproducibility, production dependency audit, and Next.js build.
+- Vercel Preview `dpl_FDRYLViByQDj4xb3KmRAk1d7Syum` is READY for the exact review head: [open The Batteries roster](https://monwitness-374ucznkf-bjo163s-projects.vercel.app/team). Protected read-only fetch returned 200 for `/`, `/team`, `/episodes`, `/api/episodes` (15 rows), `/api/health/db` (`connected`, `development`), and `/api/auth/get-session` (`null`); app signup proxy returned 404. The editor-session fetch was intercepted by Vercel deployment protection after redirect, so it does not establish the application response. Preview data lineage matches dev, but the encrypted `DATABASE_URL` host was not read and exact branch mapping remains open.
+- Current GitHub API state: PR #4 targets `dev`, is open/draft/unmerged and mergeable, with no submitted reviews; PR #2 is open/unmerged and not mergeable (`dev` → `main`). No PR was merged.
+- The production Neon schedule remains empty; its API says schedule creation is not enabled on this Free project. Owner chose to remain Free, so daily/30-day backups are unmet. Snapshot/restore has only been tested for the empty production application database. App-data restore, RPO/RTO, and a free private secondary target remain unverified.
+- Neon dev read-only query confirms all 15 stories remain `published` with `original_source_status='source_needed'`, as the owner directed until original material, credits, and rights evidence are available.
+- Managed Auth credential-attempt throttling, direct provider signup restriction, owner admin onboarding/MFA, authenticated editor E2E, and persistent-dev migration-ledger/apply remain unverified. Production remains **NO-GO**.
+
+## Historical evidence snapshots — 2026-10-12
+
+The following SHA-specific bullets and archived log are historical checkpoints. Consult the live checkpoint above and PR #4 / Issue #3 for current branch state.
 
 - Review branch `codex/v11-release-readiness` evidence refresh `e69d82f1ae936eeffb30e946e54a43365ee7cc50` passed exact-head GitHub Actions run [38174166221](https://github.com/bjo163/monwitness-xii/actions/runs/38174166221) (locked install, auth tests, migration reproducibility, production dependency audit, production build). PR #4 is the draft review path targeting `dev`; the latest recorded state is open and mergeable. PR #2 remains open/unmergeable from `dev` to `main`. See [PR #4](https://github.com/bjo163/monwitness-xii/pull/4) and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3) for moving GitHub state. No PR was merged.
 - The latest recorded protected Preview app-level smoke is on app SHA `09624ca`: homepage, handover, archive, representative detail and DB health returned 200; DB was connected/development; archive API returned 15 metadata-only entries; signed-out Auth session was `200 null`; editor session was `401`; app signup path was `404`. A later documentation-only review-head CI pass does not imply a new Preview deployment.
