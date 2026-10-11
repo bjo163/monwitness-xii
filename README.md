@@ -10,7 +10,7 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 ## Quick links
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
 - [Latest READY remote review visual: The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team) — protected Preview for checkpoint `d6c884b`; local unpushed changes are not included.
-- [Local Story Archive visual](http://localhost:3004/episodes) — available while the latest local review server is running; archive rows require a development-only database connection.
+- [Local Story Archive visual](http://localhost:3005/episodes) — current local production build; archive rows require a development-only database connection.
 - [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
 - [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
 - [Grand Plan implementation checklist](docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md)
@@ -41,7 +41,7 @@ Add your *development-only* `DATABASE_URL`, `NEON_AUTH_BASE_URL`, a newly genera
 ```bash
 npm test
 npm run db:check # regenerates migration SQL and validates the committed migration history
-npm audit --omit=dev
+npm audit
 npm run build
 npm run db:verify # read-only, needs DATABASE_URL
 ```
@@ -52,7 +52,7 @@ For populated-development baseline preflight only, also set `EXPECTED_DATABASE_H
 
 For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
 
-The latest local production build's [Story Archive page](http://localhost:3004/episodes) is running. It shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible.
+The latest local production build's [Story Archive page](http://localhost:3005/episodes) is running. It shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible.
 
 The current local review includes an Archive notice explaining that a published index does not establish source provenance or reuse rights. Without a local development `DATABASE_URL`, the notice is visible but the database-backed episode cards show the safe retry state. This local review change is not in the remote Preview.
 
@@ -68,12 +68,15 @@ For recovery operations, use the [V11 backup/restore runbook](docs/BACKUP_RESTOR
 | `GET /api/health/db` | Read-only DB connectivity | Public health signal (no secrets) |
 | `GET /api/episodes` | Published editorial indexes plus a provenance notice | Five-field allowlist; no-store; no source or rights evidence |
 | `GET /api/episodes/:slug` | Published episode index plus a provenance notice | Five-field allowlist; no-store; no source or rights evidence |
-| `GET/POST /api/auth/*` | Allowlisted Neon Managed Auth session routes | Neon Auth session |
+| `GET /api/auth/get-session` | Current Neon Auth session | Neon Auth session; no-store |
+| `POST /api/auth/sign-in/email` | Email/password sign-in | Neon Auth session; no-store |
+| `POST /api/auth/sign-out` | End current browser session | Neon Auth session; no-store |
+| `GET /api/auth/token` | Retrieve a Neon Auth token | Neon Auth session; no-store |
 | `GET /api/editor/session` | Current editor role and allowlist status | Own session only |
 | `POST /api/editor/drafts` | Draft + immutable first revision + audit | Same-origin Neon Auth admin session and server allowlist |
 | `POST /api/editor/revisions` | Append immutable revision + audit | Same-origin Neon Auth admin session and server allowlist |
 
-Editor writes require a same-origin Neon Auth session with the `admin` role and a matching server-side `EDITOR_ADMIN_USER_IDS` entry; audit records attribute each write to the mapped application user. Authentication is fail-closed if configuration or the provider is unavailable. The application auth proxy only forwards session, sign-in, sign-out, and token routes; public sign-up requests to this app are rejected with 404. Neon Auth currently reports provider-level `allow_sign_up=true`, and Neon documents restricted sign-up as unsupported/not yet available. This means a direct provider registration may still be possible; the app proxy is not a provider-wide signup control. The explicit user-ID allowlist prevents a newly registered account from gaining editor rights unless an owner configures that ID server-side; identity onboarding policy and authenticated admin E2E remain release gates. The limiter passed PGlite tests and an isolated Neon SQL concurrency rehearsal; authenticated application-route writes, owner-admin sign-in, and route-level concurrency remain unverified before accepting drafts. Neon Managed Auth currently does not provide MFA in this configuration.
+Editor writes require a same-origin Neon Auth session with the `admin` role and a matching server-side `EDITOR_ADMIN_USER_IDS` entry; audit records attribute each write to the mapped application user. Authentication is fail-closed if configuration or the provider is unavailable. The application auth proxy permits only SDK-defined methods for its four allowlisted routes; mismatched methods return 405 with a route-specific `Allow` header. Public sign-up requests to this app are rejected with 404. Neon Auth currently reports provider-level `allow_sign_up=true`, and Neon documents restricted sign-up as unsupported/not yet available. This means a direct provider registration may still be possible; the app proxy is not a provider-wide signup control. The explicit user-ID allowlist prevents a newly registered account from gaining editor rights unless an owner configures that ID server-side; identity onboarding policy and authenticated admin E2E remain release gates. The limiter passed PGlite tests and an isolated Neon SQL concurrency rehearsal; authenticated application-route writes, owner-admin sign-in, and route-level concurrency remain unverified before accepting drafts. Neon Managed Auth currently does not provide MFA in this configuration.
 
 ## Release rules
 - Keep **`dev`** for development, **`main`** for production. No forced merge.
