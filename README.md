@@ -60,6 +60,8 @@ The current local review includes an Archive notice explaining that a published 
 
 The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), targeting `dev`. They have not been merged or released. See [CHANGELOG.md](CHANGELOG.md) for this review's changes and outstanding gates.
 
+For recovery operations, use the [V11 backup/restore runbook](docs/BACKUP_RESTORE_RUNBOOK_V11.md). It documents the isolated, unfinalized restore workflow and the remaining production-data/RPO/RTO gates.
+
 ## API surface
 | Route | Purpose | Security |
 | --- | --- | --- |

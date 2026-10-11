@@ -1,0 +1,32 @@
+# MoonWitness XII — Backup and restore runbook (V11)
+
+**Status:** operator procedure drafted; production-data recovery, scheduled retention, RPO/RTO, and production cutover are not verified. **Production remains NO-GO.**
+
+## Verified state and limits
+
+- Neon production has no application tables or Archive records in the last recorded read-only audit. A manual snapshot was restored to an isolated branch and reached `ready`; the source and restored database trees matched, and both `neondb` databases measured 7,716,864 bytes. This proves restoration of the then-empty application state only, not recovery of representative user/story data.
+- The owner chose to remain on Neon Free while requesting daily snapshots with 30-day retention. The production automatic schedule remains empty, and schedule creation was rejected on the current plan. The requested cadence/retention is therefore unmet. RPO and RTO have not been agreed.
+- Neon snapshots can be restored into a new branch without changing the source branch. Keep restore/finalize separate so the restored branch can be checked before any routing or promotion. See [Neon snapshot guidance](https://neon.com/blog/three-ways-to-use-your-snapshots).
+
+## Recovery procedure
+
+1. **Declare and record the incident.** Record the incident owner, project ID, source branch ID, incident start time in UTC, suspected bad-write window, and the most recent known-good recovery point. Do not paste connection strings, source manuscripts, witness records, or secrets into tickets or logs.
+2. **Stop application writes.** Use the incident-approved write-freeze mechanism and verify draft/revision POSTs are denied. Preserve the original production branch; do not restore over it, delete it, or change its default status as an improvised fix.
+3. **Choose the recovery point.** Use a snapshot for a named preserved state or PITR for a point within the configured history window. Confirm the selected snapshot/time and timezone with a second operator. On the selected Free plan, the currently recorded PITR window is only six hours; daily/30-day snapshots are not configured.
+4. **Restore to an isolated branch.** Create a new non-default branch from the selected snapshot/time and leave it unfinalized. Record the new branch ID and parent/snapshot ID. Wait for provider state `ready`. If creation fails or the identity is ambiguous, stop and leave the source untouched.
+5. **Verify the recovered target before connecting the app.** Independently check the project, branch, endpoint host, database name, and restore point in the provider control plane. Compare schema/table inventory, expected migration ledger, row counts, key relationships, and application invariants to the incident's accepted recovery point. Use read-only checks and return only counts/status; do not export source text or private witness data as evidence. Never derive the expected target host/name solely from the candidate DSN.
+6. **Run isolated application checks.** If the recovered state contains the app schema, set the candidate DSN only in a temporary local process environment, run the applicable read-only schema verifier, and exercise a local app instance. Confirm published indexes, private draft isolation, Auth/session behavior, and health responses as appropriate. Do not point production traffic or Vercel at this branch during validation. Production currently has no app tables, so this step has not yet been demonstrated with representative data.
+7. **Obtain explicit recovery approval.** The owner and an independent reviewer must approve the selected point, branch identity, validation results, expected data loss, and remaining risks. Define/accept RPO and RTO. A backup restore is not permission to promote, deploy, or change production configuration.
+8. **Cut over only under a separate approved change.** Use the reviewed provider branch-finalization or application connection-switch procedure for the chosen recovery design. Keep the original branch and its ID intact as the rollback source; verify target identity again immediately before cutover. Smoke the read-only public and signed-out auth surface, then verify writes only on an explicitly approved isolated test record. Do not expose restored drafts or originals publicly.
+9. **If any check fails, abort before finalization.** Keep the source/default branch unchanged, keep the restore branch isolated for diagnosis, retain sanitized evidence, and do not repoint the application. Delete the isolated branch only after incident-owner review confirms it is no longer needed.
+
+## Rollback and evidence record
+
+- Before finalization/cutover, rollback means **do not finalize or route to the candidate branch**; retain the source as the active branch. This safe abort path follows the isolated-restore model but has not been rehearsed with representative app data.
+- After a cutover, use the pre-approved provider/application rollback plan to return traffic to the preserved source branch. Exact production cutover and rollback have not been exercised; do not assume the snapshot restore rehearsal proves them.
+- For every rehearsal or incident, record: approver(s), UTC start/end, project/source/restore branch IDs, snapshot or PITR time, provider state, sanitized schema/count/invariant results, verifier/smoke output, cutover decision, rollback decision, and measured recovery time/data gap. Never record DSNs or content bodies.
+- Until a private destination and budget are approved, do not put plaintext database dumps or private source material in this public repository or its Actions artifacts. No alternative scheduled backup target is configured.
+
+## Release gate
+
+This runbook improves operator guidance; it does not close DB-03. DB-03 remains **IN PROGRESS** until daily/30-day retention has an approved and functioning destination, RPO/RTO are accepted, and restore/cutover/rollback are verified with a representative application dataset. Keep production **NO-GO**.

@@ -13,6 +13,8 @@ Preview smoke also requires no-store on login, signed-out Auth session, and edit
 
 Supply-chain verification: full `npm audit` reports zero vulnerabilities across 298 locked dependency entries, including development packages. GitHub Actions now runs the full audit; local `actionlint` passes, but the unpushed workflow change has no remote Actions result.
 
+Backup/restore operator steps are now documented in [BACKUP_RESTORE_RUNBOOK_V11.md](./BACKUP_RESTORE_RUNBOOK_V11.md). DB-03 remains open: only the empty production database was restored in rehearsal, automatic snapshots remain unavailable under the chosen Free plan, and RPO/RTO plus representative-data recovery are unverified.
+
 All 15 development stories remain published metadata with `original_source_status='source_needed'`. Neon production automatic snapshot schedule is empty and unavailable on the selected Free plan; requested daily/30-day retention and representative-data recovery remain unmet. Owner/admin onboarding, direct-provider signup behavior, effective sign-in attempt limits, MFA, authenticated editor write/audit E2E, and persistent-dev migration-ledger strategy remain open. No production DB, Auth, billing, or deployment change occurred.
 
 ## Historical release evidence snapshots — 2026-10-12
