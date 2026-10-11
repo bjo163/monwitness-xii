@@ -35,6 +35,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 - Restricted each allowlisted Neon Auth endpoint to its SDK-defined method (`get-session`/`token`: GET; `sign-in/email`/`sign-out`: POST). Local regression tests cover mismatched methods, and a fresh production server on port 3005 passed all 22 loopback smoke checks plus direct 405/Allow and denied-signup checks. `npm test` passes 66/66 and `npm run build` passes. The owner requested local-only work; no push or deployment was made.
 - Extended both local and Preview HTTP smoke profiles to assert route-specific Auth method handling (`405` plus the exact `Allow` header); smoke-script contract tests enforce coverage in each profile.
 - Latest full local checkpoint after those smoke changes: 67/67 tests, `db:check`, production build, full `npm audit` (0 findings), `actionlint`, and 24/24 loopback HTTP smoke checks pass. No remote CI was run because the branch remains local-only.
+- A signed-out local `GET /api/auth/token` returns 401 with `Cache-Control: no-store`; local and Preview smoke profiles now enforce this token boundary (or the expected unconfigured-auth 503 for local environments without provider config).
 
 ### Release state
 
