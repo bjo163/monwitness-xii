@@ -2,6 +2,8 @@
 
 **As of:** 2026-10-12 • **Owner repository:** bjo163/monwitness-xii • **Release verdict:** NO-GO for production promotion.
 
+> **Live status:** this handover preserves the detailed historical evidence below. For current review state, use [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3), [release gates](./RELEASE_GATES_V11.md), and [finalization plan](./FINALIZATION_V11_RELEASE_PLAN.md). At review head `b4a2bf9`, exact-head Actions [38174607348](https://github.com/bjo163/monwitness-xii/actions/runs/38174607348) passed. PR #4 remains draft and unmerged; PR #2 remains open/unmergeable. Neon remains Free by owner choice; daily/30-day retention is unmet, and no backup destination is approved or configured. Production promotion remains NO-GO.
+
 ## Current architecture
 - GitHub: `dev` (ongoing) → `main` (production). PR #2 remains open with merge conflicts.
 - Vercel project: `monwitness-xii`; Preview `dpl_HCuUTFQgX4QCBXGYJ1PB3mBtGVGr` is READY for integration SHA `e5eff67`. Authorized fetch returned 200 for homepage, restored universe pages, liveness, DB readiness, and 15 metadata-only archive entries. This does not verify protected editor routes or authenticated writes.
@@ -33,6 +35,7 @@
 - [x] Sign-in-only editor entry and admin-only, same-origin server authorization implemented; public signup routes are denied by the application proxy. Neon Auth provider config reads `allow_sign_up=true`; current Neon docs say restricted signup is not yet supported, so direct provider registration remains an open identity-onboarding risk/gate.
 - [x] Local anonymous HTTP returns auth proxy 200/null, editor session 401, and draft POST 401.
 - [x] Exact baseline and retention migration SQL replayed in a blank isolated Neon rehearsal database; 9 schemas/16 tables verified; `RESTRICT` behavior and rollback to `CASCADE` exercised; source dev branch remained unchanged.
+- [x] The official Drizzle PGlite migrator now has a regression test: it applies all three journaled migrations, checks the migration ledger and final FK policy, then reruns without duplicating ledger records. This validates local migrator behavior; persistent Neon dev/Preview migration remains pending.
 - [ ] Owner-provisioned admin sign-in, logout, session restoration and protected write E2E tests. Editor writes additionally require a server-side `EDITOR_ADMIN_USER_IDS` allowlist; it is intentionally unset until the owner identity is verified.
 - [ ] Live actor-attributed audit, revision concurrency and database transaction tests.
 - [x] Frontend homepage and archive exist on dev.
@@ -41,8 +44,8 @@
 - [x] Atomic editor write limiter implemented: 30 per authenticated actor per 15-minute window; PGlite tests and real Neon SQL concurrency rehearsal passed (35 concurrent reservations → 30 accepted, 5 rejected). This is not authenticated application-route concurrency proof.
 - [ ] Owner-provisioned admin sign-in, session lifecycle, actor-attributed writes/audit, and authenticated application concurrency remain unverified.
 - [ ] Resolve existing-schema migration ledger strategy. Migrations `0001` and `0002` were rehearsed on an approved disposable Neon branch only; they are not applied to persistent dev/Preview.
-- [ ] Backups: manual production snapshot restored to an isolated branch for the empty app-database state. Owner selected daily/30-day backups and chose to stay on Free. Neon Free allows only 6 hours of PITR history; the automatic snapshot schedule remains empty. S3-based `pg_dump` automation is possible but carries separate storage/transfer costs and is not configured. Define RPO/RTO and prove recovery with representative app data.
-- [x] GitHub Actions run [38164622428](https://github.com/bjo163/monwitness-xii/actions/runs/38164622428) passed on docs-only review head `a42c10e`; app-code head `b05826a` passed [38164298570](https://github.com/bjo163/monwitness-xii/actions/runs/38164298570).
+- [ ] Backups: manual production snapshot restored to an isolated branch for the empty app-database state. Owner selected daily/30-day backups and chose to stay on Free. Neon Free allows only 6 hours of PITR history; the automatic snapshot schedule remains empty. S3-based `pg_dump` automation adds separate cost and is not configured. GitHub Actions artifacts on this public repository are downloadable by readers; only client-side encrypted dumps could be considered, with 500 MB included storage shared with Packages and possible overage charges. No destination, workflow, size cap, or hard-stop budget is approved/configured. Define RPO/RTO and prove recovery with representative app data.
+- [x] Latest exact-head Actions run [38174607348](https://github.com/bjo163/monwitness-xii/actions/runs/38174607348) passed on review head `b4a2bf9`.
 - [ ] Integrate the conflict-resolution branch: commit `e5eff67` merges `main` (`7daffea`) into PR #4 while preserving V11 work. PR #2 remains open/dirty (`dev` → `main`) until this lands in `dev`; PR #4 is still a draft. Neither PR was merged. Obtain explicit approval before production promotion.
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
 
