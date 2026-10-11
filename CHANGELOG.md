@@ -8,7 +8,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 - Reconciled the live review checkpoint to HEAD `293cee5` and exact-head CI [38179410407](https://github.com/bjo163/monwitness-xii/actions/runs/38179410407); marked older CI/Preview references as historical where they remain useful.
 - Changed the missing Grand Master Plan V11/V11.2 source gap from “done” to blocked pending the authoritative files, and added a blocked module inventory rather than inventing absent requirements.
-- Recorded the current Vercel Free quota limit and owner-selected 24-hour wait. The latest READY visual preview remains the app-identical `f784d6f` deployment; current-head Preview smoke remains open.
+- Recorded the Vercel Free quota warning and the owner's choice to keep the plan and wait. Git integration produced READY Preview `dpl_HnnQ6MgscYdnHiSTWGM7SwtkZJch` for `d6c884b` without an upgrade; protected public page/API smoke passed while the editor-session route remains inaccessible behind deployment protection.
 - Preserved all 15 Archive entries as `source-needed` until original material, credits, and rights evidence are supplied.
 
 ### Release state
