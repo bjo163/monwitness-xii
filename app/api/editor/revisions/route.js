@@ -16,8 +16,9 @@ export async function POST(request){
  try {
   if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});
   const sql=neon(process.env.DATABASE_URL);
-  // Lock the draft row before allocating the next revision number. All writers for
-  // one story serialize here; the unique index remains a final integrity guard.
+  // Lock the draft row before allocating the next revision number. The unique
+  // index remains the integrity guard; a concurrent allocation can still return
+  // 409 and should be retried by the caller.
   const rows=await sql`
     WITH target AS MATERIALIZED (
       SELECT id FROM archive.stories

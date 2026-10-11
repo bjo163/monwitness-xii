@@ -14,7 +14,7 @@ assert.match(schema, /references\(\(\)=>stories\.id,\{onDelete:"restrict"\}\)/, 
 const schemas = [...initial.matchAll(/CREATE SCHEMA "([^"]+)"/g)].map((match) => match[1]);
 assert.equal(new Set(schemas).size, 9, "initial migration should create nine distinct schemas");
 assert.equal((initial.match(/CREATE TABLE /g) ?? []).length, 16, "initial migration should create 16 tables");
-assert.match(retention, /DROP CONSTRAINT "story_revisions_story_id_stories_id_fk"/);
+assert.match(retention, /DROP CONSTRAINT "story_revisions_story_id_fkey"/);
 assert.match(retention, /ON DELETE restrict/);
 assert.equal(snapshot.tables["archive.story_revisions"].foreignKeys.story_revisions_story_id_stories_id_fk.onDelete, "restrict");
 assert.equal(journal.entries.length, 2);
