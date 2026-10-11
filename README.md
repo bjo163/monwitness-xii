@@ -9,6 +9,7 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 
 ## Quick links
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
+- [Latest READY review visual: The Batteries roster](https://monwitness-374ucznkf-bjo163s-projects.vercel.app/team) — app-identical Preview checkpoint; newer review commits only change documentation and await the Vercel Free quota reset.
 - [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
 - [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
 - [Grand Plan implementation checklist](docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md)
