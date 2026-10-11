@@ -2,7 +2,7 @@
 
 **Updated:** 2026-10-12 (Asia/Jakarta)
 **Branch:** `codex/v11-release-readiness` (review branch targeting `dev`)  
-**Last pushed review head:** `06e2a119377e46a735714608becf96e095846553`; exact-head Actions [38180083381](https://github.com/bjo163/monwitness-xii/actions/runs/38180083381) passed. **Local checkout:** latest local-only commit on this branch; Archive provenance UI and API notice included, verified locally but not in CI or Preview. The latest app-identical READY Preview is the earlier `d6c884b95b96e50134b43ed4bdc5eea52aed387e`. Owner requested local-only work and no further push/deploy. Remote metadata is tracked in [PR #4](https://github.com/bjo163/monwitness-xii/pull/4); its last observed state is draft/unmerged.
+**Last pushed review head:** `06e2a119377e46a735714608becf96e095846553`; exact-head Actions [38180083381](https://github.com/bjo163/monwitness-xii/actions/runs/38180083381) passed. **Local checkout:** `c15da18` (five local commits ahead); Archive provenance UI and API notice included, verified locally but not in CI or Preview. The latest app-identical READY Preview is the earlier `d6c884b95b96e50134b43ed4bdc5eea52aed387e`. Owner requested local-only work and no further push/deploy. Remote metadata is tracked in [PR #4](https://github.com/bjo163/monwitness-xii/pull/4); its last observed state is draft/unmerged.
 **Release decision:** NO-GO for production promotion.  
 **Evidence policy:** DONE requires implementation plus recorded verification. “Verified” in older handover material is historical evidence and is not a substitute for rerunning checks on this checkout.
 
