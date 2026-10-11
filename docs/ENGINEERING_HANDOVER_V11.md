@@ -7,6 +7,8 @@
 
 ## Work completed in this handover pass
 
+- 2026-10-11 visual and Codex follow-up: installed a coherent set of one faceless traveler cover illustration plus four full-body Batteries character portraits in `public/characters/`. The canonical character direction and variant naming are described in `public/characters/character-guide.txt`; the earlier vector explorations remain available under `public/characters/styles/vector/`. The AETHERION Codex now saves the selected level, checklist, and cleared early-access levels in browser-local storage only, with range checks and a visible journey counter. This local progress is not an authenticated or synchronized account record.
+
 - Cloned the requested repository to `X:\REPO\monwitness-xii`; the existing similarly named directories were unrelated repositories and were left unchanged.
 - Recorded the baseline: Node v26.5.0 and npm 11.17.0; dependency installation completed; the existing `npm test` command failed because Node 26 rejects `--experimental-default-type=module`; running the original suite via `node --test tests/*.test.js` passed all 10 tests; `npm run build` passed.
 - Updated the test script to use the portable native Node test runner. The current suite has 24 tests, including an in-memory PostgreSQL migration execution and FK rollback test. Neon-specific writes and concurrency still need an isolated branch.
@@ -43,6 +45,7 @@
 - GitHub Actions run [38151254216](https://github.com/bjo163/monwitness-xii/actions/runs/38151254216) — **PASS** on commit `1edf328`, including locked install, 24 tests, migration regeneration, production dependency audit, and build.
 - Read-only Neon connector on project `proud-surf-04547637`, branch `mw-v11-development` — **PASS** for inventory: 9 schemas, 16 tables, selected columns match Drizzle; 15 published stories, 0 drafts, 0 revisions, 0 audit events. Live `archive.story_revisions` FK is `ON DELETE CASCADE` and named `story_revisions_story_id_fkey`; migration now drops that exact constraint and recreates it as `RESTRICT`.
 - `git diff --check` — **PASS**.
+- Latest visual/Codex follow-up verification: on Node v26.5.0 / npm 11.17.0, `npm test` passed 24/24 before adding the new Codex progress parser regression cases; `npm run db:check` passed; `npm audit --omit=dev` found 0 vulnerabilities; production `npm run build` passed. Local `next start` on port 3000 returns HTTP 200; the hero image and four crew images each return HTTP 200. Fresh verification is in progress for the final parser and checklist edits.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
 - `npm run db:verify` — local script **NOT RUN**; no shell `DATABASE_URL` was provided. Read-only Neon connector provided table inventory and selected table schema evidence.
 - Follow-up verification after the migration/verifier corrections: `node --check scripts/verify-schema.mjs`, `npm test` (20/20), `npm run db:check`, `npm run build`, and `git diff --check` — **PASS**.
@@ -63,3 +66,14 @@
 See [the implementation checklist](GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md) for task IDs, statuses, dependencies, evidence, and risk tracking.
 
 - Final verified CI: run [38150833675](https://github.com/bjo163/monwitness-xii/actions/runs/38150833675) on SHA `f58f8dc` passed, including locked install, 23 tests, migration regeneration check, production dependency audit, and build.
+
+- Final follow-up rerun: npm test — **PASS**, 26/26 including two malformed/out-of-range progress restoration cases; npm run db:check — **PASS**; npm audit --omit=dev — **PASS**, zero vulnerabilities; npm run build — **PASS**; git diff --check — **PASS**. The refreshed production server at http://localhost:3000/ renders the journey counter and returns HTTP 200 for the home page and all five canonical WebP images.
+
+## 2026-10-12 follow-up — Managed Auth and visual release candidate
+
+- Continued on `codex/v11-release-readiness`; kept prior visual changes, including the faceless human Batteries cast, consistent character asset folder, and local Codex journey progress.
+- Provisioned Neon Managed Auth on development branch `mw-v11-development` only; production was not changed. Added a same-origin admin-only editor gate, lazy server SDK setup, signed-in editor session endpoint, and a login screen. The auth proxy allowlist permits session lookup, email sign-in, sign-out, and token routes; public account creation and other auth routes are denied. Draft/revision creation records the authenticated Neon actor mapping in the same database statement as the content and audit event.
+- Latest verification on Node v26.5.0 / npm 11.17.0: `npm test` **PASS** (28/28); `npm run db:check` **PASS**; `npm audit --omit=dev` **PASS** (0 vulnerabilities); `npm run build` **PASS** (Next.js 16.4.0).
+- Local `next start` at `http://localhost:3000` is running. Homepage, hero and crew artwork, and `/editor/login` render. Live Auth checks: `GET /api/auth/get-session` 200 (signed out), `/api/editor/session` 401 (expected signed-out denial). Smoke checks for health/archive return 503 because this checkout has no `DATABASE_URL`; they are **not** evidence of a healthy database or archive. The editor draft endpoint is POST-only (GET 405); no authenticated POST was sent.
+- Managed Auth has no owner/admin account configured for an end-to-end sign-in/write check. MFA, write rate limiting, authenticated write tests, live migration rehearsal/rollback, backup/restore, and the project source-document/rights review remain release gates. Local progress remains device-only.
+- Release decision remains **NO-GO for production**. Next owner actions: provision/designate an admin identity and test it on the development branch, close the listed gates, review the draft PR, then separately obtain explicit approval before any production promotion.

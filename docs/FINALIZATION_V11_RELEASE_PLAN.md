@@ -12,7 +12,10 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [x] Preview DATABASE_URL separated from production secrets.
 - [x] Development Story Archive includes 15 **editorial index entries**, not source-complete manuscripts.
 - [x] GET published-only episodes API, /episodes UI, homepage link, DB health probe implemented.
-- [x] Server-to-server write API **fails closed** without configured EDITOR_API_TOKEN.
+- [x] Neon Managed Auth provisioned on isolated dev branch only; production untouched.
+- [x] Local admin-only sign-in and session authorization are implemented; public account creation is disabled.
+- [x] Anonymous HTTP checks: auth session proxy `200 null`, editor session `401`, draft POST `401`.
+- [x] Unit tests cover admin RBAC, origin rejection, invalid identities and actor mapping contract.
 - [x] Append-only draft/revision SQL + audit-event CTE committed (not E2E proven).
 - [x] Shared payload validation and unit test files committed.
 - [x] GitHub Actions workflow + DB inventory and HTTP smoke test scripts committed.
@@ -22,7 +25,9 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 ### P0: security and tests
 - [ ] Confirm real runtime HTTP results: /api/health/db=200, /api/episodes=200, story slug=200; verify 15 entries.
 - [ ] Confirm GitHub Actions pipeline status; unit tests green in CI.
-- [ ] Authenticate real editor via sessions, enforce per-user RBAC, server authorization, rate limit.
+- [ ] Provision owner admin identity and complete live sign-in/session/logout restoration checks.
+- [ ] Verify authenticated write + revision + actor-attributed audit and concurrency on isolated dev database.
+- [ ] Add rate limiting and choose MFA-capable identity for production editor access; Neon Managed Auth currently does not expose MFA.
 - [ ] End-to-end create draft + revision + audit on dev-only database; 403/401 invalid-token tests; concurrency and retry.
 - [ ] Finish schema alignment of Drizzle definitions with actual dev SQL; generate and commit reproducible migration.
 - [ ] Review any shared credentials, rotate old password if necessary.

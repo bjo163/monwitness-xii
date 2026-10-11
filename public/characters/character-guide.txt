@@ -1,0 +1,16 @@
+MOONWITNESS CHARACTER ART LIBRARY
+
+hero/ — scene illustrations and cover art for feature panels.
+crew/ — canonical full-body character illustrations for The Batteries cards.
+expressions/ — non-face gestures, poses, props, and comic emotion marks.
+styles/ — approved alternate treatments such as risograph, monochrome, and neon.
+
+CANONICAL ART DIRECTION
+Characters are human in silhouette and faceless by design. Their entire faces
+stay hidden behind shadow, hoods, or featureless visors. Identify each character
+through outfit, props, accent color, posture, and comic sound effects. Keep the
+premium ink-and-risograph graphic-novel treatment coherent across the four.
+Canonical character cards use WebP for page weight; original prompt-generated
+PNGs remain in the Codex generated-images archive. Vector explorations live in
+styles/vector/. Add variants without overwriting canonical art. Name variants
+character--pose--style.webp (example: four-lah--wave--risograph.webp).

@@ -7,7 +7,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
 export async function POST(request){
- const auth=authorizeEditor(request);
+ const auth=await authorizeEditor(request);
  if(!auth.ok)return Response.json({error:auth.message},{status:auth.status});
  const body = await readJsonBody(request);
  if (!body.ok) return Response.json({error:body.message},{status:body.status});
@@ -20,7 +20,13 @@ export async function POST(request){
   // index remains the integrity guard; a concurrent allocation can still return
   // 409 and should be retried by the caller.
   const rows=await sql`
-    WITH target AS MATERIALIZED (
+    WITH actor AS (
+      INSERT INTO identity.users(external_auth_id,display_name)
+      VALUES (${auth.user.id},${auth.user.name})
+      ON CONFLICT (external_auth_id) DO UPDATE SET
+        display_name=COALESCE(EXCLUDED.display_name,identity.users.display_name)
+      RETURNING id
+    ), target AS MATERIALIZED (
       SELECT id FROM archive.stories
       WHERE slug=${input.slug} AND status='draft'
       FOR UPDATE
@@ -33,10 +39,10 @@ export async function POST(request){
       SELECT story_id,revision,${input.body},'editorial',${typeof input.notes==="string"?input.notes.slice(0,2000):null} FROM next_revision
       RETURNING story_id,revision
     ), audit AS (
-      INSERT INTO system.audit_events(event,entity,entity_id,payload)
-      SELECT 'story.revision.created','archive.story_revisions',inserted.story_id,
+      INSERT INTO system.audit_events(actor_id,event,entity,entity_id,payload)
+      SELECT actor.id,'story.revision.created','archive.story_revisions',inserted.story_id,
         jsonb_build_object('slug',${input.slug},'revision',inserted.revision)
-      FROM inserted RETURNING entity_id
+      FROM inserted CROSS JOIN actor RETURNING entity_id
     )
     SELECT inserted.revision FROM inserted JOIN audit ON audit.entity_id=inserted.story_id
   `;

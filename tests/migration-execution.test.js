@@ -34,6 +34,41 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
   assert.equal(fkAfter.rows.length, 1);
   assert.equal(fkAfter.rows[0].confdeltype, "r");
 
+  const authored = await db.query(`
+    WITH actor AS (
+      INSERT INTO identity.users(external_auth_id,display_name)
+      VALUES ($1,$2)
+      ON CONFLICT (external_auth_id) DO UPDATE SET
+        display_name=COALESCE(EXCLUDED.display_name,identity.users.display_name)
+      RETURNING id
+    ), draft AS (
+      INSERT INTO archive.stories(slug,title,status,original_source_status)
+      VALUES ($3,$4,'draft','source_needed') RETURNING id,slug
+    ), revision AS (
+      INSERT INTO archive.story_revisions(story_id,revision,body,source_type,notes)
+      SELECT id,1,$5,'user_original','Original draft' FROM draft RETURNING story_id
+    ), audit AS (
+      INSERT INTO system.audit_events(actor_id,event,entity,entity_id,payload)
+      SELECT actor.id,'story.draft.created','archive.stories',draft.id,
+        jsonb_build_object('slug',draft.slug,'revision',1)
+      FROM draft JOIN revision ON revision.story_id=draft.id CROSS JOIN actor
+      RETURNING entity_id
+    ) SELECT draft.id,draft.slug FROM draft JOIN audit ON audit.entity_id=draft.id
+  `, ["managed-auth-editor-1", "Test Editor", "pglite-authored-draft", "Authored draft", "Original words"]);
+  assert.equal(authored.rows.length,1);
+  const attribution=await db.query(`
+    SELECT users.external_auth_id,events.event,events.entity_id,revision.body
+    FROM system.audit_events events
+    JOIN identity.users users ON users.id=events.actor_id
+    JOIN archive.stories stories ON stories.id=events.entity_id
+    JOIN archive.story_revisions revision ON revision.story_id=stories.id
+    WHERE stories.slug=$1
+  `,["pglite-authored-draft"]);
+  assert.deepEqual(attribution.rows[0],{
+    external_auth_id:"managed-auth-editor-1",event:"story.draft.created",
+    entity_id:authored.rows[0].id,body:"Original words",
+  });
+
   const restrictedStory = await db.query(
     "INSERT INTO archive.stories(slug,title) VALUES ($1,$2) RETURNING id",
     ["pglite-restrict-test", "Restriction test"],

@@ -19,8 +19,11 @@
 - [x] Draft creation and append-only revision scaffolds, both disabled when no token present.
 - [x] Atomic audit event statements added in editor draft/revision queries.
 - [x] 5 authorization-unit cases run locally, passed (isolated Node 22 test run); repository has tests/editor-auth.test.js.
-- [ ] Real editor authentication, roles, sessions, logout and protected writes.
-- [ ] End-to-end editor API authenticated write/revision/audit and concurrency tests.
+- [x] Neon Managed Auth is provisioned on the isolated development branch; production Auth is untouched.
+- [x] Sign-in-only admin gate, server-side role checks, same-origin checks and actor-attributed audit SQL are implemented.
+- [x] Anonymous runtime requests fail closed: Auth session 200/null, editor session 401, draft POST 401.
+- [ ] Provision owner-controlled admin account and verify sign-in, logout, session restore and authenticated write/revision/audit on dev.
+- [ ] Verify concurrent revisions, live actor mapping, rate limits and public read isolation.
 - [ ] Durable backups, privacy review, per-item evidence/original source recovery and publication gates.
 
 ## Future work (not DONE)
@@ -42,4 +45,6 @@ Dev accepted only after current build passes and endpoint and transaction tests 
 - [x] Frontend `/handover` page added; homepage links to the handover status.
 - [x] Current release decision: NO-GO for production until gates pass; no forced PR merge.
 - [ ] Verify `/handover` on deployed preview via HTTP; READY build alone is not enough.
-- [ ] Editor sessions/RBAC, migrations, CI checks and protected end-to-end tests.
+- [x] Development Auth integration and anonymous-denial checks.
+- [ ] Admin sign-in E2E, migrations, CI checks and protected write/concurrency tests.
+- [ ] MFA-capable production editor identity; current Neon Managed Auth configuration does not expose MFA.

@@ -21,4 +21,7 @@ async function check(path,accept){
 await check("/api/health/db",(r,b)=>r.status===200&&b?.status==="ok"&&b?.database==="connected");
 await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15);
 await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock");
+await check("/editor/login",(r)=>r.status===200);
+await check("/api/auth/get-session",(r,b)=>r.status===200&&b===null);
+await check("/api/editor/session",(r,b)=>r.status===401&&b?.authenticated===false);
 await check("/api/editor/drafts",(r,b)=>r.status===405);

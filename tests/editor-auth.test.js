@@ -1,35 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { authorizeEditor } from "../lib/editor-auth.js";
+import {resolveEditorAuthorization} from "../lib/editor-auth-policy.js";
 
-const old=process.env.EDITOR_API_TOKEN;
-const token="moonwitness-v11-editor-token-example-must-be-rotated";
-const request=(value,origin)=>({headers:new Headers({
-  ...(value?{authorization:value}:{}),
-  ...(origin?{origin}:{}),
-})});
-test("writes fail closed when token is not configured",()=>{
-  delete process.env.EDITOR_API_TOKEN;
-  assert.deepEqual(authorizeEditor(request("Bearer "+token)),{ok:false,status:503,message:"Editor writes are disabled"});
+const admin={user:{id:"auth-user-7",name:"Moon Editor",role:"admin"}};
+const context=(overrides={})=>({
+ authConfigured:true,session:admin,origin:"http://localhost:3000",
+ expectedOrigin:"http://localhost:3000",fetchSite:"same-origin",...overrides,
 });
-test("short configuration fails closed",()=>{
-  process.env.EDITOR_API_TOKEN="short";
-  assert.equal(authorizeEditor(request("Bearer short")).status,503);
+
+test("editor writes fail closed when Managed Auth is not configured",()=>{
+ assert.equal(resolveEditorAuthorization(context({authConfigured:false})).status,503);
 });
-test("missing and invalid tokens rejected",()=>{
-  process.env.EDITOR_API_TOKEN=token;
-  assert.equal(authorizeEditor(request()).status,401);
-  assert.equal(authorizeEditor(request("Bearer invalid")).status,401);
+test("signed-out users cannot write",()=>{
+ assert.equal(resolveEditorAuthorization(context({session:null})).status,401);
 });
-test("browser origin blocked even if bearer matches",()=>{
-  process.env.EDITOR_API_TOKEN=token;
-  assert.equal(authorizeEditor(request("Bearer "+token,"https://evil.example")).status,403);
+test("authenticated non-admins cannot write",()=>{
+ assert.equal(resolveEditorAuthorization(context({session:{user:{id:"reader-1",role:"user"}}})).status,403);
 });
-test("trusted server token authorized",()=>{
-  process.env.EDITOR_API_TOKEN=token;
-  assert.equal(authorizeEditor(request("Bearer "+token)).ok,true);
+test("admin role and same-origin browser request are authorized with actor identity",()=>{
+ assert.deepEqual(resolveEditorAuthorization(context()),{ok:true,user:{id:"auth-user-7",name:"Moon Editor"}});
 });
-test.after(()=>{
-  if(old===undefined) delete process.env.EDITOR_API_TOKEN;
-  else process.env.EDITOR_API_TOKEN=old;
+test("missing or cross-origin requests are rejected",()=>{
+ assert.equal(resolveEditorAuthorization(context({origin:null})).status,403);
+ assert.equal(resolveEditorAuthorization(context({origin:"https://attacker.example"})).status,403);
+ assert.equal(resolveEditorAuthorization(context({fetchSite:"cross-site"})).status,403);
+});
+test("invalid identity identifiers fail closed",()=>{
+ assert.equal(resolveEditorAuthorization(context({session:{user:{id:" ",role:"admin"}}})).status,403);
+ assert.equal(resolveEditorAuthorization(context({session:{user:{id:"x".repeat(256),role:"admin"}}})).status,403);
 });
