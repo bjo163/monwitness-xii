@@ -52,4 +52,4 @@ try {
   await rm(temporaryDirectory, { recursive: true, force: true });
 }
 
-console.log("Drizzle artifacts pass structural and generation checks: 16 tables, retained revisions, and a two-step journal. Neon apply/rollback remains unverified.");
+console.log("Drizzle artifacts pass structural and generation checks: 16 tables, retained revisions, and a two-step journal. This local check does not execute SQL on Neon; see the engineering handover for environment-specific rehearsal evidence.");

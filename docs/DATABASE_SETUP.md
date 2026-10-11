@@ -23,4 +23,4 @@
 - RPG progress is educational, not a ranking of spiritual standing.
 
 ## Current status
-Drizzle schema and client scaffold are committed, but no database migration has been executed.
+No application schema migration has been applied to the persistent development or production databases. For isolated verification only, the committed baseline and retention SQL were replayed against a fresh database on disposable Neon branch `br-flat-shape-b5ofan15`; the retention migration and rollback passed there. The persistent development database still lacks a Drizzle migration ledger, so baseline stamping is unresolved. Production remains untouched.

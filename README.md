@@ -47,7 +47,7 @@ SMOKE_BASE_URL=https://your-authorized-preview.example npm run smoke:http
 
 `npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
 
-`npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are under review; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping and disposable-branch rehearsal remain release blockers. **Do not run migrations against production without review and approval.**
+`npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are reproducible and were replayed against an isolated Neon rehearsal database; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping remains a release blocker. **Do not run migrations against production without review and approval.**
 
 The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), targeting `dev`. They have not been merged or released. See [CHANGELOG.md](CHANGELOG.md) for this review's changes and outstanding gates.
 
