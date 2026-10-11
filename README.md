@@ -52,6 +52,8 @@ For populated-development baseline preflight only, also set `EXPECTED_DATABASE_H
 
 For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
 
+The latest local production build is available at [http://localhost:3002/](http://localhost:3002/). The database-backed Archive currently shows its safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; the security and visual shell remain viewable.
+
 The current local review includes an Archive notice explaining that a published index does not establish source provenance or reuse rights. Without a local development `DATABASE_URL`, the notice is visible but the database-backed episode cards show the safe retry state. This local review change is not in the remote Preview.
 
 `npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are reproducible and were replayed against an isolated Neon rehearsal database; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping remains a release blocker. **Do not run migrations against production without review and approval.**
