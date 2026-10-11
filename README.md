@@ -9,7 +9,8 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 
 ## Quick links
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
-- [Latest READY review visual: The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team) — protected Preview for review checkpoint `d6c884b`; newer review commits only change documentation.
+- [Latest READY remote review visual: The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team) — protected Preview for checkpoint `d6c884b`; local unpushed changes are not included.
+- [Local Story Archive visual](http://localhost:3000/episodes) — available while the local review server is running; archive rows require a development-only database connection.
 - [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
 - [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
 - [Grand Plan implementation checklist](docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md)
@@ -48,6 +49,8 @@ npm run db:verify # read-only, needs DATABASE_URL
 `npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
 
 For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
+
+The current local review includes an Archive notice explaining that a published index does not establish source provenance or reuse rights. Without a local development `DATABASE_URL`, the notice is visible but the database-backed episode cards show the safe retry state. This local review change is not in the remote Preview.
 
 `npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are reproducible and were replayed against an isolated Neon rehearsal database; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping remains a release blocker. **Do not run migrations against production without review and approval.**
 
