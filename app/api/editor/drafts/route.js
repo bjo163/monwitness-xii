@@ -1,7 +1,4 @@
-import { getDatabase } from "../../../../db/client";
-import { stories, storyRevisions } from "../../../../db/schema";
 import { authorizeEditor } from "../../../../lib/editor-auth";
-import { eq } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 
 export const runtime = "nodejs";
@@ -28,7 +25,14 @@ export async function POST(request) {
       SELECT id,1,${input.body},'user_original','Original draft' FROM draft
       RETURNING story_id
     )
-    SELECT draft.id, draft.slug FROM draft JOIN first_revision ON first_revision.story_id=draft.id
+    , audit AS (
+      INSERT INTO system.audit_events(event,entity,entity_id,payload)
+      SELECT 'story.draft.created','archive.stories',draft.id,
+        jsonb_build_object('slug',draft.slug,'revision',1)
+      FROM draft JOIN first_revision ON first_revision.story_id=draft.id
+      RETURNING entity_id
+    )
+    SELECT draft.id, draft.slug FROM draft JOIN audit ON audit.entity_id=draft.id
   `;
   const story=rows[0];
   if(!story) return Response.json({error:"Failed to create draft"},{status:500});
