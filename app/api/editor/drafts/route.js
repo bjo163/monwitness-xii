@@ -4,7 +4,6 @@ import { neon } from "@neondatabase/serverless";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-const slugRule=/^[a-z0-9-]{3,120}$/;
 
 export async function POST(request) {
  const auth=authorizeEditor(request);
@@ -12,8 +11,9 @@ export async function POST(request) {
  let input;
  try { input=await request.json(); } catch {return Response.json({error:"Invalid JSON"},{status:400});}
  if(!validateDraft(input)) return Response.json({error:"Invalid draft fields"},{status:400});
- const sql=neon(process.env.DATABASE_URL);
  try {
+  if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});
+  const sql=neon(process.env.DATABASE_URL);
   // One SQL statement ensures the draft and first revision are committed atomically.
   const rows=await sql`
     WITH draft AS (

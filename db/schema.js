@@ -26,7 +26,7 @@ export const stories = archive.table("stories", {
   updatedAt: timestamp("updated_at", {withTimezone:true}).notNull().defaultNow()
 });
 export const storyRevisions = archive.table("story_revisions", {
- id:id(), storyId:uuid("story_id").notNull().references(()=>stories.id,{onDelete:"cascade"}),
+ id:id(), storyId:uuid("story_id").notNull().references(()=>stories.id,{onDelete:"restrict"}),
  revision:integer("revision").notNull(), body:text("body").notNull(),
  sourceType:text("source_type").notNull().default("editorial"),
  notes:text("notes"), createdAt:createdAt()

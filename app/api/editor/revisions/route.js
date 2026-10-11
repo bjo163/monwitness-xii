@@ -11,12 +11,15 @@ export async function POST(request){
  let input;try{input=await request.json()}catch{return Response.json({error:"Invalid JSON"},{status:400})}
  if(!validateRevision(input)) return Response.json({error:"Invalid revision fields"},{status:400});
  try {
+  if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});
   const sql=neon(process.env.DATABASE_URL);
-  // Only drafts can be revised; locked published items remain immutable.
-  // Concurrent writes are rejected by unique constraint (409), never overwritten.
+  // Lock the draft row before allocating the next revision number. All writers for
+  // one story serialize here; the unique index remains a final integrity guard.
   const rows=await sql`
-    WITH target AS (
-      SELECT id FROM archive.stories WHERE slug=${input.slug} AND status='draft'
+    WITH target AS MATERIALIZED (
+      SELECT id FROM archive.stories
+      WHERE slug=${input.slug} AND status='draft'
+      FOR UPDATE
     ), next_revision AS (
       SELECT target.id AS story_id, COALESCE(MAX(r.revision),0)+1 AS revision
       FROM target LEFT JOIN archive.story_revisions r ON r.story_id=target.id
