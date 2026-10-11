@@ -21,8 +21,8 @@ jobs:
         run: npm test
       - name: Drizzle migration reproducibility check
         run: npm run db:check
-      - name: Production dependency security audit
-        run: npm audit --omit=dev
+      - name: Full dependency security audit
+        run: npm audit
       - name: Next.js production build (without DB secret)
         run: npm run build
         env:

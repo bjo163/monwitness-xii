@@ -11,6 +11,8 @@ Follow-up runtime inspection exposed Next static generation overriding the edito
 
 Preview smoke also requires no-store on login, signed-out Auth session, and editor session responses. These checks have not been run against an authorized Preview after the change.
 
+Supply-chain verification: full `npm audit` reports zero vulnerabilities across 298 locked dependency entries, including development packages. GitHub Actions now runs the full audit; local `actionlint` passes, but the unpushed workflow change has no remote Actions result.
+
 All 15 development stories remain published metadata with `original_source_status='source_needed'`. Neon production automatic snapshot schedule is empty and unavailable on the selected Free plan; requested daily/30-day retention and representative-data recovery remain unmet. Owner/admin onboarding, direct-provider signup behavior, effective sign-in attempt limits, MFA, authenticated editor write/audit E2E, and persistent-dev migration-ledger strategy remain open. No production DB, Auth, billing, or deployment change occurred.
 
 ## Historical release evidence snapshots — 2026-10-12
