@@ -18,6 +18,8 @@
 - Revision allocation locks the draft story row as a best-effort concurrency guard; a uniqueness conflict still returns 409 for retry. Concurrent behavior remains unverified against PostgreSQL.
 - Added a shared editor JSON body parser that requires `application/json`, rejects invalid UTF-8, and caps streamed payloads at 256 KiB. Added SQL contract and body parser unit tests.
 - Updated GitHub Actions to use the committed lockfile with `npm ci`.
+- Corrected the retention migration to drop the live dev FK name (`story_revisions_story_id_fkey`) discovered through read-only Neon inspection. Updated its structural assertion accordingly.
+- Expanded `scripts/verify-schema.mjs` to compare the Drizzle snapshot against live table/column inventories, types/nullability, foreign keys, indexes, unique constraints, migration-ledger presence, and archive counts. It is read-only and requires `DATABASE_URL`; the full comparison has not been run from this shell.
 - Added `docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md` with evidence/status fields and an explicit note that the Grand Master Plan V11/V11.2 source files are missing from this checkout.
 
 ## Verification
@@ -31,9 +33,10 @@
 - `git diff --check` — **PASS**.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
 - `npm run db:verify` — local script **NOT RUN**; no shell `DATABASE_URL` was provided. Read-only Neon connector provided table inventory and selected table schema evidence.
+- Follow-up verification after the migration/verifier corrections: `node --check scripts/verify-schema.mjs`, `npm test` (18/18), `npm run db:check`, `npm run build`, and `git diff --check` — **PASS**.
 - `npm run smoke:http` raw Node call is blocked by Vercel Authentication (302); the authenticated Vercel connector successfully fetched all four smoke paths and verified expected responses.
 - GitHub Issue #3 is open. PR #2 is open and unmergeable. Draft PR #4 targets `dev`, is mergeable, and has green checks; it has not been merged.
-- Commits `1e1760d`, `80e8205`, `e269ffb` are ancestors from the local work; review branch commits include `4e72818` and `f128776`. Review branch is pushed; primary `dev` remains unchanged.
+- Commits `1e1760d`, `80e8205`, `e269ffb` are ancestors from the local work; review branch commits include `4e72818`, `f128776`, and `e9ccb38`. Commit `e9ccb38` is pushed to the review branch. GitHub reports PR #4 open, draft, mergeable, targeting `dev`; checks for `e9ccb38` were not yet visible at the time of this update. Primary `dev` remains unchanged.
 - Migrations, backups/restores, production env, and deployment — **NOT TOUCHED**.
 
 ## Blockers and next actions
