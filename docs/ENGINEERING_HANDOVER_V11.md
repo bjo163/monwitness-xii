@@ -28,6 +28,7 @@
 - `npm run db:verify` — **NOT RUN**; no development `DATABASE_URL` was provided.
 - `npm run smoke:http` — **NOT RUN**; requires an authorized preview URL.
 - GitHub Issue #3 is open; PR #2 is open and reported `mergeable: false`. The latest GitHub Actions `verify` job passed on remote commit `c03e977`, before this local work.
+- Local commits from this work: `1e1760d` (portable verification and handover) and `80e8205` (migration artifacts, revision serialization, and lockfile). Both are on local `dev`, ahead of `origin/dev`; they have not been pushed.
 - Migrations, backups/restores, production env, and deployment — **NOT TOUCHED**.
 
 ## Blockers and next actions
