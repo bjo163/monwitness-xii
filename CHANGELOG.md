@@ -9,6 +9,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 - Repeatable dependency installation and CI checks using the committed npm lockfile.
 - A read-only Drizzle snapshot verifier for tables, columns, defaults, foreign keys, indexes, unique constraints, migration-ledger presence, and archive counts.
 - A migration generation check that regenerates the schema baseline into an isolated temporary directory and verifies the committed historical FK transition.
+- An in-memory PostgreSQL migration execution test covering fresh baseline, FK retention migration, `RESTRICT` behavior, and rollback to the original `CASCADE` policy.
 - Bounded editor JSON request parsing (256 KiB), JSON content-type enforcement, and malformed UTF-8 rejection.
 - Automated auth, input-validation, request-body, public-archive, migration-contract, and schema-verifier contract tests.
 - A Grand Master Plan implementation checklist and engineering handover record.
@@ -22,9 +23,10 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 ### Verification
 
-- Local checks after dependency updates: 23 tests pass; migration structural and regeneration checks and production build pass.
+- Local checks after dependency updates: 24 tests pass; PostgreSQL migration up/down, structural and regeneration checks, and production build pass.
 - `npm audit --omit=dev` reports zero production dependency vulnerabilities. Full audit still reports a moderate advisory in Drizzle Kit's development-only `@esbuild-kit` / esbuild 0.18.20 transitive dependency; no compatible fixed Drizzle Kit release is available in the current package range.
 - GitHub Actions run 38150833675 passed for review SHA `f58f8dc`, including locked install, 23 tests, migration regeneration check, production dependency audit, and build.
+- The PGlite execution test exposed and helped fix a fresh-install defect: the FK migration now drops both the live Neon and Drizzle baseline constraint names. Local apply/rollback passes; Neon branch rehearsal remains pending.
 - Read-only development schema comparison: 16/16 tables and 109/109 columns match; one revision foreign-key delete-action drift remains (`CASCADE` live, intended `RESTRICT`).
 - Authenticated HTTP smoke on the Vercel preview tied to SHA `8460d24`: DB health 200, published list 200 with 15 records, known slug 200, editor draft GET 405.
 - No drafts existed on the development database, so live public-response leakage behavior still needs a draft fixture on a disposable branch.

@@ -21,6 +21,7 @@ test("revision allocation locks the draft row and writes audit with the revision
 
 test("revision rows cannot cascade away with their story", () => {
   assert.match(schema, /storyId:uuid\("story_id"\)\.notNull\(\)\.references\(\(\)=>stories\.id,\{onDelete:"restrict"\}\)/);
-  assert.match(retentionMigration, /DROP CONSTRAINT "story_revisions_story_id_fkey"/);
+  assert.match(retentionMigration, /DROP CONSTRAINT IF EXISTS "story_revisions_story_id_fkey"/);
+  assert.match(retentionMigration, /DROP CONSTRAINT IF EXISTS "story_revisions_story_id_stories_id_fk"/);
   assert.match(retentionMigration, /ON DELETE restrict/);
 });

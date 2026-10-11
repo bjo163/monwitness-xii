@@ -38,12 +38,14 @@ Add your *development-only* `DATABASE_URL` to `.env.local` (never commit a secre
 
 ```bash
 npm test
-npm run db:check # regenerates migration baseline to a temporary directory and verifies history
+npm run db:check # regenerates migration SQL and validates the committed migration history
 npm audit --omit=dev
 npm run build
 npm run db:verify # read-only, needs DATABASE_URL
 SMOKE_BASE_URL=https://your-authorized-preview.example npm run smoke:http
 ```
+
+`npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
 
 `npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are under review; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping and disposable-branch rehearsal remain release blockers. **Do not run migrations against production without review and approval.**
 
