@@ -20,6 +20,7 @@
 - Updated GitHub Actions to use the committed lockfile with `npm ci`.
 - Corrected the retention migration to drop the live dev FK name (`story_revisions_story_id_fkey`) discovered through read-only Neon inspection. Updated its structural assertion accordingly.
 - Expanded `scripts/verify-schema.mjs` to compare the Drizzle snapshot against live table/column inventories, types/nullability, foreign keys, indexes, unique constraints, migration-ledger presence, and archive counts. It is read-only and requires `DATABASE_URL`; the full comparison has not been run from this shell.
+- Used read-only Neon SQL to compare the complete dev inventory to the Drizzle snapshot: 16/16 tables, 109/109 columns, types/nullability, and normalized defaults match. Of 15 foreign keys, 14 match; the only drift is the known revision FK delete action (`CASCADE` live, `RESTRICT` intended). All 3 Drizzle indexes and 21 primary/unique constraints are semantically present; two unique indexes are represented as unique constraints in the live database. FK update actions are all `NO ACTION` as expected. Existing unique constraint names also differ from some Drizzle snapshot names, although constrained columns and uniqueness semantics match.
 - Added `docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md` with evidence/status fields and an explicit note that the Grand Master Plan V11/V11.2 source files are missing from this checkout.
 
 ## Verification
@@ -33,16 +34,17 @@
 - `git diff --check` — **PASS**.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
 - `npm run db:verify` — local script **NOT RUN**; no shell `DATABASE_URL` was provided. Read-only Neon connector provided table inventory and selected table schema evidence.
-- Follow-up verification after the migration/verifier corrections: `node --check scripts/verify-schema.mjs`, `npm test` (18/18), `npm run db:check`, `npm run build`, and `git diff --check` — **PASS**.
+- Follow-up verification after the migration/verifier corrections: `node --check scripts/verify-schema.mjs`, `npm test` (20/20), `npm run db:check`, `npm run build`, and `git diff --check` — **PASS**.
 - `npm run smoke:http` raw Node call is blocked by Vercel Authentication (302); the authenticated Vercel connector successfully fetched all four smoke paths and verified expected responses.
-- GitHub Issue #3 is open. PR #2 is open and unmergeable. Draft PR #4 targets `dev`, is mergeable, and has green checks; it has not been merged.
-- Commits `1e1760d`, `80e8205`, `e269ffb` are ancestors from the local work; review branch commits include `4e72818`, `f128776`, and `e9ccb38`. Commit `e9ccb38` is pushed to the review branch. GitHub reports PR #4 open, draft, mergeable, targeting `dev`; checks for `e9ccb38` were not yet visible at the time of this update. Primary `dev` remains unchanged.
+- GitHub Actions run [38149000704](https://github.com/bjo163/monwitness-xii/actions/runs/38149000704) — **PASS** on `99a97df9385f1007b228a7de49e354becdb88bf6` (locked install, tests, build). Follow-up source changes after that SHA require a new run.
+- GitHub Issue #3 is open. PR #2 is open and unmergeable. Draft PR #4 targets `dev` and is mergeable. It has not been merged.
+- Commits `1e1760d`, `80e8205`, `e269ffb` are ancestors from the local work; review branch commits include `4e72818`, `f128776`, `e9ccb38`, and `99a97df`. The review branch is pushed. Primary `dev` remains unchanged.
 - Migrations, backups/restores, production env, and deployment — **NOT TOUCHED**.
 
 ## Blockers and next actions
 
 1. Review PR #4 and merge it to `dev` only after review; retain PR #2 as a separate dev-to-main release gate.
-2. Compare all remaining live columns/indexes/constraints. Do not apply the initial baseline to existing dev until the migration ledger has a reviewed baseline-stamping plan; rehearse the exact FK change on an isolated disposable branch.
+2. Review the confirmed revision-FK drift, unique object-name differences, and missing migration ledger. Do not apply the initial baseline to existing dev until a reviewed baseline-stamping plan exists; rehearse the exact FK change on an isolated disposable branch.
 3. Choose a real editor identity/session and role model; implement actor attribution, rate limiting, and protected write tests before enabling writes.
 4. Rehearse backup/restore on a separate target; complete source/rights review and locate authoritative Grand Master Plan source docs.
 5. Keep production promotion **NO-GO** until every release gate has verified evidence and the owner explicitly approves promotion.

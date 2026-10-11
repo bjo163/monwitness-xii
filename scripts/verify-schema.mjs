@@ -26,12 +26,16 @@ const actualTableNames = new Set(actualTables.map((row) => `${row.table_schema}.
 const missingTables = Object.keys(expectedTables).filter((name) => !actualTableNames.has(name));
 const unexpectedTables = [...actualTableNames].filter((name) => !Object.hasOwn(expectedTables, name));
 
-const actualColumns = await db`SELECT table_schema, table_name, column_name, data_type, is_nullable
+const actualColumns = await db`SELECT table_schema, table_name, column_name, data_type, is_nullable, column_default
 FROM information_schema.columns WHERE table_schema IN (${db.unsafe(schemaSql)})`;
 const actualColumnMap = new Map(actualColumns.map((column) => [`${column.table_schema}.${column.table_name}.${column.column_name}`, column]));
 const missingColumns = [];
 const mismatchedColumns = [];
+const mismatchedDefaults = [];
 const expectedColumnKeys = new Set();
+const normalizeDefault = (value) => value == null ? null : String(value)
+  .replace(/::(?:jsonb|text|integer|boolean|uuid|timestamp with time zone)$/i, "")
+  .replace(/^\((.*)\)$/, "$1");
 for (const [tableName, table] of Object.entries(expectedTables)) {
   for (const [columnName, expected] of Object.entries(table.columns)) {
     const key = `${tableName}.${columnName}`;
@@ -44,6 +48,11 @@ for (const [tableName, table] of Object.entries(expectedTables)) {
     const expectedNullable = expected.notNull ? "NO" : "YES";
     if (actual.data_type !== expected.type || actual.is_nullable !== expectedNullable) {
       mismatchedColumns.push({ column: key, expected: { type: expected.type, nullable: expectedNullable }, actual: { type: actual.data_type, nullable: actual.is_nullable } });
+    }
+    const expectedDefault = normalizeDefault(expected.default);
+    const actualDefault = normalizeDefault(actual.column_default);
+    if (expectedDefault !== actualDefault) {
+      mismatchedDefaults.push({ column: key, expected: expectedDefault, actual: actualDefault });
     }
   }
 }
@@ -59,7 +68,11 @@ const actualForeignKeys = await db`
     CASE constraint_row.confdeltype
       WHEN 'a' THEN 'no action' WHEN 'r' THEN 'restrict' WHEN 'c' THEN 'cascade'
       WHEN 'n' THEN 'set null' WHEN 'd' THEN 'set default'
-    END AS on_delete
+    END AS on_delete,
+    CASE constraint_row.confupdtype
+      WHEN 'a' THEN 'no action' WHEN 'r' THEN 'restrict' WHEN 'c' THEN 'cascade'
+      WHEN 'n' THEN 'set null' WHEN 'd' THEN 'set default'
+    END AS on_update
   FROM pg_constraint AS constraint_row
   JOIN pg_class AS source_table ON source_table.oid = constraint_row.conrelid
   JOIN pg_namespace AS source_ns ON source_ns.oid = source_table.relnamespace
@@ -70,7 +83,7 @@ const actualForeignKeys = await db`
   JOIN pg_attribute AS source_column ON source_column.attrelid = source_table.oid AND source_column.attnum = source_key.attnum
   JOIN pg_attribute AS target_column ON target_column.attrelid = target_table.oid AND target_column.attnum = target_key.attnum
   WHERE constraint_row.contype = 'f' AND source_ns.nspname IN (${db.unsafe(schemaSql)})
-  GROUP BY source_ns.nspname, source_table.relname, target_ns.nspname, target_table.relname, constraint_row.confdeltype
+  GROUP BY source_ns.nspname, source_table.relname, target_ns.nspname, target_table.relname, constraint_row.confdeltype, constraint_row.confupdtype
 `;
 const signature = (value) => JSON.stringify({
   schema: value.schema,
@@ -80,6 +93,7 @@ const signature = (value) => JSON.stringify({
   targetTable: value.targetTable,
   targetColumns: value.targetColumns,
   onDelete: value.onDelete,
+  onUpdate: value.onUpdate,
 });
 const expectedForeignKeys = [];
 for (const [tableKey, table] of Object.entries(expectedTables)) {
@@ -92,19 +106,28 @@ for (const [tableKey, table] of Object.entries(expectedTables)) {
       targetTable: foreignKey.tableTo,
       targetColumns: foreignKey.columnsTo,
       onDelete: foreignKey.onDelete,
+      onUpdate: foreignKey.onUpdate,
     });
   }
 }
-const normalizeActual = (fk) => ({ schema: fk.schema_name, table: fk.table_name, columns: fk.columns, targetSchema: fk.target_schema, targetTable: fk.target_table, targetColumns: fk.target_columns, onDelete: fk.on_delete });
+const normalizeActual = (fk) => ({ schema: fk.schema_name, table: fk.table_name, columns: fk.columns, targetSchema: fk.target_schema, targetTable: fk.target_table, targetColumns: fk.target_columns, onDelete: fk.on_delete, onUpdate: fk.on_update });
 const actualFkSignatures = new Set(actualForeignKeys.map((fk) => signature(normalizeActual(fk))));
 const expectedFkSignatures = new Set(expectedForeignKeys.map(signature));
 const missingForeignKeys = expectedForeignKeys.filter((fk) => !actualFkSignatures.has(signature(fk)));
 const unexpectedForeignKeys = actualForeignKeys.map(normalizeActual).filter((fk) => !expectedFkSignatures.has(signature(fk)));
 
 const actualIndexes = await db`
-  SELECT schemaname AS schema_name, tablename AS table_name, indexname AS index_name,
-    indexdef AS definition
-  FROM pg_indexes WHERE schemaname IN (${db.unsafe(schemaSql)})
+  SELECT index_namespace.nspname AS schema_name, table_class.relname AS table_name,
+    index_class.relname AS index_name, pg_get_indexdef(index_class.oid) AS definition
+  FROM pg_class AS index_class
+  JOIN pg_index AS index_row ON index_row.indexrelid = index_class.oid
+  JOIN pg_class AS table_class ON table_class.oid = index_row.indrelid
+  JOIN pg_namespace AS index_namespace ON index_namespace.oid = index_class.relnamespace
+  WHERE index_class.relkind = 'i' AND index_namespace.nspname IN (${db.unsafe(schemaSql)})
+    AND NOT EXISTS (
+      SELECT 1 FROM pg_constraint AS constraint_row
+      WHERE constraint_row.conindid = index_class.oid
+    )
 `;
 const actualUniqueConstraints = await db`
   SELECT source_ns.nspname AS schema_name, source_table.relname AS table_name,
@@ -133,6 +156,10 @@ const expectedIndexShape = (index) => ({
   columns: index.columns.map((column) => column.expression),
 });
 const indexShapeSignature = (index) => JSON.stringify(index);
+const uniqueConstraintSignature = ({ schema, table, columns }) => JSON.stringify({ schema, table, columns });
+const actualUniqueConstraintShapes = actualUniqueConstraints.map((row) => ({
+  schema: row.schema_name, table: row.table_name, columns: row.columns,
+}));
 const expectedIndexShapes = [];
 for (const table of Object.values(expectedTables)) {
   for (const index of Object.values(table.indexes)) expectedIndexShapes.push(expectedIndexShape({ ...index, schema: table.schema, table: table.name }));
@@ -140,7 +167,13 @@ for (const table of Object.values(expectedTables)) {
 const actualIndexShapes = actualIndexes.map(normalizeIndex);
 const actualIndexSignatures = new Set(actualIndexShapes.map(indexShapeSignature));
 const expectedIndexSignatures = new Set(expectedIndexShapes.map(indexShapeSignature));
-const missingIndexes = expectedIndexShapes.filter((index) => !actualIndexSignatures.has(indexShapeSignature(index)));
+const equivalentUniqueIndexConstraints = actualUniqueConstraintShapes.filter((constraint) =>
+  expectedIndexShapes.some((index) => index.unique && index.schema === constraint.schema && index.table === constraint.table
+    && JSON.stringify(index.columns) === JSON.stringify(constraint.columns)));
+const equivalentUniqueConstraintSignatures = new Set(equivalentUniqueIndexConstraints.map(uniqueConstraintSignature));
+const missingIndexes = expectedIndexShapes.filter((index) => !actualIndexSignatures.has(indexShapeSignature(index))
+  && !(index.unique && equivalentUniqueIndexConstraints.some((constraint) => constraint.schema === index.schema
+    && constraint.table === index.table && JSON.stringify(constraint.columns) === JSON.stringify(index.columns))));
 const unexpectedIndexes = actualIndexShapes.filter((index) => !expectedIndexSignatures.has(indexShapeSignature(index)));
 
 const expectedUniqueConstraints = [];
@@ -157,14 +190,12 @@ for (const table of Object.values(expectedTables)) {
     if (column.primaryKey) expectedUniqueConstraints.push({ schema: table.schema, table: table.name, name: `${table.name}_pkey`, columns: [column.name] });
   }
 }
-const actualUniqueConstraintShapes = actualUniqueConstraints.map((row) => ({
-  schema: row.schema_name, table: row.table_name, name: row.constraint_name, columns: row.columns,
-}));
-const uniqueConstraintSignature = (constraint) => JSON.stringify(constraint);
 const expectedUniqueSignatures = new Set(expectedUniqueConstraints.map(uniqueConstraintSignature));
 const actualUniqueSignatures = new Set(actualUniqueConstraintShapes.map(uniqueConstraintSignature));
 const missingUniqueConstraints = expectedUniqueConstraints.filter((constraint) => !actualUniqueSignatures.has(uniqueConstraintSignature(constraint)));
-const unexpectedUniqueConstraints = actualUniqueConstraintShapes.filter((constraint) => !expectedUniqueSignatures.has(uniqueConstraintSignature(constraint)));
+const unexpectedUniqueConstraints = actualUniqueConstraintShapes.filter((constraint) =>
+  !expectedUniqueSignatures.has(uniqueConstraintSignature(constraint))
+  && !equivalentUniqueConstraintSignatures.has(uniqueConstraintSignature(constraint)));
 
 const migrationLedger = await db`SELECT to_regclass('drizzle.__drizzle_migrations') IS NOT NULL AS present`;
 const storyCounts = actualTableNames.has("archive.stories")
@@ -181,12 +212,14 @@ const result = {
   missingColumns,
   unexpectedColumns,
   mismatchedColumns,
+  mismatchedDefaults,
   expectedForeignKeys: expectedForeignKeys.length,
   actualForeignKeys: actualForeignKeys.length,
   missingForeignKeys,
   unexpectedForeignKeys,
   expectedIndexes: expectedIndexShapes.length,
   actualIndexes: actualIndexShapes.length,
+  equivalentUniqueIndexConstraints: equivalentUniqueIndexConstraints.length,
   missingIndexes,
   unexpectedIndexes,
   expectedUniqueConstraints: expectedUniqueConstraints.length,
@@ -198,4 +231,4 @@ const result = {
   drafts: storyCounts.drafts,
 };
 console.log(JSON.stringify(result, null, 2));
-if (missingTables.length || unexpectedTables.length || missingColumns.length || unexpectedColumns.length || mismatchedColumns.length || missingForeignKeys.length || unexpectedForeignKeys.length || missingIndexes.length || unexpectedIndexes.length || missingUniqueConstraints.length || unexpectedUniqueConstraints.length) process.exit(1);
+if (missingTables.length || unexpectedTables.length || missingColumns.length || unexpectedColumns.length || mismatchedColumns.length || mismatchedDefaults.length || missingForeignKeys.length || unexpectedForeignKeys.length || missingIndexes.length || unexpectedIndexes.length || missingUniqueConstraints.length || unexpectedUniqueConstraints.length) process.exit(1);
