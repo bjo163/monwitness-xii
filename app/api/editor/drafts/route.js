@@ -10,6 +10,10 @@ export const dynamic = "force-dynamic";
 export async function POST(request) {
  const auth=await authorizeEditor(request);
  if(!auth.ok) return Response.json({error:auth.message},{status:auth.status});
+ const body = await readJsonBody(request);
+ if (!body.ok) return Response.json({error:body.message},{status:body.status});
+ const input = body.value;
+ if(!validateDraft(input)) return Response.json({error:"Invalid draft fields"},{status:400});
  if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});
  const sql=neon(process.env.DATABASE_URL);
  try {
@@ -18,10 +22,6 @@ export async function POST(request) {
  } catch {
   return Response.json({error:"Write protection unavailable"},{status:503});
  }
- const body = await readJsonBody(request);
- if (!body.ok) return Response.json({error:body.message},{status:body.status});
- const input = body.value;
- if(!validateDraft(input)) return Response.json({error:"Invalid draft fields"},{status:400});
  try {
   // One SQL statement ensures the draft and first revision are committed atomically.
   const rows=await sql`

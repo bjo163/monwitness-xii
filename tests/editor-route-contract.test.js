@@ -15,6 +15,10 @@ test("draft, first revision, and audit are inserted by one SQL statement", () =>
   assert.match(draftRoute,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
   assert.match(draftRoute,/reserveEditorWrite\(\{sql,actorId:auth\.user\.id\}\)/);
   assert.match(draftRoute,/status:429,headers:\{"Retry-After"/);
+  assert.ok(draftRoute.indexOf("await authorizeEditor(request)") < draftRoute.indexOf("await readJsonBody(request)"));
+  assert.ok(draftRoute.indexOf("await readJsonBody(request)") < draftRoute.indexOf("validateDraft(input)"));
+  assert.ok(draftRoute.indexOf("validateDraft(input)") < draftRoute.indexOf("reserveEditorWrite("));
+  assert.ok(draftRoute.indexOf("reserveEditorWrite(") < draftRoute.indexOf("WITH actor AS"));
 });
 
 test("revision allocation locks the draft row and writes audit with the revision", () => {
@@ -27,6 +31,10 @@ test("revision allocation locks the draft row and writes audit with the revision
   assert.match(revisionRoute,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
   assert.match(revisionRoute,/reserveEditorWrite\(\{sql,actorId:auth\.user\.id\}\)/);
   assert.match(revisionRoute,/status:429,headers:\{"Retry-After"/);
+  assert.ok(revisionRoute.indexOf("await authorizeEditor(request)") < revisionRoute.indexOf("await readJsonBody(request)"));
+  assert.ok(revisionRoute.indexOf("await readJsonBody(request)") < revisionRoute.indexOf("validateRevision(input)"));
+  assert.ok(revisionRoute.indexOf("validateRevision(input)") < revisionRoute.indexOf("reserveEditorWrite("));
+  assert.ok(revisionRoute.indexOf("reserveEditorWrite(") < revisionRoute.indexOf("WITH actor AS"));
 });
 
 test("revision rows cannot cascade away with their story", () => {

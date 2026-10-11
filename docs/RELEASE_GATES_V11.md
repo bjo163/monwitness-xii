@@ -11,6 +11,8 @@ Fresh rerun at source head `9e27739` (documentation changes only): `npm test` 71
 
 Latest handover UI follow-up: local `/handover` now reflects this checkout's evidence and gates, removes the stale “Preview is live” claim, and keeps production NO-GO. Smoke now covers the page and asserts the local-only release state. On the updated checkout, `npm test` passes 72/72, production build succeeds, and local production smoke passes 30/30 at `127.0.0.1:3012` with required CSP. No deploy, push, database write, or Auth config change occurred.
 
+Editor write limiter follow-up: both draft and revision endpoints now validate bounded request JSON before reserving the per-actor write quota; reservation still precedes all mutating SQL. Route-contract tests guard ordering. `npm test` 72/72, `npm run db:check`, `npm audit` 0 findings, production build, and local CSP-required smoke 30/30 passed at `127.0.0.1:3013`. Live authenticated writes are still unverified because no local database URL/admin session is available.
+
 Both local and Preview smoke profiles additionally assert exact per-route Auth method rejection (`POST` session and `GET` sign-in return 405 with `Allow: GET` and `Allow: POST` respectively), route-specific `OPTIONS`, rejected `HEAD`, plus no-store denial on signed-out token retrieval. Local smoke additionally checks slug detail errors and the five-field response projection. A script contract test prevents profile drift. The rebuilt local smoke now contains 29 checks.
 
 The current local Auth provider returns 401/no-store for `GET /api/auth/token` without a session. Local and Preview smoke assert the signed-out token boundary, allowing the generic unconfigured-auth 503 only in local mode.
