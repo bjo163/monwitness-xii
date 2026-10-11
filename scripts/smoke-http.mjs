@@ -38,7 +38,7 @@ if(profile==="preview"){
  await check("/api/editor/session",(r,b)=>r.status===401&&b?.authenticated===false);
  await check("/api/editor/drafts",(r)=>r.status===405);
 }else{
- await check("/",(r)=>r.status===200);
+ await check("/",(r)=>r.status===200&&r.headers.get("x-content-type-options")==="nosniff"&&r.headers.get("x-frame-options")==="DENY"&&r.headers.get("referrer-policy")==="strict-origin-when-cross-origin"&&r.headers.get("permissions-policy")==="camera=(), microphone=(), geolocation=()");
  await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/crew/${name}.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6);
  for(const route of ["/throwing-dice","/four-books","/aetherion","/witness-log","/the-lab"]){
   await check(route,(r)=>r.status===200);
