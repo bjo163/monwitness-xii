@@ -6,6 +6,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import { evidence, mediaAssets, stories, storyRevisions } from "../db/schema.js";
 import { findPublicEpisode, listPublicEpisodes } from "../lib/public-archive-query.js";
 import { createPublicEpisodeResponse, createPublicEpisodesResponse } from "../lib/public-archive-response.js";
+import { createPublicEpisodeRouteHandler } from "../lib/public-archive-route.js";
 
 const migrationFiles = [
   "../drizzle/0000_0000_initial_v11.sql",
@@ -78,6 +79,45 @@ test("public archive Drizzle queries expose only published editorial fields from
   assert.deepEqual(Object.keys(detail).sort(), ["experienceType", "season", "slug", "synopsis", "title"]);
   assert.equal(await findPublicEpisode(db, stories, "draft-must-stay-private"), null);
   assert.equal(await findPublicEpisode(db, stories, "unknown-story"), null);
+
+  const detailRoute = createPublicEpisodeRouteHandler({ getDatabase: () => db, stories });
+  const routeResponse = await detailRoute(
+    new Request("http://localhost/api/episodes/source-needed-public-index"),
+    { params: Promise.resolve({ slug: "source-needed-public-index" }) },
+  );
+  assert.equal(routeResponse.status, 200);
+  assert.equal(routeResponse.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await routeResponse.json(), {
+    episode: {
+      slug: "source-needed-public-index",
+      title: "Public Editorial Index",
+      season: "Season One",
+      synopsis: "A summary written for the public index.",
+      experienceType: "comic",
+    },
+    notice: "Published means this metadata index is public. It does not verify original sources, credits, or reuse rights.",
+  });
+
+  const draftResponse = await detailRoute(
+    new Request("http://localhost/api/episodes/draft-must-stay-private"),
+    { params: Promise.resolve({ slug: "draft-must-stay-private" }) },
+  );
+  assert.equal(draftResponse.status, 404);
+  assert.equal(draftResponse.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await draftResponse.json(), { error: "Not found" });
+
+  let invalidSlugDatabaseCalls = 0;
+  const invalidSlugRoute = createPublicEpisodeRouteHandler({
+    getDatabase: () => { invalidSlugDatabaseCalls += 1; throw new Error("must not connect"); },
+    stories,
+  });
+  const invalidSlugResponse = await invalidSlugRoute(
+    new Request("http://localhost/api/episodes/INVALID"),
+    { params: Promise.resolve({ slug: "INVALID" }) },
+  );
+  assert.equal(invalidSlugResponse.status, 400);
+  assert.equal(invalidSlugResponse.headers.get("cache-control"), "no-store");
+  assert.equal(invalidSlugDatabaseCalls, 0);
 
   const publicJson = JSON.stringify({ list, detail });
   for (const privateValue of [

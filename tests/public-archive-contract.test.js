@@ -4,6 +4,7 @@ import { test } from "node:test";
 
 const listRoute = await readFile(new URL("../app/api/episodes/route.js", import.meta.url), "utf8");
 const detailRoute = await readFile(new URL("../app/api/episodes/[slug]/route.js", import.meta.url), "utf8");
+const detailHandler = await readFile(new URL("../lib/public-archive-route.js", import.meta.url), "utf8");
 const queryModule = await readFile(new URL("../lib/public-archive-query.js", import.meta.url), "utf8");
 
 test("public archive list selects a bounded published-only metadata projection", () => {
@@ -17,12 +18,14 @@ test("public archive list selects a bounded published-only metadata projection",
 });
 
 test("public story detail requires a valid slug and published status", () => {
-  assert.match(detailRoute, /!\/\^\[a-z0-9-\]\{1,120\}\$\//);
-  assert.match(detailRoute, /createPublicArchiveErrorResponse\("invalid-slug"\)/);
+  assert.match(detailRoute, /createPublicEpisodeRouteHandler\(\{ getDatabase, stories \}\)/);
+  assert.match(detailHandler, /!\/\^\[a-z0-9-\]\{1,120\}\$\//);
+  assert.match(detailHandler, /createPublicArchiveErrorResponse\("invalid-slug"\)/);
   assert.match(queryModule, /\.where\(and\(eq\(stories\.slug, slug\), eq\(stories\.status, "published"\)\)\)/);
-  assert.match(detailRoute, /findPublicEpisode\(db, stories, slug\)/);
-  assert.match(detailRoute, /if \(!episode\) return createPublicArchiveErrorResponse\("not-found"\)/);
-  assert.match(detailRoute, /createPublicEpisodeResponse\(episode\)/);
-  assert.match(detailRoute, /createPublicArchiveErrorResponse\("unavailable"\)/);
+  assert.match(detailHandler, /findPublicEpisode\(db, stories, slug\)/);
+  assert.match(detailHandler, /if \(!episode\) return createPublicArchiveErrorResponse\("not-found"\)/);
+  assert.match(detailHandler, /createPublicEpisodeResponse\(episode\)/);
+  assert.match(detailHandler, /createPublicArchiveErrorResponse\("unavailable"\)/);
   assert.doesNotMatch(detailRoute, /originalSourceStatus|storyRevisions|auditEvents|\.select\(\)/);
+  assert.doesNotMatch(detailHandler, /originalSourceStatus|storyRevisions|auditEvents|\.select\(\)/);
 });
