@@ -23,7 +23,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 - Local checks after dependency updates: 23 tests pass; migration structural check and production build pass.
 - `npm audit --omit=dev` reports zero production dependency vulnerabilities. Full audit still reports a moderate advisory in Drizzle Kit's development-only `@esbuild-kit` / esbuild 0.18.20 transitive dependency; no compatible fixed Drizzle Kit release is available in the current package range.
-- GitHub Actions run 38150232299 passed for review SHA `8460d24`, including locked install, 21 tests, production dependency audit, and build. CI for two later public-archive tests is pending.
+- GitHub Actions run 38150466832 passed for review SHA `c84a6ee`, including locked install, 23 tests, production dependency audit, and build.
 - Read-only development schema comparison: 16/16 tables and 109/109 columns match; one revision foreign-key delete-action drift remains (`CASCADE` live, intended `RESTRICT`).
 - Authenticated HTTP smoke on the Vercel preview tied to SHA `8460d24`: DB health 200, published list 200 with 15 records, known slug 200, editor draft GET 405.
 - No drafts existed on the development database, so live public-response leakage behavior still needs a draft fixture on a disposable branch.
