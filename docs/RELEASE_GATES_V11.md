@@ -8,7 +8,7 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 - [x] Read-only public API and Neon-backed archive page in dev source.
 - [ ] Finish preview HTTP evidence: current SHA `5d2700d` returns app/DB health 200, published archive 200/15, known story 200, signed-out Auth session 200/null, and public signup 404. Verify exact encrypted DB host/branch and signed-out editor-session 401; current connector could not observe that expected 401.
 - [x] Reproducible generated Drizzle SQL migration checked against disposable branch; see exact Neon rehearsal in `GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md`.
-- [ ] Verify persistent development migration drift/ledger strategy and database backup/restore. Current Neon inventory has zero snapshots/schedules on dev and production; snapshot API rejects non-root dev. No production snapshot/restore rehearsal has been attempted.
+- [ ] Resolve populated-dev migration ledger strategy. Manual snapshot/restore is now rehearsed from Neon production root to an isolated branch: exact DB tree and 7,716,864-byte `neondb` size match, but both have 0 app tables. Dev/prod automatic snapshot schedules are empty; application-data restore, retention, and RPO/RTO remain unverified.
 
 ## Security and editor
 - [x] Neon Managed Better Auth enabled on isolated development branch only; production Auth unchanged.

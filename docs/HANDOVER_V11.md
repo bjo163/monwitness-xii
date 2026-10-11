@@ -38,7 +38,7 @@
 - [x] Frontend homepage and archive exist on dev.
 - [ ] End-to-end HTTP and database transaction tests with evidence.
 - [ ] Live editor session, RBAC write, and actor-attributed audit E2E tests (policy and SQL contract are implemented and unit-tested).
-- [ ] Resolve existing-schema migration ledger strategy; verify backups and restoration (dev currently has no snapshot schedule or manual snapshot evidence).
+- [ ] Resolve existing-schema migration ledger strategy; configure an approved snapshot schedule/retention and define RPO/RTO. A manual production-root snapshot restored to an isolated branch with matching DB tree/size, but production contains no app tables and app-data restore is unverified.
 - [ ] GitHub Actions green on the exact current review head; latest pre-fix audit failed on esbuild and is being corrected.
 - [ ] Resolve PR conflicts; authorize prod connection and promotion.
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
