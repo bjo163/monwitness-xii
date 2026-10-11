@@ -54,6 +54,22 @@ test("unsupported Auth methods are rejected before configuration or provider acc
   assert.equal(providerCalls(), 0);
 });
 
+test("allowlisted Auth routes reject mismatched methods before provider access", async () => {
+  const { handlers, providerCalls } = makeHandlers({ configured: true });
+  for (const [path, method, handler, expectedAllow] of [
+    [["get-session"], "POST", handlers.POST, "GET"],
+    [["sign-in", "email"], "GET", handlers.GET, "POST"],
+    [["sign-out"], "GET", handlers.GET, "POST"],
+    [["token"], "POST", handlers.POST, "GET"],
+  ]) {
+    const response = await handler(request(method, path), context(path));
+    assert.equal(response.status, 405, `${method} ${path.join("/")}`);
+    assert.equal(response.headers.get("allow"), expectedAllow);
+    assert.deepEqual(await response.json(), { error: "Authentication method unavailable" });
+  }
+  assert.equal(providerCalls(), 0);
+});
+
 test("allowlisted Auth routes fail closed with 503 when provider configuration is absent", async () => {
   const { handlers, providerCalls } = makeHandlers();
   const response = await handlers.POST(request("POST", ["sign-in", "email"]), context(["sign-in", "email"]));
