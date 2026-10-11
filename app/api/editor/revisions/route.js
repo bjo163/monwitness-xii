@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { authorizeEditor } from "../../../../lib/editor-auth";
+import { validateRevision } from "../../../../lib/request-validation";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -8,8 +9,7 @@ export async function POST(request){
  const auth=authorizeEditor(request);
  if(!auth.ok)return Response.json({error:auth.message},{status:auth.status});
  let input;try{input=await request.json()}catch{return Response.json({error:"Invalid JSON"},{status:400})}
- if(!input||typeof input.slug!=="string"||!/^[a-z0-9-]{3,120}$/.test(input.slug)||typeof input.body!=="string"||!input.body.trim()||input.body.length>250000)
-   return Response.json({error:"Invalid revision fields"},{status:400});
+ if(!validateRevision(input)) return Response.json({error:"Invalid revision fields"},{status:400});
  try {
   const sql=neon(process.env.DATABASE_URL);
   // Only drafts can be revised; locked published items remain immutable.
