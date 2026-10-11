@@ -18,7 +18,7 @@ On the previously approved, non-default Neon rehearsal branch `br-flat-shape-b5o
 
 This rehearsal validates Drizzle's timestamp-based baseline-stamp sequence on a clone; it did not run `npm run db:migrate` through a local database URL, which is unavailable in this checkout.
 
-The additive `0002` migration was also applied to this same authorized disposable clone. A PostgreSQL rehearsal admitted exactly 30 writes for one editor, rejected the next five, reset the count after an expired window, and removed the temporary test row. The table was then dropped to roll the clone back; a read-only check confirmed 15 stories, zero revisions, and no rate-limit table. This was an isolated schema/SQL rehearsal only; the persistent dev branch has not received `0001` or `0002`.
+The additive `0002` migration was also applied to this same authorized disposable clone. A PostgreSQL rehearsal admitted exactly 30 writes for one editor, rejected the next five, reset the count after an expired window, and removed the temporary test row. A second rehearsal sent 35 independent SQL upserts concurrently through the Neon connector to the same actor key; exactly 30 returned an admitted row, five returned no row, and the stored counter was 30. The test actor and table were then removed; a read-only check confirmed 15 stories, zero revisions, and no rate-limit table. This proves atomic reservation at the SQL level on Neon, not end-to-end concurrency through authenticated application requests. The persistent dev branch has not received `0001` or `0002`.
 
 ## Read-only preflight before any dev stamp
 
