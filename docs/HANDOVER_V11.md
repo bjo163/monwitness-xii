@@ -47,7 +47,7 @@
 1. Provision an owner-controlled admin user on dev Auth and verify login/logout/session restore; keep public signup off.
 2. Run authenticated draft/revision/audit and concurrent-write tests on dev with disposable content; verify actor IDs and public read isolation.
 3. Run CI for the patched dependency lockfile; continue migration-ledger baseline planning (the disposable Neon apply/rollback rehearsal is complete).
-4. Rehearse backup/restore, add rate limiting, and choose an MFA-capable production editor identity (Managed Auth lacks MFA here).
+4. Rehearse backup/restore; rate limiting is implemented and tested in review code but still needs the reviewed migration on the intended dev target; choose an MFA-capable production editor identity (Managed Auth lacks MFA here).
 5. Resolve PR #2 conflicts against `main`, re-run checks; verify production DB mapping, source/rights and explicit release approval.
 6. Deploy only after every gate passes; verify checks and rehearse rollback.
 

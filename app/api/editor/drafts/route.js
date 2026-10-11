@@ -1,4 +1,5 @@
 import { authorizeEditor } from "../../../../lib/editor-auth";
+import { reserveEditorWrite } from "../../../../lib/editor-write-limit";
 import { validateDraft } from "../../../../lib/request-validation";
 import { readJsonBody } from "../../../../lib/read-json-body";
 import { neon } from "@neondatabase/serverless";
@@ -9,13 +10,19 @@ export const dynamic = "force-dynamic";
 export async function POST(request) {
  const auth=await authorizeEditor(request);
  if(!auth.ok) return Response.json({error:auth.message},{status:auth.status});
+ if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});
+ const sql=neon(process.env.DATABASE_URL);
+ try {
+  const limit=await reserveEditorWrite({sql,actorId:auth.user.id});
+  if(!limit.allowed)return Response.json({error:"Too many editor writes; retry later"},{status:429,headers:{"Retry-After":String(limit.retryAfterSeconds)}});
+ } catch {
+  return Response.json({error:"Write protection unavailable"},{status:503});
+ }
  const body = await readJsonBody(request);
  if (!body.ok) return Response.json({error:body.message},{status:body.status});
  const input = body.value;
  if(!validateDraft(input)) return Response.json({error:"Invalid draft fields"},{status:400});
  try {
-  if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});
-  const sql=neon(process.env.DATABASE_URL);
   // One SQL statement ensures the draft and first revision are committed atomically.
   const rows=await sql`
     WITH actor AS (

@@ -13,6 +13,8 @@ test("draft, first revision, and audit are inserted by one SQL statement", () =>
   assert.match(draftRoute,/await authorizeEditor\(request\)/);
   assert.match(draftRoute,/INSERT INTO system\.audit_events\(actor_id,event/);
   assert.match(draftRoute,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
+  assert.match(draftRoute,/reserveEditorWrite\(\{sql,actorId:auth\.user\.id\}\)/);
+  assert.match(draftRoute,/status:429,headers:\{"Retry-After"/);
 });
 
 test("revision allocation locks the draft row and writes audit with the revision", () => {
@@ -23,6 +25,8 @@ test("revision allocation locks the draft row and writes audit with the revision
   assert.match(revisionRoute,/await authorizeEditor\(request\)/);
   assert.match(revisionRoute,/INSERT INTO system\.audit_events\(actor_id,event/);
   assert.match(revisionRoute,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
+  assert.match(revisionRoute,/reserveEditorWrite\(\{sql,actorId:auth\.user\.id\}\)/);
+  assert.match(revisionRoute,/status:429,headers:\{"Retry-After"/);
 });
 
 test("revision rows cannot cascade away with their story", () => {

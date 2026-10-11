@@ -4,13 +4,15 @@ import { join, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { PGlite } from "@electric-sql/pglite";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const schema = await readFile(join(root, "db", "schema.js"), "utf8");
 const initial = await readFile(join(root, "drizzle", "0000_0000_initial_v11.sql"), "utf8");
 const retention = await readFile(join(root, "drizzle", "0001_initial_v11.sql"), "utf8");
+const writeLimits = await readFile(join(root, "drizzle", "0002_editor_write_limits.sql"), "utf8");
 const journal = JSON.parse(await readFile(join(root, "drizzle", "meta", "_journal.json"), "utf8"));
-const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", "0001_snapshot.json"), "utf8"));
+const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", "0002_snapshot.json"), "utf8"));
 
 assert.match(schema, /references\(\(\)=>stories\.id,\{onDelete:"restrict"\}\)/, "revision FK must retain source stories");
 const schemas = [...initial.matchAll(/CREATE SCHEMA "([^"]+)"/g)].map((match) => match[1]);
@@ -20,9 +22,11 @@ assert.match(retention, /DROP CONSTRAINT IF EXISTS "story_revisions_story_id_fke
 assert.match(retention, /DROP CONSTRAINT IF EXISTS "story_revisions_story_id_stories_id_fk"/);
 assert.match(retention, /ON DELETE restrict/);
 assert.equal(snapshot.tables["archive.story_revisions"].foreignKeys.story_revisions_story_id_stories_id_fk.onDelete, "restrict");
-assert.equal(journal.entries.length, 2);
+assert.equal(journal.entries.length, 3);
 assert.equal(journal.entries[0].tag, "0000_0000_initial_v11");
 assert.equal(journal.entries[1].tag, "0001_initial_v11");
+assert.equal(journal.entries[2].tag, "0002_editor_write_limits");
+assert.ok(snapshot.tables["system.editor_write_limits"], "latest Drizzle snapshot must include write limits");
 
 const temporaryBase = resolve(tmpdir());
 const temporaryDirectory = await mkdtemp(join(temporaryBase, "mw-v11-migration-check-"));
@@ -40,16 +44,30 @@ try {
 
   const generatedFiles = (await readdir(generatedDirectory)).filter((name) => /^\d{4}_.+\.sql$/.test(name));
   assert.equal(generatedFiles.length, 1, "a fresh output directory should generate one complete baseline migration");
-  const normalizeNewlines = (value) => value.replace(/\r\n/g, "\n");
-  const generatedSql = normalizeNewlines(await readFile(join(generatedDirectory, generatedFiles[0]), "utf8"));
-  const initialSql = normalizeNewlines(initial);
-  const historicalRevisionFk = generatedSql.match(/ALTER TABLE "archive"\."story_revisions" ADD CONSTRAINT "story_revisions_story_id_stories_id_fk" FOREIGN KEY \("story_id"\) REFERENCES "archive"\."stories"\("id"\) ON DELETE restrict ON UPDATE no action;--> statement-breakpoint/);
-  assert.ok(historicalRevisionFk, "generated baseline must contain the revision retention FK");
-  const expectedHistoricalBaseline = generatedSql.replace(historicalRevisionFk[0], historicalRevisionFk[0].replace("ON DELETE restrict", "ON DELETE cascade"));
-  assert.equal(initialSql, expectedHistoricalBaseline, "committed baseline must match regenerated schema except for the documented historical FK policy");
+  const generatedSql = await readFile(join(generatedDirectory, generatedFiles[0]), "utf8");
+  const generatedDb = new PGlite();
+  const migratedDb = new PGlite();
+  try {
+    await generatedDb.exec(generatedSql);
+    await migratedDb.exec(initial);
+    await migratedDb.exec(retention);
+    await migratedDb.exec(writeLimits);
+
+    const readSchema = async (db) => {
+      const schemas = await db.query(`SELECT schema_name FROM information_schema.schemata WHERE schema_name IN ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system') ORDER BY schema_name`);
+      const tables = await db.query(`SELECT table_schema,table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema IN ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system') ORDER BY table_schema,table_name`);
+      const columns = await db.query(`SELECT table_schema,table_name,column_name,ordinal_position,data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema IN ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system') ORDER BY table_schema,table_name,ordinal_position`);
+      const indexes = await db.query(`SELECT schemaname,tablename,indexname,indexdef FROM pg_indexes WHERE schemaname IN ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system') ORDER BY schemaname,tablename,indexname`);
+      const constraints = await db.query(`SELECT n.nspname AS schema_name,c.relname AS table_name,con.conname,pg_get_constraintdef(con.oid) AS definition FROM pg_constraint con JOIN pg_class c ON c.oid=con.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system') ORDER BY n.nspname,c.relname,con.conname`);
+      return [schemas.rows,tables.rows,columns.rows,indexes.rows,constraints.rows];
+    };
+    assert.deepEqual(await readSchema(migratedDb), await readSchema(generatedDb), "committed migration chain must reproduce the full Drizzle schema");
+  } finally {
+    await Promise.all([generatedDb.close(), migratedDb.close()]);
+  }
 } finally {
   assert.ok(temporaryDirectory.startsWith(`${temporaryBase}${sep}`), "refusing to remove a path outside the temp directory");
   await rm(temporaryDirectory, { recursive: true, force: true });
 }
 
-console.log("Drizzle artifacts pass structural and generation checks: 16 tables, retained revisions, and a two-step journal. This local check does not execute SQL on Neon; see the engineering handover for environment-specific rehearsal evidence.");
+console.log("Drizzle artifacts pass generation and PostgreSQL replay checks: the committed migration chain matches the full generated schema, including retained revisions and editor write limits. This local check does not execute SQL on Neon; see the engineering handover for environment-specific rehearsal evidence.");

@@ -14,7 +14,7 @@ Drafts, original materials, revision bodies, evidence and personal witness logs 
 - Writes require an exact same-origin `Origin` and reject `Sec-Fetch-Site: cross-site`.
 - Both endpoints atomically map the Neon Auth subject to `identity.users` and write its user id to `system.audit_events.actor_id` with the manuscript change.
 - JSON content type, bounded body size, input shape, immutable revision behavior, and database writes remain independently validated.
-- Remaining: live development login and authorized write/revision/audit tests; concurrent write test; rate limiting; an editing/publishing workflow; production account policy. Neon Managed Auth in this configuration does not expose MFA.
+- Remaining: live development login and authorized write/revision/audit tests; concurrent write test against PostgreSQL; apply the tested editor rate-limit migration on an explicitly approved development target; an editing/publishing workflow; production account policy. Neon Managed Auth in this configuration does not expose MFA.
 
 ## Development branch state
 Neon project proud-surf-04547637, development branch br-green-butterfly-b51kp4b1.

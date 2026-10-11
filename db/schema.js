@@ -98,3 +98,8 @@ export const auditEvents = system.table("audit_events", {
  entityId:uuid("entity_id"), payload:jsonb("payload").notNull().default({}),
  createdAt:createdAt()
 });
+export const editorWriteLimits = system.table("editor_write_limits", {
+  actorId: text("actor_id").primaryKey(),
+  windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull().defaultNow(),
+  requestCount: integer("request_count").notNull().default(0)
+});

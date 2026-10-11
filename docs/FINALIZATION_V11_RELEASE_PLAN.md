@@ -28,7 +28,8 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [ ] Confirm GitHub Actions is green on the current verifier change; previous exact-head run `38162078569` passed on `41221a4`.
 - [ ] Provision owner admin identity and complete live sign-in/session/logout restoration checks.
 - [ ] Verify authenticated write + revision + actor-attributed audit and concurrency on isolated dev database.
-- [ ] Add rate limiting and choose MFA-capable identity for production editor access; Neon Managed Auth currently does not expose MFA.
+- [x] Implement an atomic database-backed limit of 30 editor writes per actor per 15-minute window; PGlite concurrency and isolated Neon apply/limit/reset/rollback rehearsals pass. Applying migration `0002` to persistent dev and authenticated end-to-end validation remain gated.
+- [ ] Choose an MFA-capable identity for production editor access; Neon Managed Auth currently does not expose MFA.
 - [ ] End-to-end create draft + revision + audit on dev-only database; 403/401 invalid-session tests; concurrency and retry.
 - [ ] Finish schema alignment of Drizzle definitions with actual dev SQL; generate and commit reproducible migration.
 - [ ] Review any shared credentials, rotate old password if necessary.

@@ -5,6 +5,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 const initial = await readFile(new URL("../drizzle/0000_0000_initial_v11.sql", import.meta.url), "utf8");
 const retention = await readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8");
+const writeLimits = await readFile(new URL("../drizzle/0002_editor_write_limits.sql", import.meta.url), "utf8");
 
 test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL", async (t) => {
   const db = new PGlite();
@@ -27,6 +28,13 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
   assert.equal(fkBefore.rows[0].confdeltype, "c");
 
   await db.exec(retention);
+  await db.exec(writeLimits);
+  const rateLimitColumns = await db.query(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema='system' AND table_name='editor_write_limits'
+    ORDER BY ordinal_position
+  `);
+  assert.deepEqual(rateLimitColumns.rows.map((row) => row.column_name), ["actor_id", "window_started_at", "request_count"]);
   const fkAfter = await db.query(`
     SELECT conname, confdeltype FROM pg_constraint
     WHERE conrelid='archive.story_revisions'::regclass AND contype='f'
