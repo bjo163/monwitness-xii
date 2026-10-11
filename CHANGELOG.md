@@ -16,7 +16,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 - `npm run db:check`: passed; replayed migration chain matches the generated current schema.
 - `npm run build`: passed; `npm audit --omit=dev`: zero vulnerabilities; `git diff --check`: passed.
 - On the isolated Neon rehearsal clone, migration `0002` admitted 30 sequential writes, rejected the next five, reset the expired window and was rolled back. Final check: 15 stories, zero revisions, no limiter table. Persistent dev and production were unchanged.
-- CI/preview verification for the pushed rate-limit change will be recorded after this implementation is pushed.
+- Exact-head verification after push: GitHub Actions run [38163817600](https://github.com/bjo163/monwitness-xii/actions/runs/38163817600) passed. Vercel deployment `dpl_AQsA8BZHazBz1Af3WpJi4s6RFoJT` is READY; authorized preview fetch returned homepage, health, DB readiness and archive endpoints as 200. Database migration has not been applied to persistent dev/preview.
 
 ### Remaining gates
 
