@@ -21,7 +21,7 @@ The live review branch SHA, PR state, and latest exact-head CI run are tracked i
 - [x] Vercel dev build READY at 6b48b588.
 - [x] Read-only public API and Neon-backed archive page in dev source.
 - [x] Verify current app Preview HTTP behavior on `09624ca`: homepage, handover, archive, representative detail and DB health return 200; archive API returns 15 metadata-only entries; signed-out Auth session returns 200/null; editor session returns 401; app signup path returns 404. Detail remains editorial-only and marked `SOURCE NEEDED`.
-- [ ] Independently confirm the encrypted Preview `DATABASE_URL` host/branch maps to the isolated development branch. Sanitized environment metadata and exact 15-row slug/title parity strongly support dev data mapping; the secret URL itself was not read.
+- [ ] Independently confirm the encrypted Preview `DATABASE_URL` host/branch. Sanitized environment metadata labels it for dev; the 15-row slug/title fingerprint also matches the dev-derived migration-rehearsal clone, so parity cannot uniquely identify the target. The secret URL itself was not read.
 - [x] Reproducible generated Drizzle SQL migration checked against disposable branch; see exact Neon rehearsal in `GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md`.
 - [ ] Resolve populated-dev migration ledger strategy. Manual snapshot/restore is now rehearsed from Neon production root to an isolated branch: exact DB tree and 7,716,864-byte `neondb` size match, but both have 0 app tables. Dev/prod automatic snapshot schedules are empty; application-data restore, retention, and RPO/RTO remain unverified.
 
