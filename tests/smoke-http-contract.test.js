@@ -9,6 +9,7 @@ const nextConfig = await readFile(new URL("../next.config.js", import.meta.url),
 const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.meta.url), "utf8");
 const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", import.meta.url), "utf8");
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
+const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
 
 function runSmoke(env) {
   return spawnSync(process.execPath, [script], {
@@ -75,4 +76,13 @@ test("local and Preview smoke enforce route-specific OPTIONS and HEAD behavior",
 test("local smoke checks public Archive detail projection and invalid-slug handling", () => {
   assert.match(smokeScript, /api\/episodes\/tick-tock-on-the-clock",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===200&&b\?\.episode\?\.slug==="tick-tock-on-the-clock"&&b\?\.notice===PUBLIC_ARCHIVE_NOTICE&&JSON\.stringify\(Object\.keys\(b\.episode\)\.sort\(\)\)===JSON\.stringify\(\["experienceType","season","slug","synopsis","title"\]\)\)\|\|\(r\.status===503&&b\?\.error==="Archive unavailable"\)\)\)/);
   assert.match(smokeScript, /api\/episodes\/INVALID%21",\(r,b\)=>r\.status===400&&r\.headers\.get\("cache-control"\)==="no-store"&&b\?\.error==="Invalid slug"/);
+});
+
+test("local handover reports current local evidence and keeps production NO-GO", () => {
+  assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
+  assert.match(handoverPage, /72 automated tests pass/);
+  assert.match(handoverPage, /Daily snapshots with 30-day retention are not configured/);
+  assert.match(handoverPage, /All 15 development Archive entries remain source-needed/);
+  assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
+  assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
 });

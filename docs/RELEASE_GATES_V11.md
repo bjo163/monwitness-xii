@@ -9,6 +9,8 @@ Auth proxy methods are now restricted per installed Neon Auth SDK route contract
 
 Fresh rerun at source head `9e27739` (documentation changes only): `npm test` 71/71, `npm run db:check`, `npm audit` 0 findings, `npm run build`, and production loopback smoke 29/29 on `127.0.0.1:3011` with CSP required. Visual pages and character assets returned 200; signed-out token was 401, signup 404, unsupported Auth methods 405. Local DB/Archive returned expected 503 because the checkout has no `DATABASE_URL`. This provides local evidence only; there is no remote CI, push, deployment, or database change.
 
+Latest handover UI follow-up: local `/handover` now reflects this checkout's evidence and gates, removes the stale “Preview is live” claim, and keeps production NO-GO. Smoke now covers the page and asserts the local-only release state. On the updated checkout, `npm test` passes 72/72, production build succeeds, and local production smoke passes 30/30 at `127.0.0.1:3012` with required CSP. No deploy, push, database write, or Auth config change occurred.
+
 Both local and Preview smoke profiles additionally assert exact per-route Auth method rejection (`POST` session and `GET` sign-in return 405 with `Allow: GET` and `Allow: POST` respectively), route-specific `OPTIONS`, rejected `HEAD`, plus no-store denial on signed-out token retrieval. Local smoke additionally checks slug detail errors and the five-field response projection. A script contract test prevents profile drift. The rebuilt local smoke now contains 29 checks.
 
 The current local Auth provider returns 401/no-store for `GET /api/auth/token` without a session. Local and Preview smoke assert the signed-out token boundary, allowing the generic unconfigured-auth 503 only in local mode.

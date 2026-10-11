@@ -58,6 +58,7 @@ if(profile==="preview"){
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE&&JSON.stringify(Object.keys(b.episode).sort())===JSON.stringify(["experienceType","season","slug","synopsis","title"]))||(r.status===503&&b?.error==="Archive unavailable")));
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES")));
+ await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("Local smoke")&&t.includes("Release gates remaining")&&!t.includes("Preview is live"));
  await check("/editor/login",(r)=>r.status===200&&r.headers.get("cache-control")==="no-store");
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
