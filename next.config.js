@@ -19,6 +19,8 @@ const productionContentSecurityPolicy = [
   "frame-ancestors 'none'",
 ].join("; ");
 
+const noStoreHeaders = [{ key: "Cache-Control", value: "no-store" }];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -32,11 +34,11 @@ const nextConfig = {
       },
       {
         source: "/api/:path*",
-        headers: [{ key: "Cache-Control", value: "no-store" }],
+        headers: noStoreHeaders,
       },
       {
         source: "/editor/:path*",
-        headers: [{ key: "Cache-Control", value: "no-store" }],
+        headers: noStoreHeaders,
       },
     ];
   },

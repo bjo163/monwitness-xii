@@ -31,7 +31,7 @@ if(profile==="preview"){
  await check("/api/health",(r,b)=>r.status===200&&b?.status==="ok"&&b?.service==="moonwitness-xii");
  await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
- await check("/editor/login",(r)=>r.status===200);
+ await check("/editor/login",(r)=>r.status===200&&r.headers.get("cache-control")==="no-store");
  await check("/api/auth/get-session",(r,b)=>r.status===200&&b===null);
  await check("/api/auth/sign-up/email",(r)=>r.status===404);
  await check("/api/auth/get-session",(r)=>r.status===405,"PUT");
@@ -49,7 +49,7 @@ if(profile==="preview"){
  await check("/api/health",(r,b)=>r.status===200&&b?.status==="ok"&&b?.service==="moonwitness-xii");
  await check("/api/health/db",(r,b)=>(r.status===200&&b?.status==="ok"&&b?.database==="connected")||(r.status===503&&b?.status==="error"&&b?.database==="unavailable"));
  await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
- await check("/editor/login",(r)=>r.status===200);
+ await check("/editor/login",(r)=>r.status===200&&r.headers.get("cache-control")==="no-store");
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/sign-up/email",(r,b)=>r.status===404&&b?.error==="Authentication route unavailable");
  await check("/api/auth/get-session",(r)=>r.status===405,"PUT");
