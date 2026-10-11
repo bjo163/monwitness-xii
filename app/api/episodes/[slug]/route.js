@@ -1,6 +1,6 @@
 import { getDatabase } from "../../../../db/client";
 import { stories } from "../../../../db/schema";
-import { and, eq } from "drizzle-orm";
+import { findPublicEpisode } from "../../../../lib/public-archive-query.js";
 import {
   createPublicArchiveErrorResponse,
   createPublicEpisodeResponse,
@@ -16,10 +16,7 @@ export async function GET(_request, context) {
   }
   try {
     const db = getDatabase();
-    const [episode] = await db.select({
-      slug: stories.slug, title: stories.title, season: stories.season,
-      synopsis: stories.synopsis, experienceType: stories.experienceType,
-    }).from(stories).where(and(eq(stories.slug, slug), eq(stories.status, "published"))).limit(1);
+    const episode = await findPublicEpisode(db, stories, slug);
     if (!episode) return createPublicArchiveErrorResponse("not-found");
     return createPublicEpisodeResponse(episode);
   } catch {
