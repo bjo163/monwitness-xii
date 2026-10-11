@@ -46,6 +46,8 @@ npm run build
 npm run db:verify # read-only, needs DATABASE_URL
 ```
 
+For populated-development baseline preflight only, also set `EXPECTED_DATABASE_HOST` and `EXPECTED_DATABASE_NAME` using the independently confirmed Neon development endpoint details. The verifier rejects missing or mismatched target values before connecting; see [the migration reconciliation runbook](docs/MIGRATION_LEDGER_RECONCILIATION_V11.md). This guard does not authorize any database write.
+
 `npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
 
 For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.

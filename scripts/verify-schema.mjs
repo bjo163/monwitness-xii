@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
 import { selectSchemaSnapshot } from "../lib/schema-snapshot-selection.js";
+import { getDatabaseTargetError } from "../lib/database-target.js";
 
 const args = process.argv.slice(2);
 const baselineReconciliation = args.length === 1 && args[0] === "--baseline-reconciliation";
@@ -15,6 +16,17 @@ if (args.length > 0 && !baselineReconciliation) {
 const uri = process.env.DATABASE_URL;
 if (!uri) {
   console.error("DATABASE_URL missing; verification not run");
+  process.exit(2);
+}
+
+const targetError = getDatabaseTargetError({
+  uri,
+  expectedHost: process.env.EXPECTED_DATABASE_HOST,
+  expectedDatabase: process.env.EXPECTED_DATABASE_NAME,
+  requireExpected: baselineReconciliation,
+});
+if (targetError) {
+  console.error(`${targetError}; verification not run`);
   process.exit(2);
 }
 

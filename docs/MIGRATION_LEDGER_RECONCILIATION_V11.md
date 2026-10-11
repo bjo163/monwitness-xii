@@ -22,13 +22,16 @@ The additive `0002` migration was also applied to this same authorized disposabl
 
 ## Read-only preflight before any dev stamp
 
-After securely obtaining and positively verifying the exact development-branch connection string, run:
+After securely obtaining the development-branch connection string, independently verify its endpoint host and database name against the selected Neon development branch in the Neon control plane. The baseline preflight requires these values separately so it can reject a copied production or unrelated DSN before opening a connection. Do not populate the expected values by extracting them from `DATABASE_URL` alone. Run:
 
 ```sh
-DATABASE_URL="<verified development branch URL>" node scripts/verify-schema.mjs --baseline-reconciliation
+DATABASE_URL="<verified development branch URL>" \
+EXPECTED_DATABASE_HOST="<host from verified development endpoint details>" \
+EXPECTED_DATABASE_NAME="<database name from verified development endpoint details>" \
+node scripts/verify-schema.mjs --baseline-reconciliation
 ```
 
-This mode compares live schema structure with `drizzle/meta/0000_snapshot.json` and permits the migration ledger to be absent. It still fails on table, column, default, FK, index, or uniqueness drift. It does not write to the database. Do not use this mode for ordinary current-schema verification.
+This mode validates the DSN's host and database against the independently supplied expected values before connecting, then compares live schema structure with `drizzle/meta/0000_snapshot.json` and permits the migration ledger to be absent. It still fails on table, column, default, FK, index, or uniqueness drift. It does not write to the database, and mismatch errors never print the DSN. The host-to-branch association must be checked in the Neon control plane immediately before use. Do not use this mode for ordinary current-schema verification.
 
 ## Reviewed sequence for a future persistent-dev migration
 
