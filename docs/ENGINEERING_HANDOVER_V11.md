@@ -5,7 +5,7 @@
 **Starting commit:** `c03e977`  
 **Release decision:** **NO-GO for production promotion.**
 
-> **Chronology notice:** this is an append-only engineering record. The checkpoint and implementation chronology below are historical snapshots. For current operational state, use [HANDOVER_V11.md](./HANDOVER_V11.md), [RELEASE_GATES_V11.md](./RELEASE_GATES_V11.md), [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3). The latest verified repository checkpoint is `293cee5003385e927a45bad6b2f915a5eeeb3020` with passing CI [38179410407](https://github.com/bjo163/monwitness-xii/actions/runs/38179410407); current-head Preview is delayed by the owner-selected Vercel Free quota wait. Do not interpret older first-person/present-tense entries as live status.
+> **Chronology notice:** this is an append-only engineering record. The checkpoint and implementation chronology below are historical snapshots. For current operational state, use [HANDOVER_V11.md](./HANDOVER_V11.md), [RELEASE_GATES_V11.md](./RELEASE_GATES_V11.md), [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3). The last passing exact-head CI before this docs refresh was `af6e135e0809160e1cb5a76eca5cd83de8655d05`, run [38179792108](https://github.com/bjo163/monwitness-xii/actions/runs/38179792108); current-head Preview is delayed by the owner-selected Vercel Free quota wait. Do not interpret older first-person/present-tense entries as live status.
 
 ## 2026-10-12 application-head and Preview checkpoint
 
