@@ -19,9 +19,14 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "@neondatabase/serverless": "^1.0.0",
-    "drizzle-orm": "^0.44.0"
+    "drizzle-orm": "^0.45.4"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.0"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.29"
+    }
   }
 }

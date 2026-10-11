@@ -17,11 +17,13 @@ This file records user-visible and operational changes for MoonWitness XII.
 - Revision retention uses an intended `ON DELETE RESTRICT` policy so source manuscripts cannot be silently removed with revisions.
 - Revision number conflicts return HTTP 409 for retry; the row lock is a best-effort guard, not a proof of serializable allocation.
 - GitHub Actions now checks pull requests targeting `dev` and `main`.
+- Upgrade Drizzle ORM to 0.45.4 and pin Next.js's PostCSS dependency to patched 8.5.29.
 
 ### Verification
 
-- Local checks: 20 tests pass; migration structural check and production build pass.
-- GitHub Actions run 38149000704 passed for review SHA `99a97df`; the latest review commit needs its own CI result.
+- Local checks after dependency updates: 20 tests pass; migration structural check and production build pass.
+- `npm audit --omit=dev` reports zero production dependency vulnerabilities. Full audit still reports a moderate advisory in Drizzle Kit's development-only `@esbuild-kit` / esbuild 0.18.20 transitive dependency; no compatible fixed Drizzle Kit release is available in the current package range.
+- GitHub Actions run 38149488540 passed for review SHA `a86e7eb`; the latest dependency/security workflow changes need their own CI result.
 - Read-only development schema comparison: 16/16 tables and 109/109 columns match; one revision foreign-key delete-action drift remains (`CASCADE` live, intended `RESTRICT`).
 
 ### Not released / remaining gates

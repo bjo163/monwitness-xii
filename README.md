@@ -38,6 +38,7 @@ Add your *development-only* `DATABASE_URL` to `.env.local` (never commit a secre
 
 ```bash
 npm test
+npm audit --omit=dev
 npm run build
 npm run db:verify # read-only, needs DATABASE_URL
 SMOKE_BASE_URL=https://your-authorized-preview.example npm run smoke:http

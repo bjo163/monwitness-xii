@@ -1,7 +1,7 @@
 # MoonWitness XII V11 — Grand Master Plan implementation checklist
 
 **Updated:** 2026-10-11 (Asia/Jakarta)  
-**Branch:** `dev`  
+**Branch:** `codex/v11-release-readiness` (review branch targeting `dev`)  
 **Release decision:** NO-GO for production promotion.  
 **Evidence policy:** DONE requires implementation plus recorded verification. “Verified” in older handover material is historical evidence and is not a substitute for rerunning checks on this checkout.
 
@@ -17,7 +17,7 @@ The repository contains the V11 handover, finalization release plan, V11.1 fast-
 | FND-02 | Runtime | Install dependencies and establish clean build | P0 | [x] DONE | FND-01 | `npm install --no-audit --no-fund` | `npm run build` passed on Node v26.5.0 / npm 11.17.0 | Local-only | CI uses Node 22; rerun there |
 | FND-03 | QA | Restore portable test command and verify existing unit suite | P0 | [x] DONE | FND-02 | `package.json` now uses Node's native `--test` runner | `npm test` passed: 10 tests | Local changes | Route-level and database integration tests remain unimplemented |
 | FND-04 | QA | Exercise HTTP contract and expected archive count | P0 | [x] DONE | Authorized preview URL and access | `scripts/smoke-http.mjs` checks health, 15 rows, slug shape, POST-only method | Protected preview on SHA `4e72818`: health 200/connected; list 200/15 entries; known slug 200; editor GET 405 | `4e72818` | Preview uses development config only; editor POST authorization still needs runtime checks |
-| FND-05 | CI | Confirm GitHub Actions green on current review branch | P0 | [x] DONE | Push/CI access | `.github/workflows/quality.yml` uses lockfile-based `npm ci` and PR checks target `dev`/`main` | Run 38149409282 on SHA `020214d` completed success; locked install, 20 tests, and build all green | `020214d` | Documentation-only changes after this SHA are pending a routine CI rerun |
+| FND-05 | CI | Confirm GitHub Actions green on current review branch | P0 | [x] DONE | Push/CI access | `.github/workflows/quality.yml` uses lockfile-based `npm ci`, PR checks target `dev`/`main`, and production dependency auditing | Run 38149488540 on SHA `a86e7eb` completed success; current dependency/workflow edits still need a new run | `a86e7eb` | CI evidence on latest dependency-security commit pending |
 
 ## Story Archive, identity, and data integrity
 
@@ -45,4 +45,6 @@ The repository contains the V11 handover, finalization release plan, V11.1 fast-
 - Baseline test command failed because `--experimental-default-type=module` is not accepted by Node 26. The native runner `node --test tests/*.test.js` passed the original 10 tests.
 - After changes: `npm test` passed 18/18; `npm run db:check` passed; `npm run build` passed; `git diff --check` passed.
 - GitHub Issue #3 remains open; PR #2 remains open and `mergeable: false`. Actions run 38149409282 passed for SHA `020214d` (locked install, tests, production build).
+- Security remediation: Drizzle ORM is 0.45.4; Next's PostCSS resolves to 8.5.29. `npm audit --omit=dev` passes with zero production vulnerabilities. Full `npm audit` still reports four moderate findings tied to the dev-only Drizzle Kit `@esbuild-kit` / esbuild 0.18.20 chain; npm's suggested Drizzle Kit downgrade is breaking and was not applied.
+- Post-upgrade local verification: `npm test` passes 20/20; `npm run db:check`, `npm run build`, and `git diff --check` pass. GitHub Actions run 38149488540 passed for SHA `a86e7eb`; updated dependency and CI audit changes need a new run.
 - Authenticated preview verified health 200, list 200/15, known slug 200, editor GET 405 on the review deployment for `f128776`. The local shell has no DB credentials; no migration apply or production deployment was run.
