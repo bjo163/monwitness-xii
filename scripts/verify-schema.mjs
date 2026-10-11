@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
+import { hasSchemaDrift } from "../lib/schema-verification-status.js";
 
 const uri = process.env.DATABASE_URL;
 if (!uri) {
@@ -231,7 +232,4 @@ const result = {
   drafts: storyCounts.drafts,
 };
 console.log(JSON.stringify(result, null, 2));
-const schemaDrift = missingTables.length || unexpectedTables.length || missingColumns.length || unexpectedColumns.length
-  || mismatchedColumns.length || mismatchedDefaults.length || missingForeignKeys.length || unexpectedForeignKeys.length
-  || missingIndexes.length || unexpectedIndexes.length || missingUniqueConstraints.length || unexpectedUniqueConstraints.length;
-if (schemaDrift || !migrationLedger[0].present) process.exit(1);
+if (hasSchemaDrift(result)) process.exit(1);

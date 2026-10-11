@@ -32,8 +32,8 @@
 - GitHub Actions run [38148501998](https://github.com/bjo163/monwitness-xii/actions/runs/38148501998) — **PASS** on `f12877655ede097505d003be3ed41a62e49bca9f`; locked install, tests, and build all green on Node 22.
 - GitHub Actions run [38149409282](https://github.com/bjo163/monwitness-xii/actions/runs/38149409282) — **PASS** on `020214d171fe8061784024d8ec2c00975b31dd9a`; locked install, 20 tests, and build all green on Node 22.
 - GitHub Actions run [38149488540](https://github.com/bjo163/monwitness-xii/actions/runs/38149488540) — **PASS** on `a86e7eba39ffff5f622bf232882a7099a41adc66`. It predates the current dependency and audit workflow updates.
-- Post-upgrade local checks — **PASS**: `npm test` (20/20), `npm run db:check`, `npm run build`, `npm audit --omit=dev` (0 production vulnerabilities), and `git diff --check`. Full `npm audit` reports moderate dev-only findings through Drizzle Kit's deprecated `@esbuild-kit` loader; the proposed automatic downgrade is breaking and was not applied. CI now includes the production-only audit; latest changed workflow still needs a run.
-- Schema verifier contract now explicitly fails when the migration ledger is missing, as well as on structural schema drift; the verifier itself remains read-only.
+- Post-upgrade local checks — **PASS**: `npm test` (21/21), `npm run db:check`, `npm run build`, `npm audit --omit=dev` (0 production vulnerabilities), and `git diff --check`. Full `npm audit` reports moderate dev-only findings through Drizzle Kit's deprecated `@esbuild-kit` loader; the proposed automatic downgrade is breaking and was not applied. CI includes the production-only audit.
+- Schema verifier contract now explicitly fails when the migration ledger is missing, as well as on structural schema drift; the verifier itself remains read-only. The failure predicate is covered by behavior tests.
 - Authenticated protected-preview fetch on review SHA `f12877655ede097505d003be3ed41a62e49bca9f` — **PASS**: database health 200/connected; published archive list 200 with 15 entries; `tick-tock-on-the-clock` 200; GET draft endpoint 405. Preview alias is `https://monwitness-xii-git-codex-v11-release-readiness-bjo163s-projects.vercel.app`.
 - Read-only Neon connector on project `proud-surf-04547637`, branch `mw-v11-development` — **PASS** for inventory: 9 schemas, 16 tables, selected columns match Drizzle; 15 published stories, 0 drafts, 0 revisions, 0 audit events. Live `archive.story_revisions` FK is `ON DELETE CASCADE` and named `story_revisions_story_id_fkey`; migration now drops that exact constraint and recreates it as `RESTRICT`.
 - `git diff --check` — **PASS**.
@@ -56,4 +56,4 @@
 
 See [the implementation checklist](GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md) for task IDs, statuses, dependencies, evidence, and risk tracking.
 
-- Final documentation refresh: run 38149782312 on SHA `b6d334f` passed, including the new production dependency audit step; the current verifier change requires a fresh CI run.
+- Final verified CI: run 38149868055 on SHA `2f1c4c9` passed, including locked install, 20 tests, production dependency audit, and build.
