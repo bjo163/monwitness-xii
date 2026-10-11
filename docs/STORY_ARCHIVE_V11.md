@@ -21,6 +21,18 @@ Neon project proud-surf-04547637, development branch br-green-butterfly-b51kp4b1
 Nine schemas and sixteen initial tables created in development; production database is unchanged.
 Run endpoint smoke checks and verify deployment before declaring integration complete.
 
+## Editorial source, credit, and rights acceptance
+The 15 current public rows are editorial indexes only; their original sources are not verified. Before marking any entry source-complete or publishing source material, record and review:
+- canonical source title and stable URL or repository/archive identifier;
+- source owner/creator and the provenance of the received copy;
+- verification status, verifier, verification date, and a content checksum for the preserved original;
+- publication permission/license and any territorial, time, or media restrictions;
+- required author, publisher, translator, performer, and image/music credits;
+- privacy review for witness names, contact details, and identifying metadata;
+- storage location and access policy for the original, separate from the public editorial summary.
+
+Do not infer permission from possession or from a public listing. Keep missing or uncertain fields marked `source_needed` / unverified; do not make originals, evidence, or private witness material public until rights and privacy review is recorded. Current aggregate evidence: 15/15 rows remain `editorial_index_only`, `source_verified=false`, and `source_needed`; media, evidence, and revision tables have no rows. No source documents were examined in that aggregate check.
+
 ## Protected draft API
 - `POST /api/editor/drafts`: creates draft and first immutable revision atomically.
 - `POST /api/editor/revisions`: appends a revision to an existing draft only.
