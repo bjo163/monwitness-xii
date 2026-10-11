@@ -23,7 +23,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 - Local checks after dependency updates: 20 tests pass; migration structural check and production build pass.
 - `npm audit --omit=dev` reports zero production dependency vulnerabilities. Full audit still reports a moderate advisory in Drizzle Kit's development-only `@esbuild-kit` / esbuild 0.18.20 transitive dependency; no compatible fixed Drizzle Kit release is available in the current package range.
-- GitHub Actions run 38149488540 passed for review SHA `a86e7eb`; the latest dependency/security workflow changes need their own CI result.
+- GitHub Actions run 38149782312 passed for review SHA `b6d334f`, including the production dependency audit step.
 - Read-only development schema comparison: 16/16 tables and 109/109 columns match; one revision foreign-key delete-action drift remains (`CASCADE` live, intended `RESTRICT`).
 
 ### Not released / remaining gates

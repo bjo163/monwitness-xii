@@ -231,4 +231,7 @@ const result = {
   drafts: storyCounts.drafts,
 };
 console.log(JSON.stringify(result, null, 2));
-if (missingTables.length || unexpectedTables.length || missingColumns.length || unexpectedColumns.length || mismatchedColumns.length || mismatchedDefaults.length || missingForeignKeys.length || unexpectedForeignKeys.length || missingIndexes.length || unexpectedIndexes.length || missingUniqueConstraints.length || unexpectedUniqueConstraints.length) process.exit(1);
+const schemaDrift = missingTables.length || unexpectedTables.length || missingColumns.length || unexpectedColumns.length
+  || mismatchedColumns.length || mismatchedDefaults.length || missingForeignKeys.length || unexpectedForeignKeys.length
+  || missingIndexes.length || unexpectedIndexes.length || missingUniqueConstraints.length || unexpectedUniqueConstraints.length;
+if (schemaDrift || !migrationLedger[0].present) process.exit(1);

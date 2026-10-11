@@ -16,6 +16,7 @@ test("schema verifier covers table, column, default, key, and index drift", () =
   assert.match(verifier, /constraint_row\.contype IN \('u', 'p'\)/);
   assert.match(verifier, /pg_index/);
   assert.match(verifier, /equivalentUniqueIndexConstraints/);
+  assert.match(verifier, /if \(schemaDrift \|\| !migrationLedger\[0\]\.present\) process\.exit\(1\)/);
 });
 
 test("schema verifier exits explicitly without a database URL", () => {
