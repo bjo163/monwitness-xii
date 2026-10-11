@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { authorizeEditor } from "../../../../lib/editor-auth";
 import { validateRevision } from "../../../../lib/request-validation";
+import { readJsonBody } from "../../../../lib/read-json-body";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -8,7 +9,9 @@ export const dynamic="force-dynamic";
 export async function POST(request){
  const auth=authorizeEditor(request);
  if(!auth.ok)return Response.json({error:auth.message},{status:auth.status});
- let input;try{input=await request.json()}catch{return Response.json({error:"Invalid JSON"},{status:400})}
+ const body = await readJsonBody(request);
+ if (!body.ok) return Response.json({error:body.message},{status:body.status});
+ const input = body.value;
  if(!validateRevision(input)) return Response.json({error:"Invalid revision fields"},{status:400});
  try {
   if (!process.env.DATABASE_URL) return Response.json({error:"Database unavailable"},{status:503});

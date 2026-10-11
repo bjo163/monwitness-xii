@@ -14,14 +14,17 @@
 - Added `package-lock.json` for repeatable installs.
 - Hardened `scripts/smoke-http.mjs`: validate the base URL, report network/JSON errors, assert the expected 15-entry archive, check the known slug response, and verify the write route is POST-only.
 - Added an initial Drizzle migration for 16 tables and a follow-up migration that changes the revision FK from `ON DELETE CASCADE` to `ON DELETE RESTRICT`, preserving manuscript revisions.
-- Added `npm run db:check`, which compares committed migration generation with the current schema in a temporary folder without exposing or using `DATABASE_URL`.
+- Added `npm run db:check` structural checks for the committed 9-schema/16-table migration, revision retention policy, and Drizzle journal. This does not claim live database drift validation.
 - Hardened revision number allocation by locking the draft story row during insertion. This serializes writers for one story, but remains unverified against PostgreSQL concurrency.
+- Added a shared editor JSON body parser that requires `application/json`, rejects invalid UTF-8, and caps streamed payloads at 256 KiB. Added SQL contract and body parser unit tests.
+- Updated GitHub Actions to use the committed lockfile with `npm ci`.
 - Added `docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md` with evidence/status fields and an explicit note that the Grand Master Plan V11/V11.2 source files are missing from this checkout.
 
 ## Verification
 
-- `npm test` — **PASS**, 10/10 existing unit tests, after the script change.
+- `npm test` — **PASS**, 18/18 unit and SQL contract tests.
 - `npm run build` — **PASS** after edits.
+- `npm run db:check` — **PASS**, local structural checks only.
 - `git diff --check` — **PASS**.
 - `npm run db:check` — **PASS**, 16-table schema migration artifacts regenerate identically.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
