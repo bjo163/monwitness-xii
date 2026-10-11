@@ -2,7 +2,7 @@
 
 **Updated:** 2026-10-12 (Asia/Jakarta)
 **Branch:** `codex/v11-release-readiness` (review branch targeting `dev`)  
-**Live review head and latest exact-head CI:** tracked on [PR #4](https://github.com/bjo163/monwitness-xii/pull/4) and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3); the last recorded run [38172761234](https://github.com/bjo163/monwitness-xii/actions/runs/38172761234) passed on `7428f938f9be5013d3726f3d938023003f978468`. PR #4 remains draft/unmerged.  
+**Live review head and latest exact-head CI:** the moving SHA and latest workflow result are linked from [PR #4](https://github.com/bjo163/monwitness-xii/pull/4) and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3). PR #4 remains draft/unmerged.
 **Release decision:** NO-GO for production promotion.  
 **Evidence policy:** DONE requires implementation plus recorded verification. “Verified” in older handover material is historical evidence and is not a substitute for rerunning checks on this checkout.
 
