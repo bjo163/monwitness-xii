@@ -39,6 +39,8 @@ if(profile==="preview"){
  await check("/api/auth/get-session",(r)=>r.status===405,"PUT");
  await check("/api/auth/get-session",(r)=>r.status===405&&r.headers.get("allow")==="GET","POST");
  await check("/api/auth/sign-in/email",(r)=>r.status===405&&r.headers.get("allow")==="POST");
+ await check("/api/auth/sign-in/email",(r)=>r.status===204&&r.headers.get("allow")==="POST","OPTIONS");
+ await check("/api/auth/get-session",(r)=>r.status===405&&r.headers.get("allow")==="GET","HEAD");
  await check("/api/editor/session",(r,b)=>r.status===401&&r.headers.get("cache-control")==="no-store"&&b?.authenticated===false);
  await check("/api/editor/drafts",(r)=>r.status===405);
 }else{
@@ -61,6 +63,8 @@ if(profile==="preview"){
  await check("/api/auth/get-session",(r)=>r.status===405,"PUT");
  await check("/api/auth/get-session",(r)=>r.status===405&&r.headers.get("allow")==="GET","POST");
  await check("/api/auth/sign-in/email",(r)=>r.status===405&&r.headers.get("allow")==="POST");
+ await check("/api/auth/sign-in/email",(r)=>r.status===204&&r.headers.get("allow")==="POST","OPTIONS");
+ await check("/api/auth/get-session",(r)=>r.status===405&&r.headers.get("allow")==="GET","HEAD");
  await check("/api/editor/session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401&&b?.authenticated===false)||(r.status===503&&b?.error==="Editor authentication is not configured")));
  await check("/api/editor/drafts",(r)=>r.status===405);
 }

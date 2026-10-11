@@ -46,11 +46,34 @@ test("POST signup and admin routes are denied before provider access", async () 
 
 test("unsupported Auth methods are rejected before configuration or provider access", async () => {
   const { handlers, providerCalls } = makeHandlers({ configured: true });
-  for (const [method, handler] of [["PUT", handlers.PUT], ["PATCH", handlers.PATCH], ["DELETE", handlers.DELETE]]) {
+  for (const [method, handler] of [
+    ["PUT", handlers.PUT],
+    ["PATCH", handlers.PATCH],
+    ["DELETE", handlers.DELETE],
+    ["HEAD", handlers.HEAD],
+  ]) {
     const response = await handler(request(method, ["get-session"]), context(["get-session"]));
     assert.equal(response.status, 405);
-    assert.equal(response.headers.get("allow"), "GET, POST");
+    assert.equal(response.headers.get("allow"), "GET");
   }
+  assert.equal(providerCalls(), 0);
+});
+
+test("OPTIONS advertises only each allowlisted route's permitted method", async () => {
+  const { handlers, providerCalls } = makeHandlers({ configured: true });
+  for (const [path, expectedAllow] of [
+    [["get-session"], "GET"],
+    [["sign-in", "email"], "POST"],
+    [["sign-out"], "POST"],
+    [["token"], "GET"],
+  ]) {
+    const response = await handlers.OPTIONS(request("OPTIONS", path), context(path));
+    assert.equal(response.status, 204, path.join("/"));
+    assert.equal(response.headers.get("allow"), expectedAllow);
+    assert.equal(await response.text(), "");
+  }
+  const denied = await handlers.OPTIONS(request("OPTIONS", ["sign-up", "email"]), context(["sign-up", "email"]));
+  assert.equal(denied.status, 404);
   assert.equal(providerCalls(), 0);
 });
 

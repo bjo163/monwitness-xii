@@ -5,4 +5,4 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
 const handlers=createAuthRouteHandlers({getAuth,isAuthConfigured});
-export const {GET,POST,PUT,DELETE,PATCH}=handlers;
+export const {GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS}=handlers;
