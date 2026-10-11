@@ -39,6 +39,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 - Latest test/smoke checkpoint at `2904dea`: 68/68 tests and 25/25 production loopback smoke checks pass, including signed-out token denial.
 - Runtime inspection found Next.js' generated `OPTIONS` response advertised every method exported by the catch-all route. The Auth route now handles `OPTIONS` itself with only the path's permitted method in `Allow`, and handles `HEAD` explicitly as a rejection before provider access. Local tests pass 70/70; production build passes; loopback smoke passes 27/27, including `OPTIONS` and `HEAD`. Implementation commit: `d581dc3`.
 - Local loopback smoke now exercises `/api/episodes/:slug` directly: a database-unavailable detail returns the generic 503/no-store response; malformed slugs return 400/no-store before database access; a connected response must match the exact five-field editorial projection. Latest `npm test` passes 71/71 and local smoke passes 29/29. Current local DB is unavailable, so connected detail behavior remains covered by PGlite query/response tests rather than HTTP against Neon.
+- Extracted the detail endpoint into an injectable handler and exercised that same handler with the PGlite migration fixture: a published `source_needed` entry returns exactly five public fields and the provenance notice, draft slugs return 404/no-store, and invalid slugs return 400/no-store without opening the DB. Commit `964a520`; suite remains 71/71, build succeeds, and loopback smoke remains 29/29.
 
 ### Release state
 
