@@ -1,4 +1,5 @@
 import { authorizeEditor } from "../../../../lib/editor-auth";
+import { validateDraft } from "../../../../lib/request-validation";
 import { neon } from "@neondatabase/serverless";
 
 export const runtime = "nodejs";
@@ -10,8 +11,7 @@ export async function POST(request) {
  if(!auth.ok) return Response.json({error:auth.message},{status:auth.status});
  let input;
  try { input=await request.json(); } catch {return Response.json({error:"Invalid JSON"},{status:400});}
- if(!input||typeof input!=="object"||!slugRule.test(input.slug??"")||typeof input.title!=="string"||!input.title.trim()||input.title.length>250||typeof input.body!=="string"||!input.body.trim()||input.body.length>250000)
-   return Response.json({error:"Invalid draft fields"},{status:400});
+ if(!validateDraft(input)) return Response.json({error:"Invalid draft fields"},{status:400});
  const sql=neon(process.env.DATABASE_URL);
  try {
   // One SQL statement ensures the draft and first revision are committed atomically.
