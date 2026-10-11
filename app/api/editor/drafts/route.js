@@ -17,14 +17,21 @@ export async function POST(request) {
    return Response.json({error:"Invalid draft fields"},{status:400});
  const sql=neon(process.env.DATABASE_URL);
  try {
-  // Atomic insert of draft + original revision. Slug uniqueness prevents accidental duplicates.
-  const rows=await sql.transaction([
-    sql`INSERT INTO archive.stories(slug,title,season,synopsis,status,original_source_status) VALUES (${input.slug},${input.title.trim()},${typeof input.season==="string"?input.season.slice(0,150):null},${typeof input.synopsis==="string"?input.synopsis.slice(0,2000):null},'draft','source_needed') RETURNING id,slug`,
-  ]);
-  const story=rows[0]?.[0];
+  // One SQL statement ensures the draft and first revision are committed atomically.
+  const rows=await sql`
+    WITH draft AS (
+      INSERT INTO archive.stories(slug,title,season,synopsis,status,original_source_status)
+      VALUES (${input.slug},${input.title.trim()},${typeof input.season==="string"?input.season.slice(0,150):null},${typeof input.synopsis==="string"?input.synopsis.slice(0,2000):null},'draft','source_needed')
+      RETURNING id, slug
+    ), first_revision AS (
+      INSERT INTO archive.story_revisions(story_id,revision,body,source_type,notes)
+      SELECT id,1,${input.body},'user_original','Original draft' FROM draft
+      RETURNING story_id
+    )
+    SELECT draft.id, draft.slug FROM draft JOIN first_revision ON first_revision.story_id=draft.id
+  `;
+  const story=rows[0];
   if(!story) return Response.json({error:"Failed to create draft"},{status:500});
-  // Revision append is a separate step: on failure the draft remains private and recoverable.
-  await sql`INSERT INTO archive.story_revisions(story_id,revision,body,source_type,notes) VALUES (${story.id},1,${input.body},'user_original','Original draft')`;
   return Response.json({id:story.id,slug:story.slug,status:"draft"},{status:201});
  } catch(err) {
   if(err?.code==="23505")return Response.json({error:"Slug exists"},{status:409});
