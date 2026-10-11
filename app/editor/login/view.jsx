@@ -18,7 +18,7 @@ export default function EditorLogin(){
    const session=await fetch('/api/editor/session',{cache:'no-store'});
    if(!session.ok){await authClient.signOut();setMessage('This account does not have editor access.');return}
    const data=await session.json();
-   if(data.role!=='admin'){await authClient.signOut();setMessage('This account does not have editor access.');return}
+   if(!data.canEdit){await authClient.signOut();setMessage('This account does not have editor access.');return}
    window.location.assign('/editor');
   }catch{setMessage('The authentication service is not available right now. Please try again later.')}
   finally{setBusy(false)}

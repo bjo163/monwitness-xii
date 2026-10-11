@@ -23,8 +23,8 @@ This snapshot supersedes the older SHA/status references below; the original gat
 
 ## Security and editor
 - [x] Neon Managed Better Auth enabled on isolated development branch only; production Auth unchanged.
-- [x] Application sign-in-only UI/auth proxy; sign-up endpoint is denied with 404; editor routes require an `admin` session.
-- [ ] Resolve identity onboarding before accepting editors: dev Auth reads allow_sign_up=true; Neon docs say restricted signups are not yet supported. Read-only inspection found neon_auth.user empty and its role column nullable with no database default; this does not establish the Managed Auth signup role behavior. App signup proxy returns 404, but that does not prove direct provider signup is blocked. Confirm provider-side role assignment cannot be self-selected; use an identity provider with controlled registration and MFA if required.
+- [x] Application sign-in-only UI/auth proxy; app signup endpoint is denied with 404; editor writes now require both an `admin` session role and a server-side exact-user-ID allowlist.
+- [ ] Resolve identity onboarding before accepting editors: dev Auth reads `allow_sign_up=true`; Neon docs say restricted signups are not yet supported. Read-only inspection found `neon_auth.user` empty and its `role` column nullable with no database default; this does not establish the Managed Auth signup role behavior. App signup proxy returns 404, but direct provider signup may still be possible. Set an owner-controlled `EDITOR_ADMIN_USER_IDS` value for each intended environment only after provisioning and verifying the admin account; MFA-capable identity is still required for production.
 - [x] Anonymous HTTP verification: Auth proxy session `200 null`, editor session `401`, draft POST `401`.
 - [x] Same-origin and cross-site request policy has regression tests; writes map Auth subjects to `identity.users` and attribute audit rows.
 - [ ] Provision owner account and verify sign-in, admin role, sign-out and session restoration end-to-end.

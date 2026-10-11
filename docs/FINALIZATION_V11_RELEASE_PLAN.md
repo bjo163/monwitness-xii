@@ -13,8 +13,8 @@ A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI
 - [x] Development Story Archive includes 15 **editorial index entries**, not source-complete manuscripts.
 - [x] GET published-only episodes API, /episodes UI, homepage link, DB health probe implemented.
 - [x] Neon Managed Auth provisioned on isolated dev branch only; production untouched.
-- [x] Local admin-only sign-in and session authorization are implemented; the application auth proxy denies public sign-up routes.
-- [ ] Resolve identity onboarding before accepting editors: Neon Auth reports `allow_sign_up=true`, and current Neon docs say restricted signups are not yet supported. The app proxy returns 404 for signup routes, but direct provider signup is not proven blocked. Keep provider-side role assignment owner-controlled, verify how roles are granted, and select another auth approach if invite-only registration/MFA is a hard requirement.
+- [x] Local admin-only sign-in and session authorization are implemented; the application auth proxy denies public sign-up routes. Editor writes require both the provider's `admin` role and the exact user ID in a server-only `EDITOR_ADMIN_USER_IDS` allowlist.
+- [ ] Resolve identity onboarding before accepting editors: Neon Auth reports `allow_sign_up=true`, and current Neon docs say restricted signups are not yet supported. The app proxy returns 404 for signup routes, but direct provider signup is not proven blocked. Configure the owner-verified user ID per environment, verify provider-side role assignment, and select another auth approach if invite-only registration/MFA is a hard requirement.
 - [x] Anonymous HTTP checks: auth session proxy `200 null`, editor session `401`, draft POST `401`.
 - [x] Unit tests cover admin RBAC, origin rejection, invalid identities and actor mapping contract.
 - [x] Append-only draft/revision SQL + audit-event CTE committed (not E2E proven).

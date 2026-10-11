@@ -33,7 +33,7 @@
 - [x] Sign-in-only editor entry and admin-only, same-origin server authorization implemented; public signup routes are denied by the application proxy. Neon Auth provider config reads `allow_sign_up=true`; current Neon docs say restricted signup is not yet supported, so direct provider registration remains an open identity-onboarding risk/gate.
 - [x] Local anonymous HTTP returns auth proxy 200/null, editor session 401, and draft POST 401.
 - [x] Exact baseline and retention migration SQL replayed in a blank isolated Neon rehearsal database; 9 schemas/16 tables verified; `RESTRICT` behavior and rollback to `CASCADE` exercised; source dev branch remained unchanged.
-- [ ] Owner-provisioned admin sign-in, logout, session restoration and protected write E2E tests.
+- [ ] Owner-provisioned admin sign-in, logout, session restoration and protected write E2E tests. Editor writes additionally require a server-side `EDITOR_ADMIN_USER_IDS` allowlist; it is intentionally unset until the owner identity is verified.
 - [ ] Live actor-attributed audit, revision concurrency and database transaction tests.
 - [x] Frontend homepage and archive exist on dev.
 - [x] Public preview HTTP checks on the latest app-code head: homepage, liveness, database readiness, and published metadata archive return expected 200 responses.
@@ -47,7 +47,7 @@
 - [ ] Source manuscripts/posters/content provenance integrated and reviewed.
 
 ## Suggested fastest remaining order
-1. Confirm the encrypted Preview DB branch mapping and owner-controlled test identity. Before editor onboarding, verify provider-side role assignment and determine whether direct provider signups can receive roles; Neon currently documents no restricted-signup switch. If invite-only registration is mandatory, select an auth provider that supports it (and MFA).
+1. Confirm the encrypted Preview DB branch mapping and owner-controlled test identity. Before editor onboarding, verify provider-side role assignment and determine whether direct provider signups can receive roles; Neon currently documents no restricted-signup switch. Configure the verified Neon user ID in the Preview-only `EDITOR_ADMIN_USER_IDS` variable. If invite-only registration is mandatory, select an auth provider that supports it (and MFA).
 2. After separate owner approval and exact target confirmation, rehearse the pending migrations on a disposable app-connected branch, then test authenticated draft/revision/audit and route-level concurrency with disposable content.
 3. Decide whether to approve a paid Neon plan for the selected daily/30-day schedule; set RPO/RTO and test representative-data restore.
 4. Choose an MFA-capable production editor identity, complete source/rights review, and prepare rollback evidence.
