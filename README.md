@@ -38,6 +38,7 @@ Add your *development-only* `DATABASE_URL` to `.env.local` (never commit a secre
 
 ```bash
 npm test
+npm run db:check # regenerates migration baseline to a temporary directory and verifies history
 npm audit --omit=dev
 npm run build
 npm run db:verify # read-only, needs DATABASE_URL

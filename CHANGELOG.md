@@ -8,6 +8,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 - Repeatable dependency installation and CI checks using the committed npm lockfile.
 - A read-only Drizzle snapshot verifier for tables, columns, defaults, foreign keys, indexes, unique constraints, migration-ledger presence, and archive counts.
+- A migration generation check that regenerates the schema baseline into an isolated temporary directory and verifies the committed historical FK transition.
 - Bounded editor JSON request parsing (256 KiB), JSON content-type enforcement, and malformed UTF-8 rejection.
 - Automated auth, input-validation, request-body, public-archive, migration-contract, and schema-verifier contract tests.
 - A Grand Master Plan implementation checklist and engineering handover record.
@@ -21,9 +22,9 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 ### Verification
 
-- Local checks after dependency updates: 23 tests pass; migration structural check and production build pass.
+- Local checks after dependency updates: 23 tests pass; migration structural and regeneration checks and production build pass.
 - `npm audit --omit=dev` reports zero production dependency vulnerabilities. Full audit still reports a moderate advisory in Drizzle Kit's development-only `@esbuild-kit` / esbuild 0.18.20 transitive dependency; no compatible fixed Drizzle Kit release is available in the current package range.
-- GitHub Actions run 38150466832 passed for review SHA `c84a6ee`, including locked install, 23 tests, production dependency audit, and build.
+- GitHub Actions run 38150555497 passed for review SHA `beb2faa`, including locked install, 23 tests, production dependency audit, and build. The new CI migration generation step awaits a run.
 - Read-only development schema comparison: 16/16 tables and 109/109 columns match; one revision foreign-key delete-action drift remains (`CASCADE` live, intended `RESTRICT`).
 - Authenticated HTTP smoke on the Vercel preview tied to SHA `8460d24`: DB health 200, published list 200 with 15 records, known slug 200, editor draft GET 405.
 - No drafts existed on the development database, so live public-response leakage behavior still needs a draft fixture on a disposable branch.

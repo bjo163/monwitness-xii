@@ -14,7 +14,7 @@
 - Added `package-lock.json` for repeatable installs.
 - Hardened `scripts/smoke-http.mjs`: validate the base URL, report network/JSON errors, assert the expected 15-entry archive, check the known slug response, and verify the write route is POST-only.
 - Added an initial Drizzle migration for 16 tables and a follow-up migration that changes the revision FK from `ON DELETE CASCADE` to `ON DELETE RESTRICT`, preserving manuscript revisions.
-- Added `npm run db:check` structural checks for the committed 9-schema/16-table migration, revision retention policy, and Drizzle journal. This does not claim live database drift validation.
+- Added `npm run db:check` checks for the committed 9-schema/16-table migration, revision retention policy, Drizzle journal, and regenerated SQL baseline. Regeneration matches the committed historical baseline except for the expected FK change from `CASCADE` to `RESTRICT` in the second migration. This does not exercise live apply/rollback.
 - Revision allocation locks the draft story row as a best-effort concurrency guard; a uniqueness conflict still returns 409 for retry. Concurrent behavior remains unverified against PostgreSQL.
 - Added a shared editor JSON body parser that requires `application/json`, rejects invalid UTF-8, and caps streamed payloads at 256 KiB. Added SQL contract and body parser unit tests.
 - Updated GitHub Actions to use the committed lockfile with `npm ci`.
@@ -37,6 +37,7 @@
 - Authenticated protected-preview fetch on review SHA `f12877655ede097505d003be3ed41a62e49bca9f` — **PASS**: database health 200/connected; published archive list 200 with 15 entries; `tick-tock-on-the-clock` 200; GET draft endpoint 405. Preview alias is `https://monwitness-xii-git-codex-v11-release-readiness-bjo163s-projects.vercel.app`.
 - Refreshed authenticated smoke on deployment `dpl_HrL8RQgNq6MnK8imqM9ovMqszUJx` — **PASS**: Vercel reports source SHA `8460d2477837467036903990767bf09699d91295`; health 200/connected, published list 200 with 15 entries, known slug 200, editor draft GET 405. This is development preview evidence only; no authenticated POST was sent.
 - Added public-archive route contract tests for published-only filtering, explicit metadata projection, list bounds, and slug validation. Local suite and CI now pass 23/23.
+- Migration regeneration check passed locally; `.github/workflows/quality.yml` now runs `npm run db:check` alongside tests, audit, and build. CI for this workflow change is pending.
 - Read-only Neon connector on project `proud-surf-04547637`, branch `mw-v11-development` — **PASS** for inventory: 9 schemas, 16 tables, selected columns match Drizzle; 15 published stories, 0 drafts, 0 revisions, 0 audit events. Live `archive.story_revisions` FK is `ON DELETE CASCADE` and named `story_revisions_story_id_fkey`; migration now drops that exact constraint and recreates it as `RESTRICT`.
 - `git diff --check` — **PASS**.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.

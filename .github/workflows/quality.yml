@@ -19,6 +19,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Auth security regression tests
         run: npm test
+      - name: Drizzle migration reproducibility check
+        run: npm run db:check
       - name: Production dependency security audit
         run: npm audit --omit=dev
       - name: Next.js production build (without DB secret)
