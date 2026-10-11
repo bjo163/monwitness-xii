@@ -35,6 +35,8 @@
 - Post-upgrade local checks — **PASS**: `npm test` (21/21), `npm run db:check`, `npm run build`, `npm audit --omit=dev` (0 production vulnerabilities), and `git diff --check`. Full `npm audit` reports moderate dev-only findings through Drizzle Kit's deprecated `@esbuild-kit` loader; the proposed automatic downgrade is breaking and was not applied. CI includes the production-only audit.
 - Schema verifier contract now explicitly fails when the migration ledger is missing, as well as on structural schema drift; the verifier itself remains read-only. The failure predicate is covered by behavior tests.
 - Authenticated protected-preview fetch on review SHA `f12877655ede097505d003be3ed41a62e49bca9f` — **PASS**: database health 200/connected; published archive list 200 with 15 entries; `tick-tock-on-the-clock` 200; GET draft endpoint 405. Preview alias is `https://monwitness-xii-git-codex-v11-release-readiness-bjo163s-projects.vercel.app`.
+- Refreshed authenticated smoke on deployment `dpl_HrL8RQgNq6MnK8imqM9ovMqszUJx` — **PASS**: Vercel reports source SHA `8460d2477837467036903990767bf09699d91295`; health 200/connected, published list 200 with 15 entries, known slug 200, editor draft GET 405. This is development preview evidence only; no authenticated POST was sent.
+- Added public-archive route contract tests for published-only filtering, explicit metadata projection, list bounds, and slug validation. Local suite now passes 23/23; CI for the two new tests is pending.
 - Read-only Neon connector on project `proud-surf-04547637`, branch `mw-v11-development` — **PASS** for inventory: 9 schemas, 16 tables, selected columns match Drizzle; 15 published stories, 0 drafts, 0 revisions, 0 audit events. Live `archive.story_revisions` FK is `ON DELETE CASCADE` and named `story_revisions_story_id_fkey`; migration now drops that exact constraint and recreates it as `RESTRICT`.
 - `git diff --check` — **PASS**.
 - Local `next start` HTTP checks — **PASS for fail-closed behavior**: `/api/health/db`, `/api/episodes`, and known episode route return 503 with no DB URL; editor draft/revision POST return 503 with no token. This does not validate the deployed preview or Neon data.
@@ -56,4 +58,4 @@
 
 See [the implementation checklist](GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md) for task IDs, statuses, dependencies, evidence, and risk tracking.
 
-- Final verified CI: run 38150146407 on SHA `598fdd9` passed, including locked install, 21 tests, production dependency audit, and build.
+- Final verified CI before the latest public-archive tests: run [38150232299](https://github.com/bjo163/monwitness-xii/actions/runs/38150232299) on SHA `8460d24` passed, including locked install, 21 tests, production dependency audit, and build.
