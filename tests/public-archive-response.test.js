@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  createPublicArchiveErrorResponse,
   createPublicEpisodeResponse,
   createPublicEpisodesResponse,
 } from "../lib/public-archive-response.js";
@@ -46,4 +47,21 @@ test("public detail response includes notice, no-store, and only editorial field
     episode: publicEpisode,
     notice: PUBLIC_ARCHIVE_NOTICE,
   });
+});
+
+test("public archive errors keep their status and disable caching", async (t) => {
+  const cases = [
+    ["invalid-slug", 400, "Invalid slug"],
+    ["not-found", 404, "Not found"],
+    ["unavailable", 503, "Archive unavailable"],
+  ];
+
+  for (const [kind, status, error] of cases) {
+    await t.test(`${status} ${error}`, async () => {
+      const response = createPublicArchiveErrorResponse(kind);
+      assert.equal(response.status, status);
+      assert.equal(response.headers.get("Cache-Control"), "no-store");
+      assert.deepEqual(await response.json(), { error });
+    });
+  }
 });

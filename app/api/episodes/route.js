@@ -1,7 +1,10 @@
 import { getDatabase } from "../../../db/client";
 import { stories } from "../../../db/schema";
 import { desc, eq } from "drizzle-orm";
-import { createPublicEpisodesResponse } from "../../../lib/public-archive-response.js";
+import {
+  createPublicArchiveErrorResponse,
+  createPublicEpisodesResponse,
+} from "../../../lib/public-archive-response.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,6 +19,6 @@ export async function GET() {
     }).from(stories).where(eq(stories.status, "published")).orderBy(desc(stories.createdAt)).limit(100);
     return createPublicEpisodesResponse(rows);
   } catch {
-    return Response.json({ error: "Archive unavailable" }, { status: 503 });
+    return createPublicArchiveErrorResponse("unavailable");
   }
 }
