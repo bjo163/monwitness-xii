@@ -204,7 +204,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
-  assert.match(releaseGatesDoc, /Local checkpoint `5bae423` \(not pushed\).*134\/134 tests.*isolated clean-install production build/);
+  assert.match(releaseGatesDoc, /Current local tip `ea3ab93` \(application checkpoint `5bae423`; documentation\/test-only commits followed; not pushed\).*134-test suite passes.*isolated clean-install production build/);
   assert.match(releaseGatesDoc, /single loopback listener `127\.0\.0\.1:3199` \(PID 36756\).*current-source HTTP smoke is therefore pending/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
   assert.match(releaseGatesDoc, /Previous runtime snapshot \(superseded by commit `5bae423`\)/);
