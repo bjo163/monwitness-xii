@@ -12,6 +12,7 @@ const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.m
 const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", import.meta.url), "utf8");
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
+const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
 
 function runSmoke(env) {
   return spawnSync(process.execPath, [script], {
@@ -49,7 +50,7 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /source:\s*["']\/api\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(nextConfig, /source:\s*["']\/editor\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(editorLoginPage, /export const dynamic\s*=\s*["']force-dynamic["']/);
-  assert.match(smokeScript, /\/editor\/login",\(r\)=>r\.status===200&&r\.headers\.get\("cache-control"\)==="no-store"/);
+  assert.match(smokeScript, /\/editor\/login",\(r,b,t\)=>r\.status===200&&r\.headers\.get\("cache-control"\)==="no-store"&&hasStrictEditorCsp\(r,b,t\)/);
   assert.match(archivePage, /PUBLIC EDITORIAL INDEX/);
   assert.doesNotMatch(archivePage, /DEVELOPMENT VAULT/);
   assert.match(smokeScript, /\/episodes",\(r,b,t\)=>r\.status===200&&t\.includes\("PUBLIC EDITORIAL INDEX"\)&&t\.includes\(PUBLIC_ARCHIVE_NOTICE\)/);
@@ -58,6 +59,11 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /fonts\.googleapis\.com/);
   assert.match(nextConfig, /fonts\.gstatic\.com/);
   assert.match(smokeScript, /SMOKE_EXPECT_CSP/);
+  assert.match(proxySource, /crypto\.randomUUID\(\)/);
+  assert.match(proxySource, /script-src 'self' 'nonce-\$\{nonce\}' 'strict-dynamic'/);
+  assert.match(proxySource, /matcher:\s*["']\/editor\/:path\*["']/);
+  assert.match(smokeScript, /function hasStrictEditorCsp/);
+  assert.match(smokeScript, /inlineScripts\.every/);
   assert.doesNotMatch(nextConfig, /unsafe-eval/);
 });
 

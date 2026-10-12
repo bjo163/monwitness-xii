@@ -26,13 +26,33 @@ async function check(path,accept,method="GET"){
   process.exitCode=1;
  }
 }
+function hasStrictEditorCsp(response,_body,html){
+ const policy=response.headers.get("content-security-policy")??"";
+ const nonce=policy.match(/'nonce-([^']+)'/)?.[1];
+ if(!nonce||/script-src[^;]*'unsafe-inline'/.test(policy))return false;
+ const inlineScripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+  .filter(([,attributes,body])=>!/\bsrc=/.test(attributes)&&body.trim());
+ return inlineScripts.length>0&&inlineScripts.every(([,attributes])=>attributes.includes(`nonce="${nonce}"`)||attributes.includes(`nonce='${nonce}'`));
+}
+async function checkFreshEditorNonce(){
+ const label="/editor/login fresh per-request CSP nonce";
+ try{
+  const responses=await Promise.all([0,1].map(()=>fetch(new URL("/editor/login",parsedBase),{headers,redirect:"manual",signal:AbortSignal.timeout(12000)})));
+  const pages=await Promise.all(responses.map(async response=>({response,html:await response.text()})));
+  const nonces=pages.map(({response})=>response.headers.get("content-security-policy")?.match(/'nonce-([^']+)'/)?.[1]);
+  const valid=pages.every(({response,html})=>response.status===200&&response.headers.get("cache-control")==="no-store"&&hasStrictEditorCsp(response,null,html));
+  if(!valid||!nonces[0]||!nonces[1]||nonces[0]===nonces[1]){console.error(label+" FAILED: nonce was missing, reused, or not applied");process.exitCode=1}
+  else console.log(label+" PASSED");
+ }catch(error){console.error(label+" FAILED: "+(error instanceof Error?error.name:"request failed"));process.exitCode=1}
+}
 if(profile==="preview"){
  await check("/api/health/db",(r,b)=>r.status===200&&b?.status==="ok"&&b?.database==="connected");
  await check("/api/health",(r,b)=>r.status===200&&b?.status==="ok"&&b?.service==="moonwitness-xii");
  await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE));
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
- await check("/editor/login",(r)=>r.status===200&&r.headers.get("cache-control")==="no-store");
+ await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictEditorCsp(r,b,t));
+ await checkFreshEditorNonce();
  await check("/api/auth/get-session",(r,b)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&b===null);
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/sign-up/email",(r)=>r.status===404);
@@ -59,7 +79,8 @@ if(profile==="preview"){
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES")));
  await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("Local smoke")&&t.includes("Release gates remaining")&&!t.includes("Preview is live"));
- await check("/editor/login",(r)=>r.status===200&&r.headers.get("cache-control")==="no-store");
+ await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictEditorCsp(r,b,t));
+ await checkFreshEditorNonce();
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/sign-up/email",(r,b)=>r.status===404&&b?.error==="Authentication route unavailable");
