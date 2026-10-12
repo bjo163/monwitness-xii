@@ -129,6 +129,35 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   assert.equal(rateLimitedResponse.status, 429);
   assert.ok(Number(rateLimitedResponse.headers.get("retry-after")) >= 1);
 
+  let unavailableLimiterCalls = 0;
+  const databaseUnavailableHandler = createEditorDraftHandler({
+    authorizeEditor: async () => ({ ok: true, user: { id: "owner-db-unavailable", name: "Owner" } }),
+    reserveEditorWrite: async () => { unavailableLimiterCalls += 1; return { allowed: true }; },
+    getSql: () => null,
+  });
+  const databaseUnavailableResponse = await databaseUnavailableHandler(post("/api/editor/drafts", {
+    slug: "db-unavailable", title: "Unavailable", body: "No writes without a database",
+  }));
+  assert.equal(databaseUnavailableResponse.status, 503);
+  assert.deepEqual(await databaseUnavailableResponse.json(), { error: "Database unavailable" });
+  assert.equal(unavailableLimiterCalls, 0);
+
+  const limiterUnavailableHandler = createEditorDraftHandler({
+    authorizeEditor: async () => ({ ok: true, user: { id: "owner-limiter-unavailable", name: "Owner" } }),
+    reserveEditorWrite: async () => { throw new Error("limiter store unavailable"); },
+    getSql: () => sql,
+  });
+  const limiterUnavailableResponse = await limiterUnavailableHandler(post("/api/editor/drafts", {
+    slug: "limiter-unavailable", title: "Unavailable", body: "No writes without rate protection",
+  }));
+  assert.equal(limiterUnavailableResponse.status, 503);
+  assert.deepEqual(await limiterUnavailableResponse.json(), { error: "Write protection unavailable" });
+  const unavailableActors = await db.query(`
+    SELECT count(*)::int AS count FROM identity.users
+    WHERE external_auth_id IN ('owner-db-unavailable', 'owner-limiter-unavailable')
+  `);
+  assert.equal(unavailableActors.rows[0].count, 0);
+
   const finalCounts = await db.query(`
     SELECT (SELECT count(*)::int FROM archive.stories WHERE slug='fixture-story') AS stories,
       (SELECT count(*)::int FROM archive.story_revisions WHERE story_id=(SELECT id FROM archive.stories WHERE slug='fixture-story')) AS revisions,
