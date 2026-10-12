@@ -4,7 +4,7 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "107 / 107", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
+  { value: "108 / 108", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
   { value: "32 / 32", label: "local HTTP checks", detail: "Current checkout · Node 26.5.0", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
@@ -13,7 +13,7 @@ const checks = [
 const verified = [
   "Every HTML page receives a fresh script CSP nonce; smoke checks nonce rotation and every script tag.",
   "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
-  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, and actor-attributed audit SQL.",
+  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL.",
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
   "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
   "Runtime database routes require independently supplied host and database values to match the URL before connecting; readiness reports connectivity only.",
@@ -85,7 +85,7 @@ export default function HandoverPage() {
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
-          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout exercises the actual editor draft/revision handlers against PGlite and passes 107/107 tests, build, and loopback smoke 32/32 on Node 26.5.0. Local Auth returns a signed-out session and editor denial; database routes fail closed unless the independently configured endpoint host and database name match. Browser-console error review remains open.</p>
+          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout exercises the actual editor draft/revision handlers against PGlite and passes 108/108 tests, build, and loopback smoke 32/32 on Node 26.5.0. Editor authorization bypasses the signed session-data cookie cache so the provider role is checked on each decision. Local Auth returns a signed-out session and editor denial; database routes fail closed unless the independently configured endpoint host and database name match. Browser-console error review remains open.</p>
         </div>
       </section>
 

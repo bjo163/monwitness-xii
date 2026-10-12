@@ -1,11 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolveEditorSession } from "../lib/editor-session.js";
+import { getFreshEditorAuthSession, resolveEditorSession } from "../lib/editor-session.js";
 
 const configured = (getSession, adminUserIds = new Set()) => resolveEditorSession({
   authConfigured: true,
   getSession,
   adminUserIds,
+});
+
+test("editor session lookup bypasses the signed session-data cache", async () => {
+  let options;
+  const expected = { data: { user: { id: "owner-1", role: "admin" } }, error: null };
+  const result = await getFreshEditorAuthSession({
+    getSession: async (value) => { options = value; return expected; },
+  });
+  assert.deepEqual(options, { query: { disableCookieCache: "true" } });
+  assert.equal(result, expected);
 });
 
 test("unconfigured auth fails closed without calling the session provider", async () => {
