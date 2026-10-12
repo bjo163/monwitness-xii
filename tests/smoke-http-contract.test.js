@@ -124,8 +124,8 @@ test("local smoke checks editor write responses are not cacheable", () => {
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /126 \/ 126/);
-  assert.match(smokeScript, /t\.includes\("126 \/ 126"\)/);
+  assert.match(handoverPage, /127 \/ 127/);
+  assert.match(smokeScript, /t\.includes\("127 \/ 127"\)/);
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
@@ -194,7 +194,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Prior local checkpoint — superseded by the verification above/);
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
-  assert.match(releaseGatesDoc, /reports 126\/126, 34\/34, and all eight gates open/);
+  assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3000\/handover` reports 127\/127, 34\/34, and all eight gates open/);
   assert.match(releaseGatesDoc, /Read-only GitHub review recorded PR #4 draft\/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`/);
   assert.match(releaseGatesDoc, /local merge-tree simulation reported add\/add conflicts/);
   assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));

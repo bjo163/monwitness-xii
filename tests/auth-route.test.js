@@ -3,7 +3,10 @@ import test from "node:test";
 import { createAuthRouteHandlers } from "../lib/auth-route.js";
 
 const context = (path) => ({ params: Promise.resolve({ path }) });
-const request = (method, path) => new Request(`http://localhost:3000/api/auth/${path.join("/")}`, { method });
+const request = (method, path, headers = {}) => new Request(`http://localhost:3000/api/auth/${path.join("/")}`, {
+  method,
+  headers: method === "POST" ? { origin: "http://localhost:3000", ...headers } : headers,
+});
 
 function makeHandlers({ configured = false, handler } = {}) {
   let providerCalls = 0;
@@ -98,6 +101,23 @@ test("allowlisted Auth routes fail closed with 503 when provider configuration i
   const response = await handlers.POST(request("POST", ["sign-in", "email"]), context(["sign-in", "email"]));
   assert.equal(response.status, 503);
   assert.deepEqual(await response.json(), { error: "Authentication is not configured" });
+  assert.equal(providerCalls(), 0);
+});
+
+test("state-changing Auth requests require a same-origin browser request before provider access", async () => {
+  const { handlers, providerCalls } = makeHandlers({ configured: true });
+  for (const headers of [
+    { origin: "https://attacker.example" },
+    { origin: "null" },
+    { "sec-fetch-site": "cross-site" },
+  ]) {
+    const response = await handlers.POST(request("POST", ["sign-in", "email"], headers), context(["sign-in", "email"]));
+    assert.equal(response.status, 403);
+    assert.deepEqual(await response.json(), { error: "Cross-origin authentication request rejected" });
+  }
+  const missingOrigin = new Request("http://localhost:3000/api/auth/sign-out", { method: "POST" });
+  const response = await handlers.POST(missingOrigin, context(["sign-out"]));
+  assert.equal(response.status, 403);
   assert.equal(providerCalls(), 0);
 });
 
