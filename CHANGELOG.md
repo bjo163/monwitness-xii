@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Reproduce the exact review head from a clean snapshot
+
+- Exported tracked commit `85e63ea` into a fresh temporary directory without `.env.local`; `npm ci --no-audit --no-fund` installed 239 packages under Node 26.5.0 / npm 11.17.0.
+- The clean snapshot passed 113/113 tests, `db:check`, full `npm audit` (0 vulnerabilities), production build, `actionlint`, and CSP-required local HTTP smoke 32/32. The clean app returned the expected safe-unconfigured Auth and database responses.
+- npm reported existing peer/deprecation warnings and withheld the `core-js` and `esbuild` install scripts under its local script-approval policy. Node 22 exact-head CI remains unverified. No push or deployment; production remains NO-GO.
+
 ## 2026-10-12 — Guard the Archive provenance intake register
 
 - Added a regression test requiring exactly 15 numbered intake rows, each unmapped, pending, and `source_needed`, and requiring the release gate to link the register.
