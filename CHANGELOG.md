@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Reconcile active handover checkpoint references
+
+- Marked the older 95-test checkpoint as historical, aligned the current local URL to port 3036, and recorded the verified 98-test checkout in the handover and release tracker.
+- Validation on the current checkout: 98/98 tests on Node 26.5.0 and bundled Node 24.19.0, `db:check`, and CSP-required loopback HTTP smoke 32/32. The production server returned HTTP 200 for health and handover.
+- Documentation only; no application source, database, remote branch, or deployment was changed.
+
 ## 2026-10-12 — Validate migration journal before schema verification
 
 - Schema snapshot selection now rejects non-contiguous/out-of-order indices, duplicate or unsafe tags, non-increasing timestamps, and invalid migration metadata before reading migration SQL or querying the database.

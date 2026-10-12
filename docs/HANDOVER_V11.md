@@ -2,7 +2,7 @@
 
 **As of:** 2026-10-12 • **Owner repository:** bjo163/monwitness-xii • **Release verdict:** NO-GO for production promotion.
 
-### Current local review update — 2026-10-12 (local handover follow-up; clean Node 22 snapshot)
+### Current local review update — 2026-10-12 (checkout `f63d643`; clean Node 22 comparison snapshot)
 
 - The `/handover` dashboard now presents the local checkpoint and eight open gates in a responsive MoonWitness visual treatment. Latest browser-visible page is `http://127.0.0.1:3036/handover`; existing character/site artwork was preserved.
 - Removed the old `next.config.js` CSP containing `script-src 'unsafe-inline'`; both script and style policies now share a per-request nonce. Migrated the two remaining JSX style attributes to CSS classes. Production build and loopback smoke check directive/element nonce consistency, nonce rotation, every rendered script/style tag, absence of inline style attributes, and no page CSP on API/static responses.
