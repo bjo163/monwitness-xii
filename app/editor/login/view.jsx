@@ -1,6 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {createAuthClient} from '@neondatabase/auth/next';
+import {getEditorLoginAccessDecision} from '../../../lib/editor-login-feedback.js';
 
 const authClient=createAuthClient();
 
@@ -16,12 +17,12 @@ export default function EditorLogin(){
    const {error}=await authClient.signIn.email({email,password});
    if(error){setMessage('Sign in failed. Check your credentials or contact the project owner.');return}
    const session=await fetch('/api/editor/session',{cache:'no-store'});
-   if(!session.ok){await authClient.signOut();setMessage('This account does not have editor access.');return}
-   const data=await session.json();
-   if(!data.canEdit){await authClient.signOut();setMessage('This account does not have editor access.');return}
+   const data=session.status===200?await session.json():null;
+   const access=getEditorLoginAccessDecision({status:session.status,role:data?.role,canEdit:data?.canEdit});
+   if(!access.authorized){await authClient.signOut();setMessage(access.message);return}
    window.location.assign('/editor');
   }catch{setMessage('The authentication service is not available right now. Please try again later.')}
   finally{setBusy(false)}
  }
- return <main className="editorAuth"><a className="editorHome" href="/">← MOONWITNESS XII</a><section className="editorLoginCard"><p className="kicker">PRIVATE CREW ACCESS</p><h1>EDITOR<br/><span>GATE</span></h1><p>Sign in with an account the project owner has provisioned and assigned the administrator role.</p><form onSubmit={submit}><label>Email<input required type="email" autoComplete="username" value={email} onChange={event=>setEmail(event.target.value)}/></label><label>Password<input required type="password" autoComplete="current-password" value={password} onChange={event=>setPassword(event.target.value)}/></label><button className="button" disabled={busy}>{busy?'CHECKING…':'SIGN IN ↗'}</button>{message&&<p className="authMessage" role="alert">{message}</p>}</form><small>This app does not provide account creation. Ask the project owner about access.</small></section></main>
+ return <main className="editorAuth"><a className="editorHome" href="/">← MOONWITNESS XII</a><section className="editorLoginCard"><p className="kicker">PRIVATE CREW ACCESS</p><h1>EDITOR<br/><span>GATE</span></h1><p>Sign in with an account the project owner has provisioned.</p><aside className="note" role="note">Editor access requires an owner-provisioned account, the Neon Auth administrator role, and a matching user ID in the server-side editor allowlist.</aside><form onSubmit={submit}><label>Email<input required type="email" autoComplete="username" value={email} onChange={event=>setEmail(event.target.value)}/></label><label>Password<input required type="password" autoComplete="current-password" value={password} onChange={event=>setPassword(event.target.value)}/></label><button className="button" disabled={busy}>{busy?'CHECKING…':'SIGN IN ↗'}</button>{message&&<p className="authMessage" role="alert">{message}</p>}</form><small>This app has no account-creation form. Provider registration is managed separately and does not grant editor access; ask the project owner to provision and allowlist your account.</small></section></main>
 }

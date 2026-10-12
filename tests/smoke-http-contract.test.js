@@ -10,6 +10,7 @@ const qualityWorkflow = await readFile(new URL("../.github/workflows/quality.yml
 const dependabotConfig = await readFile(new URL("../.github/dependabot.yml", import.meta.url), "utf8");
 const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.meta.url), "utf8");
 const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", import.meta.url), "utf8");
+const editorLoginView = await readFile(new URL("../app/editor/login/view.jsx", import.meta.url), "utf8");
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
@@ -80,6 +81,15 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.doesNotMatch(nextConfig, /unsafe-eval/);
 });
 
+test("editor login explains owner provisioning and all editor-access requirements", () => {
+  assert.match(editorLoginView, /owner-provisioned account/);
+  assert.match(editorLoginView, /Neon Auth administrator role/);
+  assert.match(editorLoginView, /server-side editor allowlist/);
+  assert.match(editorLoginView, /Provider registration is managed separately/);
+  assert.match(editorLoginView, /getEditorLoginAccessDecision/);
+  assert.match(editorLoginView, /role:data\?\.role,canEdit:data\?\.canEdit/);
+});
+
 test("local and Preview smoke enforce per-route Neon Auth methods", () => {
   assert.equal((smokeScript.match(/api\/auth\/get-session",\(r\)=>r\.status===405&&r\.headers\.get\("allow"\)==="GET","POST"/g) ?? []).length, 2);
   assert.equal((smokeScript.match(/api\/auth\/sign-in\/email",\(r\)=>r\.status===405&&r\.headers\.get\("allow"\)==="POST"/g) ?? []).length, 2);
@@ -101,7 +111,7 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /84 \/ 84/);
+  assert.match(handoverPage, /88 \/ 88/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
