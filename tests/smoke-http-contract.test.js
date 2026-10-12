@@ -203,8 +203,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Prior local checkpoint — superseded by the verification above/);
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
-  assert.match(releaseGatesDoc, /existing local app at `http:\/\/127\.0\.0\.1:3199\/handover` responds 200 but still serves an older bundle showing `129 \/ 129`; the source dashboard reports 133\/133/);
-  assert.match(releaseGatesDoc, /Its sole listener is the already-running process on loopback port 3199\. No additional port or deployment was started/);
+  assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
+  assert.match(releaseGatesDoc, /Local checkpoint `5bae423` \(not pushed\).*134\/134 tests.*isolated clean-install production build/);
+  assert.match(releaseGatesDoc, /single loopback listener `127\.0\.0\.1:3199` \(PID 36756\).*current-source HTTP smoke is therefore pending/);
+  assert.match(releaseGatesDoc, /Previous runtime snapshot \(superseded by commit `5bae423`\)/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
   assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
   assert.match(implementationChecklist, /Latest local-only workflow and UX evidence \(clean source snapshot `4607504`; evidence docs at `09d4147`; tracker crosswalk at `65cc398`\)/);
