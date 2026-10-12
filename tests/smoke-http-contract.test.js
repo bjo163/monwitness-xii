@@ -159,6 +159,17 @@ test("local handover reports current local evidence and keeps production NO-GO",
     assert.ok(/^\[x\] DONE$|^\[ \] (IN PROGRESS|BLOCKED|TODO)$/.exec(columns[4]), `invalid task status: ${columns[4]}`);
   }
   assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs/);
+  const promptCrosswalk = implementationChecklist.split("### Attached master-prompt execution crosswalk")[1]?.split("## Story Archive, identity, and data integrity")[0] ?? "";
+  const promptItems = promptCrosswalk.split("|").map((cell) => cell.trim().split(" ")[0]).filter((cell) => cell.startsWith("P3-") || cell.startsWith("DoD-"));
+  assert.equal(promptItems.length, 28);
+  assert.equal(new Set(promptItems).size, 28);
+  for (let index = 1; index <= 14; index += 1) {
+    assert.ok(promptItems.includes(`P3-${String(index).padStart(2, "0")}`));
+    assert.ok(promptItems.includes(`DoD-${String(index).padStart(2, "0")}`));
+  }
+  assert.match(promptCrosswalk, /P3-07.*isolated Neon rehearsal covers only `0000`–`0002`/s);
+  assert.match(promptCrosswalk, /DoD-13.*No current exact-head Preview exists; user explicitly requested no deployment/);
+  assert.match(promptCrosswalk, /DoD-14.*Maintain NO-GO until all gates are verified and owner separately approves promotion/);
   assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
   assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
   assert.match(implementationChecklist, /^\| DB-02 \| Database \|.*\| \[ \] IN PROGRESS \|.*`0003`\/`0004`/m);
