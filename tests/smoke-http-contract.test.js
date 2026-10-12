@@ -117,10 +117,10 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /99 \/ 99/);
+  assert.match(handoverPage, /102 \/ 102/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 99\/99 tests, build, and loopback smoke 32\/32/);
+  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 102\/102 tests, build, and loopback smoke 32\/32/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
