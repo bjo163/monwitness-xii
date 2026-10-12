@@ -1,6 +1,8 @@
 # Story Archive provenance intake — V11
 
-**Status:** intake template only. All 15 development Archive entries remain `source_needed`. This register contains no source documents and closes no rights-review gate.
+**Status:** metadata mapping completed; evidence and rights intake remain pending. All 15 development Archive entries remain `source_needed`. This register contains no source documents and closes no rights-review gate.
+
+**Development metadata inventory:** read-only query of Neon project `proud-surf-04547637`, branch `br-green-butterfly-b51kp4b1` (`mw-v11-development`), database `neondb`, on 2026-10-12. Queried only `slug`, `status`, and `original_source_status` from `archive.stories`; no synopsis, manuscript, personal, or evidence content was read. All 15 rows were `published` indexes with `original_source_status=source_needed`. The stable slot-to-slug mapping below records inventory only; it is not a source/rights review. Re-run the inventory before applying this register to a changed database.
 
 ## Handling rules
 
@@ -13,25 +15,25 @@
 
 ## Per-entry checklist
 
-Complete one row for each development Archive record after retrieving its slug from an independently verified, read-only development inventory. The slug is intentionally left blank here; the public repository does not carry the live record list.
+The slug column is populated from the read-only development inventory above. Complete the remaining evidence and review columns only after retrieving materials from an owner-approved private store.
 
 | Slot | Development slug | Private evidence reference | Source owner and copy provenance | Original checksum | Permission/license and restrictions | Required credits | Privacy review | Reviewer / date | Decision | App status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 01 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 02 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 03 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 04 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 05 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 06 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 07 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 08 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 09 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 10 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 11 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 12 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 13 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 14 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
-| 15 | — | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 01 | `aetherion-blueprint` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 02 | `allah-promise-wednesday` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 03 | `destroy-fake-throne` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 04 | `dreams-of-dragons-fire` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 05 | `droplets` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 06 | `family-meets-in-the-sky` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 07 | `holiday-at-kautsar` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 08 | `jasa-forgiveness-drone-mode` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 09 | `somebody-told-me` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 10 | `ssdfreegv-ge-er-f` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 11 | `the-blow` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 12 | `they-call-it-karma` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 13 | `tick-tock-on-the-clock` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 14 | `tutorial-mahdi` | — | — | — | — | — | — | — | Pending | `source_needed` |
+| 15 | `yosan-2in1` | — | — | — | — | — | — | — | Pending | `source_needed` |
 
 ## Decision values
 
