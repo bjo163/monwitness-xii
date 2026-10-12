@@ -169,4 +169,19 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   assert.deepEqual(concurrentState.rows.map((row) => row.revision),
     concurrentStatuses[1] === 201 ? [1, 2, 3] : [1, 2]);
   assert.ok(concurrentState.rows.every((row) => row.audit_events === concurrentState.rows.length));
+
+  const conflictHandler = createEditorRevisionHandler({
+    authorizeEditor: async () => ({ ok: true, user: { id: "owner-conflict", name: "Owner" } }),
+    reserveEditorWrite: async () => ({ allowed: true }),
+    getSql: () => async () => {
+      const conflict = new Error("unique revision conflict");
+      conflict.code = "23505";
+      throw conflict;
+    },
+  });
+  const conflictResponse = await conflictHandler(post("/api/editor/revisions", {
+    slug: "concurrent-story", body: "Retry after unique conflict",
+  }));
+  assert.equal(conflictResponse.status, 409);
+  assert.deepEqual(await conflictResponse.json(), { error: "Concurrent revision; retry" });
 });
