@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-12 (Asia/Jakarta)
 **Branch at start:** `dev`; review work is on `codex/v11-release-readiness`
-**Starting commit:** `c03e977`  
+**Starting commit:** `c03e977`
 **Release decision:** **NO-GO for production promotion.**
 
 ### Plan status correction — 2026-10-12
