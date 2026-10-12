@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Editor access feedback
+
+- The sign-in page now states all access requirements: owner-provisioned account, Neon Auth `admin` role, and exact user ID in the server-side allowlist. It clarifies that provider registration is separate and alone grants no editor access.
+- Login feedback now distinguishes account authorization failures from Auth/session verification service failures; a 5xx response is no longer presented as an account denial.
+- Added tests for the decision logic and login guidance. Validation: 88/88 tests, production build, and local HTTP smoke 32/32. Production remains NO-GO.
+
 ## 2026-10-12 — Clean snapshot verification
 
 - Exported exact commit `38f1adc` with `git archive` into a temporary directory and installed the lockfile offline (`npm ci`, 239 packages; Node `v26.5.0`, npm `11.17.0`).
