@@ -7,9 +7,10 @@
 - Added regressions that invoke Drizzle against deliberately mismatched loopback-only targets. No database connection was attempted.
 - Validation: 95/95 tests, migration replay, full dependency audit (0 findings), `actionlint`, production build, and CSP-required loopback smoke 32/32. No push, deployment, or Neon access occurred; production remains NO-GO.
 
-## 2026-10-12 — Sync handover verification count (`4122ccf`)
+## 2026-10-12 — Sync handover verification count and scope gate (`7ec6752`)
 
 - Updated `/handover` to show the current 95/95 suite result and added smoke/contract assertions so the dashboard cannot silently return to the previous count.
+- Clarified that all ten prompt modules are mapped locally while full V11/V11.2 requirements coverage still awaits the missing authoritative plan.
 - Validation: 95/95 tests, production build, CSP-required loopback smoke 32/32. The local page returns 200, shows 95/95, and retains production NO-GO.
 
 ## 2026-10-12 — Editor session response minimization
