@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Revalidate editor sessions with Neon Auth
+
+- Editor authorization now calls the installed Neon Auth SDK with `disableCookieCache=true`, so every session/role decision goes to the provider instead of trusting a still-valid signed session-data cookie. The general UI session-data cache remains bounded at 60 seconds.
+- Added a regression for the SDK cache-bypass option and updated the local handover, README, smoke contract, and dashboard to report 108 tests.
+- Local verification at code commit `c546622`: 108/108 tests, `db:check`, zero findings from full `npm audit`, production build, `actionlint`, and CSP-required loopback smoke 32/32 on `127.0.0.1:3039`.
+- Live owner sign-in, authenticated writes, and role/session revocation still need provider-backed E2E evidence. Local only; no push or deployment. Production remains NO-GO.
+
 ## 2026-10-12 — Separate release gate IDs from implementation task IDs
 
 - Prefixed the eight dashboard/register release gates with `G-` so labels such as the persistent development migration `G-DB-02` cannot be confused with the completed disposable migration task `DB-02`.
