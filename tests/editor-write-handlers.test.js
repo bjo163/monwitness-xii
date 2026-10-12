@@ -264,10 +264,16 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   authorization = { ok: true, user: { id: "owner-rate-limited", name: "Owner" } };
   const createRateLimitedDraft = (slug) => draftHandler(post("/api/editor/drafts", { slug, title: slug, body: "Rate limit fixture" }));
   assert.equal((await createRateLimitedDraft("rate-story-one")).status, 201);
-  assert.equal((await createRateLimitedDraft("rate-story-two")).status, 201);
-  const rateLimitedResponse = await createRateLimitedDraft("rate-story-three");
+  const rateLimitedRevision = await revisionHandler(post("/api/editor/revisions", {
+    slug: "rate-story-one", body: "Second shared-quota write",
+  }));
+  assert.equal(rateLimitedRevision.status, 201);
+  const rateLimitedResponse = await createRateLimitedDraft("rate-story-two");
   assert.equal(rateLimitedResponse.status, 429);
   assert.ok(Number(rateLimitedResponse.headers.get("retry-after")) >= 1);
+  assert.equal(rateLimitedResponse.headers.get("cache-control"), "no-store");
+  const rejectedRateLimitedDraft = await db.query("SELECT count(*)::int AS count FROM archive.stories WHERE slug='rate-story-two'");
+  assert.equal(rejectedRateLimitedDraft.rows[0].count, 0);
 
   let unavailableLimiterCalls = 0;
   const databaseUnavailableHandler = createEditorDraftHandler({

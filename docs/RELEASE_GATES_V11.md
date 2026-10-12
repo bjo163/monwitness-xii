@@ -3,6 +3,8 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
+**Editor write quota response hardening:** draft and revision mutations continue to share the per-actor database quota. A 429 now returns `Retry-After` and `Cache-Control: no-store`; the PGlite handler regression verifies a draft consumes quota used by a later revision request and that a denied follow-up draft creates no row. Handler regression passed 4/4; full local suite passed 125/125 on Node 26.5.0. This does not evidence provider-level failed-login throttling or live database behavior; G-AUTH-02 remains open.
+
 ### Fresh exact-HEAD clean reproduction — `8a808b507c9b91a7dbb8206bbccb7a0022881a2c`
 
 Exported the current tracked commit using `git archive` into a fresh directory without `.env` files. `npm ci --no-audit --no-fund` installed 239 packages on Node 26.5.0 / npm 11.17.0. The exact snapshot passed 125/125 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint`, production build, and CSP-required local HTTP smoke 34/34 at loopback port 3056. Auth and DB endpoints returned their designed unconfigured 503 responses. npm repeated Neon Auth UI peer/deprecation warnings and withheld the `core-js` and `esbuild` install scripts. This provides reproducible local evidence for this commit; it does not verify remote CI, Preview, a persistent database, or owner-auth flows. No deployment, push, or persistent Neon operation occurred.

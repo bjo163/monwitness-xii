@@ -13,7 +13,7 @@ const checks = [
 const verified = [
   "Every HTML page receives a fresh script CSP nonce; smoke checks nonce rotation and every script tag.",
   "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
-  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL.",
+  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL; draft and revision writes share a database quota and rate-limit replies are no-store.",
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
   "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
   "Runtime database routes require independently supplied host and database values to match the URL before connecting; readiness reports connectivity only.",
