@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
 import { hasMigrationLedgerDrift } from "../lib/migration-ledger-verification.js";
+import { getSchemaSupplementalDrift } from "../lib/schema-supplemental-drift.js";
 import { selectSchemaSnapshot } from "../lib/schema-snapshot-selection.js";
 import { getDatabaseTargetError } from "../lib/database-target.js";
 
@@ -231,6 +232,42 @@ const unexpectedUniqueConstraints = actualUniqueConstraintShapes.filter((constra
   !expectedUniqueSignatures.has(uniqueConstraintSignature(constraint))
   && !equivalentUniqueConstraintSignatures.has(uniqueConstraintSignature(constraint)));
 
+const actualTableSecurity = await db`
+  SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name,
+    table_row.relrowsecurity AS row_security_enabled, table_row.relforcerowsecurity AS force_row_security
+  FROM pg_class AS table_row
+  JOIN pg_namespace AS schema_row ON schema_row.oid = table_row.relnamespace
+  WHERE table_row.relkind IN ('r', 'p') AND schema_row.nspname IN (${db.unsafe(schemaSql)})
+`;
+const actualCheckConstraints = await db`
+  SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name,
+    constraint_row.conname AS constraint_name, pg_get_constraintdef(constraint_row.oid) AS definition
+  FROM pg_constraint AS constraint_row
+  JOIN pg_class AS table_row ON table_row.oid = constraint_row.conrelid
+  JOIN pg_namespace AS schema_row ON schema_row.oid = table_row.relnamespace
+  WHERE constraint_row.contype = 'c' AND schema_row.nspname IN (${db.unsafe(schemaSql)})
+`;
+const actualPolicies = await db`
+  SELECT schemaname AS schema_name, tablename AS table_name, policyname AS policy_name,
+    permissive, roles, cmd, qual AS using_expression, with_check AS check_expression
+  FROM pg_policies WHERE schemaname IN (${db.unsafe(schemaSql)})
+`;
+const actualTriggers = await db`
+  SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name,
+    trigger_row.tgname AS trigger_name
+  FROM pg_trigger AS trigger_row
+  JOIN pg_class AS table_row ON table_row.oid = trigger_row.tgrelid
+  JOIN pg_namespace AS schema_row ON schema_row.oid = table_row.relnamespace
+  WHERE NOT trigger_row.tgisinternal AND schema_row.nspname IN (${db.unsafe(schemaSql)})
+`;
+const supplementalDrift = getSchemaSupplementalDrift({
+  expectedTables,
+  actualTableSecurity,
+  actualCheckConstraints,
+  actualPolicies,
+  actualTriggers,
+});
+
 const migrationLedger = await db`SELECT to_regclass('drizzle.__drizzle_migrations') IS NOT NULL AS present`;
 const migrationLedgerPresent = migrationLedger[0].present;
 const actualMigrationEntries = migrationLedgerPresent
@@ -272,6 +309,7 @@ const result = {
   actualUniqueConstraints: actualUniqueConstraintShapes.length,
   missingUniqueConstraints,
   unexpectedUniqueConstraints,
+  ...supplementalDrift,
   migrationLedgerPresent,
   expectedMigrationEntries: baselineReconciliation ? 0 : expectedMigrationEntries.length,
   actualMigrationEntries: actualMigrationEntries.length,

@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { PGlite } from "@electric-sql/pglite";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
 import { hasMigrationLedgerDrift } from "../lib/migration-ledger-verification.js";
+import { getSchemaSupplementalDrift } from "../lib/schema-supplemental-drift.js";
 
 const verifier = await readFile(new URL("../scripts/verify-schema.mjs", import.meta.url), "utf8");
 const migrationJournal = JSON.parse(await readFile(new URL("../drizzle/meta/_journal.json", import.meta.url), "utf8"));
@@ -25,6 +27,12 @@ test("schema verifier covers table, column, default, key, and index drift", () =
   assert.match(verifier, /constraint_row\.contype IN \('u', 'p'\)/);
   assert.match(verifier, /pg_index/);
   assert.match(verifier, /equivalentUniqueIndexConstraints/);
+  assert.match(verifier, /relrowsecurity AS row_security_enabled/);
+  assert.match(verifier, /relforcerowsecurity AS force_row_security/);
+  assert.match(verifier, /constraint_row\.contype = 'c'/);
+  assert.match(verifier, /FROM pg_policies/);
+  assert.match(verifier, /FROM pg_trigger/);
+  assert.match(verifier, /getSchemaSupplementalDrift/);
   assert.match(verifier, /hasSchemaDrift\(result, \{ requireLedger: !baselineReconciliation \}\)/);
   assert.match(verifier, /createHash\("sha256"\)/);
   assert.match(verifier, /SELECT hash, created_at FROM drizzle\.__drizzle_migrations ORDER BY created_at/);
@@ -78,7 +86,7 @@ test("schema verification rejects malformed or unsafe migration journal order be
   }), /journal has invalid version or dialect metadata/);
 });
 
-test("schema verification fails on a missing migration ledger and any inventory drift", () => {
+test("schema verification fails on a missing migration ledger and any inventory drift", async () => {
   const clean = { migrationLedgerPresent: true };
   assert.equal(hasSchemaDrift(clean), false);
   assert.equal(hasSchemaDrift({ ...clean, migrationLedgerPresent: false }), true);
@@ -86,6 +94,97 @@ test("schema verification fails on a missing migration ledger and any inventory 
   assert.equal(hasSchemaDrift({ ...clean, migrationLedgerPresent: false, missingForeignKeys: [{}] }, { requireLedger: false }), true);
   assert.equal(hasSchemaDrift({ ...clean, missingForeignKeys: [{}] }), true);
   assert.equal(hasSchemaDrift({ ...clean, mismatchedDefaults: [{}] }), true);
+  assert.equal(hasSchemaDrift({ ...clean, mismatchedRowSecurity: [{}] }), true);
+  assert.equal(hasSchemaDrift({ ...clean, unexpectedCheckConstraints: [{}] }), true);
+  assert.equal(hasSchemaDrift({ ...clean, unexpectedPolicies: [{}] }), true);
+  assert.equal(hasSchemaDrift({ ...clean, unexpectedTriggers: [{}] }), true);
+
+  const snapshot = JSON.parse(await readFile(new URL("../drizzle/meta/0002_snapshot.json", import.meta.url), "utf8"));
+  const expectedTables = { "archive.stories": snapshot.tables["archive.stories"] };
+  const db = new PGlite();
+  try {
+    await db.exec("CREATE SCHEMA archive; CREATE TABLE archive.stories (id integer)");
+    const inspect = async () => {
+      const actualTableSecurity = await db.query(`
+        SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name,
+          table_row.relrowsecurity AS row_security_enabled, table_row.relforcerowsecurity AS force_row_security
+        FROM pg_class AS table_row JOIN pg_namespace AS schema_row ON schema_row.oid=table_row.relnamespace
+        WHERE table_row.relkind IN ('r','p') AND schema_row.nspname='archive'
+      `);
+      const actualCheckConstraints = await db.query(`
+        SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name,
+          constraint_row.conname AS constraint_name, pg_get_constraintdef(constraint_row.oid) AS definition
+        FROM pg_constraint AS constraint_row JOIN pg_class AS table_row ON table_row.oid=constraint_row.conrelid
+        JOIN pg_namespace AS schema_row ON schema_row.oid=table_row.relnamespace
+        WHERE constraint_row.contype='c' AND schema_row.nspname='archive'
+      `);
+      const actualPolicies = await db.query(`
+        SELECT schemaname AS schema_name, tablename AS table_name, policyname AS policy_name,
+          permissive, roles, cmd, qual AS using_expression, with_check AS check_expression
+        FROM pg_policies WHERE schemaname='archive'
+      `);
+      const actualTriggers = await db.query(`
+        SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name, trigger_row.tgname AS trigger_name
+        FROM pg_trigger AS trigger_row JOIN pg_class AS table_row ON table_row.oid=trigger_row.tgrelid
+        JOIN pg_namespace AS schema_row ON schema_row.oid=table_row.relnamespace
+        WHERE NOT trigger_row.tgisinternal AND schema_row.nspname='archive'
+      `);
+      return getSchemaSupplementalDrift({
+        expectedTables,
+        actualTableSecurity: actualTableSecurity.rows,
+        actualCheckConstraints: actualCheckConstraints.rows,
+        actualPolicies: actualPolicies.rows,
+        actualTriggers: actualTriggers.rows,
+      });
+    };
+    const cleanDrift = await inspect();
+    assert.deepEqual(cleanDrift, {
+      mismatchedRowSecurity: [],
+      forcedRowSecurity: [],
+      unexpectedCheckConstraints: [],
+      unverifiedExpectedCheckConstraints: [],
+      unexpectedPolicies: [],
+      unverifiedExpectedPolicies: [],
+      unexpectedTriggers: [],
+    });
+    const futurePolicySchema = {
+      "archive.stories": {
+        ...expectedTables["archive.stories"],
+        checkConstraints: { stories_status_check: { name: "stories_status_check" } },
+        policies: { published_only: { name: "published_only" } },
+      },
+    };
+    const unsupportedExpected = getSchemaSupplementalDrift({
+      expectedTables: futurePolicySchema,
+      actualTableSecurity: [],
+      actualCheckConstraints: [],
+      actualPolicies: [],
+      actualTriggers: [],
+    });
+    assert.equal(unsupportedExpected.unverifiedExpectedCheckConstraints.length, 1);
+    assert.equal(unsupportedExpected.unverifiedExpectedPolicies.length, 1);
+    assert.equal(hasSchemaDrift({ ...clean, ...unsupportedExpected }), true);
+
+    await db.exec(`
+      ALTER TABLE archive.stories ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE archive.stories FORCE ROW LEVEL SECURITY;
+      ALTER TABLE archive.stories ADD CONSTRAINT verifier_test_check CHECK (id > 0);
+      CREATE POLICY verifier_test_policy ON archive.stories FOR SELECT USING (id > 0);
+      CREATE FUNCTION archive.verifier_test_trigger() RETURNS trigger LANGUAGE plpgsql
+        AS $function$ BEGIN RETURN NEW; END $function$;
+      CREATE TRIGGER verifier_test_trigger BEFORE INSERT ON archive.stories
+        FOR EACH ROW EXECUTE FUNCTION archive.verifier_test_trigger();
+    `);
+    const drift = await inspect();
+    assert.deepEqual(drift.mismatchedRowSecurity, [{ table: "archive.stories", expected: false, actual: true }]);
+    assert.deepEqual(drift.forcedRowSecurity, ["archive.stories"]);
+    assert.equal(drift.unexpectedCheckConstraints.length, 1);
+    assert.equal(drift.unexpectedPolicies.length, 1);
+    assert.equal(drift.unexpectedTriggers.length, 1);
+    assert.equal(hasSchemaDrift({ ...clean, ...drift }), true);
+  } finally {
+    await db.close();
+  }
 });
 
 test("migration ledger verification requires every journal hash and timestamp in order", () => {
