@@ -18,6 +18,27 @@ test("editor session lookup bypasses the signed session-data cache", async () =>
   assert.equal(result, expected);
 });
 
+test("editor authorization observes a provider role change on the next lookup", async () => {
+  let role = "admin";
+  const auth = {
+    getSession: async (options) => {
+      assert.deepEqual(options, { query: { disableCookieCache: "true" } });
+      return { data: { user: { id: "owner-1", role } }, error: null };
+    },
+  };
+  const getSession = () => getFreshEditorAuthSession(auth);
+  const adminSession = await resolveEditorSession({
+    authConfigured: true, getSession, adminUserIds: new Set(["owner-1"]),
+  });
+  assert.equal(adminSession.isEditorAdmin, true);
+
+  role = "user";
+  const revokedSession = await resolveEditorSession({
+    authConfigured: true, getSession, adminUserIds: new Set(["owner-1"]),
+  });
+  assert.equal(revokedSession.isEditorAdmin, false);
+});
+
 test("unconfigured auth fails closed without calling the session provider", async () => {
   let providerCalls = 0;
   const result = await resolveEditorSession({
