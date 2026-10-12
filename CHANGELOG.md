@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-12 — Guard direct Drizzle database commands (`fdb8f1d`)
+
+- Moved database target validation into a shared helper used by the npm migration/Studio wrappers and the repository's default Drizzle config. Direct `migrate`, `studio`, and `introspect`/`pull` commands now require a URL, separately supplied expected host/database, and operation-specific confirmation.
+- Rejected command-line credential overrides and disabled direct `drizzle-kit push`; schema changes must use reviewed SQL migrations.
+- Added regressions that invoke Drizzle against deliberately mismatched loopback-only targets. No database connection was attempted.
+- Validation: 95/95 tests, migration replay, full dependency audit (0 findings), `actionlint`, production build, and CSP-required loopback smoke 32/32. No push, deployment, or Neon access occurred; production remains NO-GO.
+
+## 2026-10-12 — Sync handover verification count (`4122ccf`)
+
+- Updated `/handover` to show the current 95/95 suite result and added smoke/contract assertions so the dashboard cannot silently return to the previous count.
+- Validation: 95/95 tests, production build, CSP-required loopback smoke 32/32. The local page returns 200, shows 95/95, and retains production NO-GO.
+
 ## 2026-10-12 — Editor session response minimization
 
 - The editor session API now sets `Cache-Control: no-store` on signed-out, authenticated, and unavailable responses. It returns only authentication state, normalized role, and editor eligibility; it does not serialize the session, user ID, email, or tokens.
