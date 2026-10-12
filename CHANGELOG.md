@@ -2,6 +2,12 @@
 
 This file records user-visible and operational changes for MoonWitness XII.
 
+## 2026-10-12 — Editor script CSP nonce
+
+- Added a Next.js 16 `proxy.js` boundary for editor pages that generates a unique nonce per request and sets an editor-only strict CSP. Public pages retain their existing rendering and CSP behavior.
+- Extended local/Preview smoke to verify the editor login's CSP nonce matches every script tag and changes between requests. The smoke passes 31/31 locally; `npm test` 79/79, migration replay, full audit (0 vulnerabilities), workflow lint, and production build pass across `5d06fdd` + `ed7a1c3`.
+- No push, deployment, or Neon access occurred. The Preview and current remote CI do not include this change; production remains NO-GO.
+
 ## 2026-10-12 — Grand Plan source inventory
 
 - Rechecked the attached master prompt, local Codex attachments, and nearby project folders for the missing authoritative Grand Master Plan V11/V11.2 files. None were found.
