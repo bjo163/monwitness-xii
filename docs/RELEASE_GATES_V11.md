@@ -3,9 +3,9 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
-### Current local verification — code commit `ccf11d6`
+### Current local verification — code commit `3252442`
 
-The current local checkout passes 125/125 tests, `db:check`, full `npm audit` (0 vulnerabilities), production build, `actionlint`, and CSP-required HTTP smoke 34/34 on Node 26.5.0. The updated dashboard is running locally at `http://127.0.0.1:3051/handover`; all eight gates remain open. A separate fresh tracked-tree snapshot at `162693b` passed the full workflow on Node 26.5.0 / npm 11.17.0 but predates the latest auth-policy wording. Node 22.23.3 was fetched to the local npm cache and verified against clean tracked commit 9d054ff below. No deployment, push, or persistent Neon operation occurred.
+The current local checkout passes 125/125 tests, `db:check`, full `npm audit` (0 vulnerabilities), production build, `actionlint`, and CSP-required HTTP smoke 34/34 on Node 26.5.0. The updated dashboard is running locally at `http://127.0.0.1:3053/handover`; all eight gates remain open. A separate fresh tracked-tree snapshot at `162693b` passed the full workflow on Node 26.5.0 / npm 11.17.0 but predates the latest auth-policy wording. Node 22.23.3 was fetched to the local npm cache and verified against clean tracked commit `9d054ff` below. No deployment, push, or persistent Neon operation occurred.
 
 **Node 22 workflow-sequence reproduction:** exported exact tracked commit `9d054ff` with `git archive` to a fresh directory without `.env` files; `npm ci --no-audit --no-fund` installed 239 packages. Node `22.23.3` / npm `11.17.0` passed 125/125 tests, `db:check`, full audit (0 vulnerabilities), production build, `actionlint`, and production HTTP smoke 34/34 at loopback port 3052. DB/Auth routes returned designed unconfigured responses (503); no credentials were copied. npm repeated the known Neon Auth transitive UI peer warnings. This verifies the local workflow sequence on Node 22, not GitHub Actions or provider/Preview behavior.
 
