@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Clean snapshot verification
+
+- Exported exact commit `38f1adc` with `git archive` into a temporary directory and installed the lockfile offline (`npm ci`, 239 packages; Node `v26.5.0`, npm `11.17.0`).
+- The clean snapshot passed 84/84 tests, `db:check`, production build, and CSP-required HTTP smoke 32/32. The no-secret snapshot correctly returned safe-unconfigured Auth and database responses.
+- npm reported peer/deprecation warnings and withheld `core-js` / `esbuild` install scripts under local script-approval policy. This is local Node 26 evidence; remote CI remains on Node 22 and has not run for this commit.
+
 ## 2026-10-12 — Migration preflight
 
 - Routed `npm run db:migrate` and `npm run db:studio` through a local fail-closed wrapper that requires a PostgreSQL URL, independently supplied expected host/database, and operation-specific confirmation before invoking Drizzle. Target errors do not reveal DSN values.

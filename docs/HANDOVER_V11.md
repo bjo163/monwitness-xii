@@ -2,12 +2,13 @@
 
 **As of:** 2026-10-12 • **Owner repository:** bjo163/monwitness-xii • **Release verdict:** NO-GO for production promotion.
 
-### Current local review update — 2026-10-12 (latest local code commit `4e176f3`)
+### Current local review update — 2026-10-12 (clean snapshot commit `38f1adc`)
 
 - The `/handover` dashboard now presents the local checkpoint and eight open gates in a responsive MoonWitness visual treatment. Latest browser-visible page is `http://127.0.0.1:3020/handover`; existing character/site artwork was preserved.
 - Removed the old `next.config.js` CSP containing `script-src 'unsafe-inline'`; both script and style policies now share a per-request nonce. Migrated the two remaining JSX style attributes to CSS classes. Production build and loopback smoke check directive/element nonce consistency, nonce rotation, every rendered script/style tag, absence of inline style attributes, and no page CSP on API/static responses.
 - The `db:migrate` and `db:studio` scripts now require independently supplied expected host/database values and operation-specific confirmation before invoking Drizzle. Tests cover missing URL/target, mismatched target, missing confirmation, and that both npm commands route through the wrapper. A local no-URL migration invocation stopped before Drizzle without opening a connection.
 - Current local verification: 84/84 tests, `db:check`, full dependency audit (0 vulnerabilities), `actionlint`, production build, smoke 32/32, and diff check pass. The rebuilt handover reports 84/84 and keeps production NO-GO. Browser console has not been inspected; no remote CI, Preview, push, deployment, or persistent Neon access occurred.
+- A fresh `git archive` of `38f1adc` installed offline from the lockfile (239 packages) and passed 84/84 tests, `db:check`, production build, and CSP-required smoke 32/32 on Node `v26.5.0` / npm `11.17.0`. No `.env.local` was included; Auth and database routes correctly returned safe unconfigured responses. npm emitted peer/deprecation warnings and withheld `core-js` and `esbuild` install scripts under local policy. This does not replace the workflow's Node 22 or remote CI evidence.
 - Local `.env.local` presence check found Neon Auth base URL and cookie secret configured, but no `DATABASE_URL` and no `EDITOR_ADMIN_USER_IDS`. The secret values were not read or printed. This checkout therefore cannot run database-backed authenticated editor E2E; owner provisioning and target verification remain required.
 - Production remains NO-GO. Auth onboarding/write E2E, persistent development migration, representative Neon restore and RPO/RTO, requested backup retention, all 15 source-needed records, independent PR review/integration, and the authoritative V11/V11.2 source remain open.
 
