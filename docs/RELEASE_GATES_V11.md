@@ -3,6 +3,10 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
+### Fresh exact-HEAD clean reproduction — `8a808b507c9b91a7dbb8206bbccb7a0022881a2c`
+
+Exported the current tracked commit using `git archive` into a fresh directory without `.env` files. `npm ci --no-audit --no-fund` installed 239 packages on Node 26.5.0 / npm 11.17.0. The exact snapshot passed 125/125 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint`, production build, and CSP-required local HTTP smoke 34/34 at loopback port 3056. Auth and DB endpoints returned their designed unconfigured 503 responses. npm repeated Neon Auth UI peer/deprecation warnings and withheld the `core-js` and `esbuild` install scripts. This provides reproducible local evidence for this commit; it does not verify remote CI, Preview, a persistent database, or owner-auth flows. No deployment, push, or persistent Neon operation occurred.
+
 ### Current local verification — application commit `3252442`; recovery fixture `18c63d3`
 
 Current source, including the expanded synthetic recovery fixture, passes 125/125 tests, db:check, full npm audit (0 vulnerabilities), production build, actionlint, and CSP-required HTTP smoke 34/34 on Node 26.5.0. The dashboard is running locally at http://127.0.0.1:3054/handover; all eight gates remain open. Node 22.23.3 passed a full recheck after all tracked diffs through 18c63d3 were synchronized onto the clean 239-package snapshot installed from 9d054ff; it was not a fresh install of 18c63d3. No deployment, push, or persistent Neon operation occurred.

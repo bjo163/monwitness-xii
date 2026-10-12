@@ -124,10 +124,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(smokeScript, /t\.includes\("125 \/ 125"\)/);
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
-  assert.match(handoverPage, /earlier clean Node 22\.23\.3 snapshot at commit 6a88a4b passed install, 95\/95 tests/);
-  assert.match(handoverPage, /Prior local verification at commit 81f8fe8 passes 125\/125 tests and CSP-required smoke 34\/34 on Node 26\.5\.0/);
-  assert.match(handoverPage, /fresh exact tracked-tree snapshot at commit 9d054ff passed on Node 22\.23\.3 \/ npm 11\.17\.0/);
-  assert.match(handoverPage, /A separate clean tracked-tree snapshot at commit 162693b/);
+  assert.match(handoverPage, /Earlier clean Node 22\.23\.3 snapshots at commits 6a88a4b and 9d054ff passed their recorded workflow checks/);
+  assert.match(handoverPage, /Fresh exact tracked-tree reproduction at commit 8a808b5 passed 125\/125 tests, migration replay, full npm audit \(0 vulnerabilities\), actionlint, production build, and CSP-required loopback smoke 34\/34 on Node 26\.5\.0 \/ npm 11\.17\.0 after a clean 239-package install/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
   assert.match(handoverPage, /effective failed-login throttling is unverified\. This SDK cannot configure a provider-wide limiter/);
