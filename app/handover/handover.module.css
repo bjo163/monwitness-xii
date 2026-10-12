@@ -3,3 +3,22 @@
 
 /* Namespace prefix keeps release-gate IDs distinct from implementation task IDs. */
 .gateId{font-size:8px;letter-spacing:.35px}
+
+@media(max-width:620px){
+  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;}
+  .wordmark{min-width:0;letter-spacing:.7px;}
+  .localBadge{gap:6px;padding:8px 9px;font-size:8px;letter-spacing:.8px;}
+  .nav{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;}
+  .nav a{min-width:0;text-align:center;font-size:7px;letter-spacing:.55px;white-space:nowrap;}
+  .hero{grid-template-columns:minmax(0,1fr);padding:50px 22px 60px;}
+  .heroCopy,.statusCard{min-width:0;}
+  .hero h1{font-size:clamp(58px,18vw,104px);letter-spacing:-4px;}
+  .intro{max-width:100%;overflow-wrap:anywhere;}
+  .heroLinks{display:grid;grid-template-columns:minmax(0,1fr);}
+  .heroLinks>a{width:100%;max-width:100%;justify-content:space-between;}
+  .statusCard{width:100%;max-width:100%;margin:0;padding:18px 16px;transform:none;}
+  .statusTop{gap:10px;letter-spacing:1px;}
+  .statusFoot{min-width:0;}
+  .statusFoot code,.statusFoot b{min-width:0;overflow-wrap:anywhere;text-align:right;}
+  .sunburst{right:0;max-width:100%;overflow:hidden;}
+}

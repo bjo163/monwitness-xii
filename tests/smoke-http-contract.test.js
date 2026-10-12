@@ -13,6 +13,7 @@ const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", i
 const editorLoginView = await readFile(new URL("../app/editor/login/view.jsx", import.meta.url), "utf8");
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
+const handoverStyles = await readFile(new URL("../app/handover/handover.module.css", import.meta.url), "utf8");
 const handoverDoc = await readFile(new URL("../docs/HANDOVER_V11.md", import.meta.url), "utf8");
 const implementationChecklist = await readFile(new URL("../docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md", import.meta.url), "utf8");
 const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
@@ -130,6 +131,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
   assert.match(handoverPage, /Schema verification detects untracked RLS, CHECK, policy, and trigger drift/);
+  assert.match(handoverStyles, /@media\(max-width:620px\)\{[\s\S]*?\.nav\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(handoverStyles, /\.heroLinks\{display:grid;grid-template-columns:minmax\(0,1fr\);\}/);
+  assert.match(handoverStyles, /\.statusCard\{width:100%;max-width:100%;margin:0;padding:18px 16px;transform:none;\}/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
   assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
   assert.match(smokeScript, /let smokeChecksTotal=0/);
