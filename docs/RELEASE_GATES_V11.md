@@ -14,7 +14,7 @@ These `G-`-prefixed IDs and open states are the source register rendered by `/ha
 | G-AUTH-02 | Identity policy | OPEN | Owner-approved registration and credential-attempt policy, plus MFA-capable production identity evidence. |
 | G-DB-02 | Persistent development migration | OPEN | Independently verified app database target, baseline/ledger reconciliation, reviewed migration apply, schema and rollback checks. |
 | G-DB-03 | Recoverable backups | OPEN | Approved retention/RPO/RTO plan and representative-data restore with verified cutover/rollback. Daily snapshots with 30-day retention remain unavailable on the selected Free plan. |
-| G-ARC-01 | Archive sources and rights | OPEN | Originals, credits, and rights evidence reviewed for all 15 entries; retain `source_needed` until then. |
+| G-ARC-01 | Archive sources and rights | OPEN | Map all 15 rows in the [provenance intake register](./ARCHIVE_PROVENANCE_INTAKE_V11.md) to actual development slugs; review original evidence, credits, privacy, and defined reuse rights. Keep `source_needed` until an authorized per-entry decision. |
 | G-REL-01 | Independent release review | OPEN | Independent review and integration of PR #4, conflict recheck of PR #2, and exact-head CI evidence. |
 | G-PLAN-01 | Full V11 traceability | OPEN | Authoritative V11/V11.2 plan supplied and each actual requirement mapped to implementation and verification evidence. |
 

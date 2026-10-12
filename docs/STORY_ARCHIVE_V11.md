@@ -32,6 +32,8 @@ The 15 current public rows are editorial indexes only; their original sources ar
 - privacy review for witness names, contact details, and identifying metadata;
 - storage location and access policy for the original, separate from the public editorial summary.
 
+Use the [V11 provenance intake register](./ARCHIVE_PROVENANCE_INTAKE_V11.md) to track each of the 15 records without placing manuscripts or private evidence in this repository. It is an empty intake template, not proof of a rights review; all entries remain `source_needed` until an authorized reviewer records a decision.
+
 Do not infer permission from possession or from a public listing. Keep missing or uncertain fields marked `source_needed` / unverified; do not make originals, evidence, or private witness material public until rights and privacy review is recorded. **Current direct database evidence (2026-10-12, development branch `br-green-butterfly-b51kp4b1`):** 15/15 rows are `published` and `original_source_status='source_needed'`; `archive.media_assets`, `research.evidence`, and `archive.story_revisions` contain zero rows. `archive.stories` does not have dedicated `editorial_index_only` or `source_verified` columns, and those keys are not present in the inspected row metadata; do not report them as verified database flags. No manuscript/source material was read. The owner explicitly confirmed all 15 entries stay source-needed until originals, credits, and rights evidence are supplied.
 
 ## Protected draft API

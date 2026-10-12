@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Add Story Archive provenance intake register
+
+- Added a 15-slot intake template for mapping verified development slugs to private evidence references, source provenance, checksums, rights, credits, privacy review, and reviewer decisions.
+- Kept every slot pending and `source_needed`; updated CNT-01 to IN PROGRESS. The register stores no manuscripts or private evidence and does not claim any source or rights review.
+- Local documentation only; no database, push, or deployment action. G-ARC-01 and production remain NO-GO.
+
 ## 2026-10-12 — Share scoped queries across Story Archive pages
 
 - Moved Archive list/detail page queries to shared published-only helpers with an explicit allowlist of the five editorial index fields plus `originalSourceStatus` for its visible provenance label.
