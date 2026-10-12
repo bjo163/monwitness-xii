@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { getDrizzleCliGuardError } from "../lib/database-target.js";
 
 const script = fileURLToPath(new URL("../scripts/drizzle-safe.mjs", import.meta.url));
+const drizzleCli = fileURLToPath(new URL("../node_modules/drizzle-kit/bin.cjs", import.meta.url));
 const safeEnvironment = {
   ...process.env,
   DATABASE_URL: "postgresql://owner:do-not-print@ep-dev.example.neon.tech/neondb?sslmode=require",
@@ -54,6 +56,68 @@ test("migration command requires explicit operator confirmation after target val
   assert.equal(result.status, 2);
   assert.match(result.stderr, /CONFIRM_DATABASE_MIGRATION=YES/);
   assert.doesNotMatch(result.stderr, /do-not-print|ep-dev|neondb/);
+});
+
+test("direct Drizzle CLI migration also rejects an unapproved target before connecting", () => {
+  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:1/moonwitness_local";
+  const result = spawnSync(process.execPath, [drizzleCli, "migrate"], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      DATABASE_URL: localOnlyUrl,
+      EXPECTED_DATABASE_HOST: "unrelated.invalid",
+      EXPECTED_DATABASE_NAME: "moonwitness_local",
+      CONFIRM_DATABASE_MIGRATION: "YES",
+    },
+    timeout: 5000,
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /DATABASE_URL host does not match EXPECTED_DATABASE_HOST; Drizzle migrate not run/);
+  assert.doesNotMatch(result.stderr, /local-only|do-not-print|127\.0\.0\.1|moonwitness_local/);
+});
+
+test("direct Drizzle introspection rejects an unapproved target before connecting", () => {
+  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:1/moonwitness_local";
+  const result = spawnSync(process.execPath, [drizzleCli, "introspect"], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      DATABASE_URL: localOnlyUrl,
+      EXPECTED_DATABASE_HOST: "unrelated.invalid",
+      EXPECTED_DATABASE_NAME: "moonwitness_local",
+      CONFIRM_DATABASE_INTROSPECTION: "YES",
+    },
+    timeout: 5000,
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /DATABASE_URL host does not match EXPECTED_DATABASE_HOST; Drizzle introspect not run/);
+  assert.doesNotMatch(result.stderr, /local-only|do-not-print|127\.0\.0\.1|moonwitness_local/);
+});
+
+test("Drizzle config rejects command-line database credential overrides", () => {
+  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:1/moonwitness_local";
+  const error = getDrizzleCliGuardError({
+    args: ["migrate", "--url=postgresql://override:do-not-print@127.0.0.1:1/other_database"],
+    env: {
+      DATABASE_URL: localOnlyUrl,
+      EXPECTED_DATABASE_HOST: "127.0.0.1",
+      EXPECTED_DATABASE_NAME: "moonwitness_local",
+      CONFIRM_DATABASE_MIGRATION: "YES",
+    },
+  });
+  assert.match(error, /Drizzle CLI connection overrides are disabled/);
+  assert.doesNotMatch(error, /local-only|override:|do-not-print|127\.0\.0\.1|moonwitness_local|other_database/);
+});
+
+test("direct schema push is disabled in favor of reviewed SQL migrations", () => {
+  const result = spawnSync(process.execPath, [drizzleCli, "push"], {
+    encoding: "utf8",
+    env: { ...process.env, DATABASE_URL: "" },
+    timeout: 5000,
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Direct drizzle-kit push is disabled/);
+  assert.doesNotMatch(result.stderr, /DATABASE_URL|do-not-print|postgresql:\/\//);
 });
 
 test("database studio requires its own explicit confirmation", () => {
