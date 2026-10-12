@@ -2,6 +2,13 @@
 
 This file records user-visible and operational changes for MoonWitness XII.
 
+## 2026-10-12 — Local review updates
+
+- Updated local visual links and release handover evidence to the current review app on port 3015; local-only direction remains in force, with no push or deployment.
+- Recorded Node 22 clean-snapshot verification and the isolated Neon `0001` constraint rehearsal. Persistent development and production databases remain untouched; production remains NO-GO.
+- Clarified that `db:verify` checks schema shape and ledger-table presence, while migration ledger contents and order require a separate query.
+- Kept all 15 Story Archive entries `source-needed` pending original source material, credits, and rights evidence.
+
 ## 2026-10-12 — Handover evidence reconciliation
 
 ### Documentation
