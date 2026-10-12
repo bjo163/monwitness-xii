@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Reject editor-controlled publication and provenance fields
+
+- Draft and revision validators now reject unknown fields, including publication state, source-verification status, and rights flags. The editor API has no request-level path for a client to self-publish or self-verify source rights.
+- PGlite exercises the actual draft handler with a forged publication/provenance payload: it returns 400 and creates no story row. Normal draft creation remains `draft` / `source_needed`.
+- Verified source commit `f3c8361`: 104/104 tests on Node 26.5.0 and Node 24.19.0, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint`, production build, diff check, and CSP-required loopback smoke 32/32 at `127.0.0.1:3037`. All eight release gates remain open; production stays NO-GO.
+- Local-only code and handover update. No push, deployment, or Neon operation occurred.
+
 ## 2026-10-12 — Verify a clean tracked-tree checkout
 
 - Exported the committed tree at `f6151d0` to a fresh temporary directory, confirmed it contained no `.env` or `.env.local`, and installed the locked 239 packages using Node `v26.5.0` / npm `11.17.0`.
