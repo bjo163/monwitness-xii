@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Validate database URL identity and TLS policy
+
+- The database target guard rejects query parameters that can override host, host address, port, database, user, password, or TLS certificate settings, and requires exactly one `sslmode` of `require`, `verify-ca`, or `verify-full`.
+- Regressions use the installed Neon PostgreSQL parser to prove `host=...` changes the driver target and `sslmode=disable` turns TLS off; both the npm migration wrapper and direct Drizzle CLI now prove they stop before connecting.
+
 ## 2026-10-12 — Apply strict Fetch Metadata checks to editor writes
 
 - Editor draft/revision authorization now rejects every present `Sec-Fetch-Site` value except `same-origin`, matching the Auth proxy; an absent Fetch Metadata header remains supported when the exact same-origin `Origin` is present.

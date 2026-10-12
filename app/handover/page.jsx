@@ -4,7 +4,7 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "127 / 127", label: "automated tests", detail: "Latest run · Node 26.5.0", tone: "pink" },
+  { value: "129 / 129", label: "automated tests", detail: "Latest run · Node 26.5.0", tone: "pink" },
   { value: "40 / 40", label: "local HTTP checks", detail: "Latest run · Node 26.5.0", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
@@ -16,7 +16,7 @@ const verified = [
   "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL. Sign-in/sign-out POSTs require a same-origin Origin and accept only same-origin Fetch Metadata when present; draft and revision writes share a database quota, and every handler response is no-store.",
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
   "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
-  "Runtime database routes require independently supplied host and database values to match the URL before connecting; readiness reports connectivity only.",
+  "Database routes require independent host/database matches, reject connection-identity query overrides, and require TLS; readiness reports connectivity only.",
   "Draft and revision APIs reject unknown fields; the database freeze also gates both writes atomically and records its operator and reason.",
   "CI workflow actions use immutable commit SHAs and Dependabot checks for action updates weekly.",
 ];

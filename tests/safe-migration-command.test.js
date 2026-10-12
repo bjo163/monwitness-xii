@@ -47,6 +47,18 @@ test("migration command rejects target mismatches before starting Drizzle", () =
   assert.doesNotMatch(result.stderr, /do-not-print|ep-dev|ep-prod|neondb/);
 });
 
+test("migration command rejects a driver-level host query override before starting Drizzle", () => {
+  const result = run("migrate", {
+    DATABASE_URL: "postgresql://owner:do-not-print@ep-dev.example.neon.tech/neondb?host=ep-prod.example.neon.tech&sslmode=require",
+    EXPECTED_DATABASE_HOST: "ep-dev.example.neon.tech",
+    EXPECTED_DATABASE_NAME: "neondb",
+    CONFIRM_DATABASE_MIGRATION: "YES",
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /must not override connection identity through query parameters/);
+  assert.doesNotMatch(result.stderr, /do-not-print|ep-dev|ep-prod|neondb/);
+});
+
 test("migration command requires explicit operator confirmation after target validation", () => {
   const result = run("migrate", {
     EXPECTED_DATABASE_HOST: "ep-dev.example.neon.tech",
@@ -75,6 +87,30 @@ test("direct Drizzle CLI migration also rejects an unapproved target before conn
   assert.equal(result.status, 1);
   assert.match(result.stderr, /DATABASE_URL host does not match EXPECTED_DATABASE_HOST; Drizzle migrate not run/);
   assert.doesNotMatch(result.stderr, /local-only|do-not-print|127\.0\.0\.1|moonwitness_local/);
+});
+
+test("direct Drizzle CLI migration rejects target, TLS override, and TLS downgrade URLs", () => {
+  for (const [DATABASE_URL, expectedMessage] of [
+    ["postgresql://role:do-not-print@ep-dev.example.neon.tech/neondb?host=ep-prod.example.neon.tech&sslmode=require", /must not override connection identity through query parameters/],
+    ["postgresql://role:do-not-print@ep-dev.example.neon.tech/neondb?sslrootcert=untrusted-path&sslmode=require", /must not override TLS configuration through query parameters/],
+    ["postgresql://role:do-not-print@ep-dev.example.neon.tech/neondb?sslmode=disable", /must specify exactly one TLS-required sslmode/],
+  ]) {
+    const result = spawnSync(process.execPath, [drizzleCli, "migrate"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        DATABASE_URL,
+        EXPECTED_DATABASE_HOST: "ep-dev.example.neon.tech",
+        EXPECTED_DATABASE_NAME: "neondb",
+        CONFIRM_DATABASE_MIGRATION: "YES",
+      },
+      timeout: 15000,
+    });
+    assert.equal(result.error, undefined, result.error?.message);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, expectedMessage);
+    assert.doesNotMatch(result.stderr, /do-not-print|ep-dev|ep-prod|neondb/);
+  }
 });
 
 test("direct Drizzle introspection rejects an unapproved target before connecting", () => {

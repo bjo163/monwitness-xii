@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { parseIntoClientConfig } from "@neondatabase/serverless";
 import {
   getApplicationDatabaseTargetError,
   getApplicationDatabaseUrl,
@@ -36,6 +37,40 @@ test("application database access requires matching independently supplied targe
     ...verified,
     DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech:5433/neondb?sslmode=require",
   }), /standard PostgreSQL port 5432/);
+
+  const hostOverride = "postgresql://role:secret@ep-dev.example.neon.tech/neondb?host=ep-prod.example.neon.tech&sslmode=require";
+  assert.equal(parseIntoClientConfig(hostOverride).host, "ep-prod.example.neon.tech", "the installed PostgreSQL driver honors a host query override");
+  const hostOverrideError = getApplicationDatabaseTargetError({ ...verified, DATABASE_URL: hostOverride });
+  assert.match(hostOverrideError, /must not override connection identity through query parameters/);
+  assert.doesNotMatch(hostOverrideError, /ep-prod/);
+  for (const parameter of ["hostaddr", "dbname", "ssl", "sslcert", "sslkey", "sslrootcert", "sslpassword", "sslcrl", "sslcrldir"]) {
+    const value = getApplicationDatabaseTargetError({
+      ...verified,
+      DATABASE_URL: `postgresql://role:secret@ep-dev.example.neon.tech/neondb?${parameter}=untrusted-value&sslmode=require`,
+    });
+    assert.match(value, parameter.startsWith("ssl")
+      ? /must not override TLS configuration through query parameters/
+      : /must not override connection identity through query parameters/);
+    assert.doesNotMatch(value, /untrusted-value/);
+  }
+
+  const tlsDisabled = "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=disable";
+  assert.equal(parseIntoClientConfig(tlsDisabled).ssl, false, "the installed PostgreSQL driver honors sslmode=disable");
+  for (const unsafeConnectionString of [
+    "postgresql://role:secret@ep-dev.example.neon.tech/neondb",
+    tlsDisabled,
+    "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=prefer",
+    "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require&sslmode=disable",
+    "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require&SSLMODE=disable",
+  ]) {
+    assert.match(getApplicationDatabaseTargetError({ ...verified, DATABASE_URL: unsafeConnectionString }), /must specify exactly one TLS-required sslmode/);
+  }
+  for (const secureMode of ["require", "verify-ca", "verify-full"]) {
+    assert.equal(getApplicationDatabaseTargetError({
+      ...verified,
+      DATABASE_URL: `postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=${secureMode}`,
+    }), null);
+  }
 
   const malformedDatabaseEncoding = {
     ...verified,
