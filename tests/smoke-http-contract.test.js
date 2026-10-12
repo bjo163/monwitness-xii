@@ -167,6 +167,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /125\/125 tests on Node 24\.19\.0/);
   assert.match(releaseGatesDoc, /125\/125 automated tests and 34\/34 local HTTP checks on both Node 24\.19\.0 and Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /All eight gates below remain OPEN/);
+  assert.match(releaseGatesDoc, /PR #4 is still draft\/open with no reviews and remote head `06e2a119377e46a735714608becf96e095846553`/);
+  assert.match(releaseGatesDoc, /PR #2 remains open\/unmergeable; a local merge-tree simulation/);
+  assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 
