@@ -131,6 +131,18 @@ test("local handover reports current local evidence and keeps production NO-GO",
   const docGateRows = [...releaseGatesDoc.matchAll(/^\| ([A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
   assert.deepEqual(uiGateIds, ["SEC-01", "AUTH-01", "AUTH-02", "DB-02", "DB-03", "ARC-01", "REL-01", "PLAN-01"]);
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
+  const implementationTasks = implementationChecklist.split(/\r?\n/).filter((line) => /^\| [A-Z][A-Z0-9-]*-\d{2} \|/.exec(line));
+  const implementationTaskIds = implementationTasks.map((line) => line.split("|")[1].trim());
+  assert.ok(implementationTasks.length >= 24, "prompt and release gaps must remain in the implementation tracker");
+  assert.equal(new Set(implementationTaskIds).size, implementationTaskIds.length, "implementation task IDs must be unique");
+  for (const line of implementationTasks) {
+    const columns = line.split("|").slice(1, -1).map((value) => value.trim());
+    assert.equal(columns.length, 10, `implementation task must include all ten required fields: ${line}`);
+    assert.ok(/^\[x\] DONE$|^\[ \] (IN PROGRESS|BLOCKED|TODO)$/.exec(columns[4]), `invalid task status: ${columns[4]}`);
+  }
+  assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the gate IDs/);
+  assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
+  assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
   assert.match(handoverDoc, /^### Current local review update/m);
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);

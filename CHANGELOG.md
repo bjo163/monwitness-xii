@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Detect untracked database security objects
+
+- Extended the read-only schema verifier to compare PostgreSQL row-security flags with the Drizzle snapshot and report unexpected CHECK constraints, row policies, and application triggers. If future snapshots introduce CHECK constraints or policies, verification now fails closed until their definitions are compared semantically.
+- Added a PGlite catalog regression that checks the clean baseline, then enables/forces RLS and adds a CHECK constraint, policy, and trigger; each drift is detected and blocks verification.
+- Validation: 99/99 tests on Node 26.5.0 and Node 24.19.0, `db:check`, full `npm audit` (0 vulnerabilities), production build, `actionlint`, diff check, and CSP-required loopback HTTP smoke 32/32.
+- Local verifier/test/documentation changes only. No Neon connection, remote CI, push, or deployment occurred.
+
 ## 2026-10-12 — Exercise actual editor write handlers against PGlite
 
 - Extracted draft and revision POST logic into injectable handlers so the application code itself can be run against an isolated PostgreSQL-compatible test database.
