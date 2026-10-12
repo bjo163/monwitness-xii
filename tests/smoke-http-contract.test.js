@@ -206,6 +206,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
   assert.match(releaseGatesDoc, /Local checkpoint `5bae423` \(not pushed\).*134\/134 tests.*isolated clean-install production build/);
   assert.match(releaseGatesDoc, /single loopback listener `127\.0\.0\.1:3199` \(PID 36756\).*current-source HTTP smoke is therefore pending/);
+  assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
   assert.match(releaseGatesDoc, /Previous runtime snapshot \(superseded by commit `5bae423`\)/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
   assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
