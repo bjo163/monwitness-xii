@@ -26,6 +26,19 @@ test("editor sign out reports provider errors without redirecting", async () => 
   assert.doesNotMatch(result.message, /private provider detail/);
 });
 
+test("editor sign out does not redirect without explicit provider success", async () => {
+  for (const response of [undefined, { data: null, error: null }, { data: { success: false }, error: null }]) {
+    let redirected = false;
+    const result = await signOutEditor({
+      signOut: async () => response,
+      redirect: () => { redirected = true; },
+    });
+
+    assert.deepEqual(result, { ok: false, message: EDITOR_SIGN_OUT_ERROR_MESSAGE });
+    assert.equal(redirected, false);
+  }
+});
+
 test("editor sign out fails safely when the provider throws", async () => {
   const result = await signOutEditor({
     signOut: async () => { throw new Error("private provider detail"); },
