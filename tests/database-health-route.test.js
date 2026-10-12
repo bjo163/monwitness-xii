@@ -2,11 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createDatabaseHealthHandler } from "../lib/database-health-handler.js";
 
-const savedDatabaseUrl = process.env.DATABASE_URL;
+const savedEnvironment = Object.fromEntries(["DATABASE_URL", "EXPECTED_DATABASE_HOST", "EXPECTED_DATABASE_NAME"]
+  .map((key) => [key, process.env[key]]));
 
 test.after(() => {
-  if (savedDatabaseUrl === undefined) delete process.env.DATABASE_URL;
-  else process.env.DATABASE_URL = savedDatabaseUrl;
+  for (const [key, value] of Object.entries(savedEnvironment)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
 });
 
 test("unconfigured database readiness stays unavailable without logging a connection failure", async () => {
@@ -28,8 +31,37 @@ test("unconfigured database readiness stays unavailable without logging a connec
   assert.deepEqual(errors, []);
 });
 
+test("database readiness fails closed without a matching independent target mapping", async () => {
+  const errors = [];
+  let databaseLoads = 0;
+  const GET = createDatabaseHealthHandler({
+    getDatabase: () => { databaseLoads += 1; throw new Error("must not load an unverified target"); },
+    probeDatabase: async () => {},
+    logger: { error: (...args) => errors.push(args) },
+  });
+
+  for (const target of [
+    { EXPECTED_DATABASE_HOST: "", EXPECTED_DATABASE_NAME: "" },
+    { EXPECTED_DATABASE_HOST: "another-host.invalid", EXPECTED_DATABASE_NAME: "moonwitness" },
+  ]) {
+    process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness";
+    process.env.EXPECTED_DATABASE_HOST = target.EXPECTED_DATABASE_HOST;
+    process.env.EXPECTED_DATABASE_NAME = target.EXPECTED_DATABASE_NAME;
+    const response = await GET();
+
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.deepEqual(await response.json(), { status: "error", database: "unavailable" });
+  }
+
+  assert.equal(databaseLoads, 0);
+  assert.deepEqual(errors, []);
+});
+
 test("database readiness reports connectivity without asserting an unverified environment", async () => {
   process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness";
+  process.env.EXPECTED_DATABASE_HOST = "local-test.invalid";
+  process.env.EXPECTED_DATABASE_NAME = "moonwitness";
   const errors = [];
   const GET = createDatabaseHealthHandler({
     getDatabase: () => ({ connected: true }),
@@ -47,6 +79,8 @@ test("database readiness reports connectivity without asserting an unverified en
 
 test("configured database failures log only their error class and return a safe response", async () => {
   process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness";
+  process.env.EXPECTED_DATABASE_HOST = "local-test.invalid";
+  process.env.EXPECTED_DATABASE_NAME = "moonwitness";
   const errors = [];
   const GET = createDatabaseHealthHandler({
     getDatabase: () => ({ connected: true }),

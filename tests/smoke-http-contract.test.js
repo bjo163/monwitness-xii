@@ -117,10 +117,10 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /104 \/ 104/);
+  assert.match(handoverPage, /107 \/ 107/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 104\/104 tests, build, and loopback smoke 32\/32/);
+  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 107\/107 tests, build, and loopback smoke 32\/32/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
@@ -148,7 +148,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
-  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3037\/handover`/);
+  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3039\/handover`/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 

@@ -18,7 +18,7 @@ test("schema verifier covers table, column, default, key, and index drift", () =
   assert.match(verifier, /selectSchemaSnapshot/);
   assert.match(verifier, /--baseline-reconciliation/);
   assert.match(verifier, /getDatabaseTargetError/);
-  assert.match(verifier, /requireExpected: baselineReconciliation/);
+  assert.match(verifier, /requireExpected:\s*true/);
   assert.match(verifier, /information_schema\.tables/);
   assert.match(verifier, /information_schema\.columns/);
   assert.match(verifier, /mismatchedDefaults/);
@@ -243,8 +243,9 @@ test("schema verifier rejects unsupported modes before database access", () => {
   assert.match(result.stderr, /Usage:.*baseline-reconciliation/);
 });
 
-test("baseline reconciliation refuses to connect without independently expected host and database", () => {
-  const result = spawnSync(process.execPath, [verifySchemaScript, "--baseline-reconciliation"], {
+test("schema verification refuses to connect without independently expected host and database", () => {
+  for (const args of [[], ["--baseline-reconciliation"]]) {
+    const result = spawnSync(process.execPath, [verifySchemaScript, ...args], {
     encoding: "utf8",
     env: {
       ...process.env,
@@ -252,14 +253,15 @@ test("baseline reconciliation refuses to connect without independently expected 
       EXPECTED_DATABASE_HOST: "",
       EXPECTED_DATABASE_NAME: "",
     },
-  });
-  assert.equal(result.status, 2);
-  assert.match(result.stderr, /Expected database host and name are required/);
-  assert.doesNotMatch(result.stderr, /secret-value|ep-prod|neondb/);
+    });
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /Expected database host and name are required/);
+    assert.doesNotMatch(result.stderr, /secret-value|ep-prod|neondb/);
+  }
 });
 
-test("baseline reconciliation rejects a mismatched host or database before network access", () => {
-  const run = (expectedHost, expectedDatabase) => spawnSync(process.execPath, [verifySchemaScript, "--baseline-reconciliation"], {
+test("schema verification rejects a mismatched host or database before network access", () => {
+  const run = (expectedHost, expectedDatabase, args = []) => spawnSync(process.execPath, [verifySchemaScript, ...args], {
     encoding: "utf8",
     env: {
       ...process.env,
@@ -269,15 +271,17 @@ test("baseline reconciliation rejects a mismatched host or database before netwo
     },
   });
 
-  const hostMismatch = run("ep-prod.example.neon.tech", "neondb");
-  assert.equal(hostMismatch.status, 2);
-  assert.match(hostMismatch.stderr, /host does not match/);
-  assert.doesNotMatch(hostMismatch.stderr, /secret-value|ep-dev|ep-prod|neondb/);
+  for (const args of [[], ["--baseline-reconciliation"]]) {
+    const hostMismatch = run("ep-prod.example.neon.tech", "neondb", args);
+    assert.equal(hostMismatch.status, 2);
+    assert.match(hostMismatch.stderr, /host does not match/);
+    assert.doesNotMatch(hostMismatch.stderr, /secret-value|ep-dev|ep-prod|neondb/);
 
-  const databaseMismatch = run("ep-dev.example.neon.tech", "production");
-  assert.equal(databaseMismatch.status, 2);
-  assert.match(databaseMismatch.stderr, /database does not match/);
-  assert.doesNotMatch(databaseMismatch.stderr, /secret-value|ep-dev|production|neondb/);
+    const databaseMismatch = run("ep-dev.example.neon.tech", "production", args);
+    assert.equal(databaseMismatch.status, 2);
+    assert.match(databaseMismatch.stderr, /database does not match/);
+    assert.doesNotMatch(databaseMismatch.stderr, /secret-value|ep-dev|production|neondb/);
+  }
 });
 
 test("database target validation parses PostgreSQL URLs and compares expected target names", async () => {

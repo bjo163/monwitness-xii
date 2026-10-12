@@ -26,7 +26,7 @@ const targetError = getDatabaseTargetError({
   uri,
   expectedHost: process.env.EXPECTED_DATABASE_HOST,
   expectedDatabase: process.env.EXPECTED_DATABASE_NAME,
-  requireExpected: baselineReconciliation,
+  requireExpected: true,
 });
 if (targetError) {
   console.error(`${targetError}; verification not run`);

@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import {
+  getApplicationDatabaseTargetError,
+  getApplicationDatabaseUrl,
+  isApplicationDatabaseConfigured,
+} from "../lib/database-target.js";
+
+const verified = {
+  DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require",
+  EXPECTED_DATABASE_HOST: "ep-dev.example.neon.tech",
+  EXPECTED_DATABASE_NAME: "neondb",
+};
+
+test("application database access requires matching independently supplied target values", () => {
+  assert.equal(isApplicationDatabaseConfigured(verified), true);
+  assert.equal(getApplicationDatabaseTargetError(verified), null);
+  assert.equal(getApplicationDatabaseUrl(verified), verified.DATABASE_URL);
+
+  const missingHost = { ...verified, EXPECTED_DATABASE_HOST: "" };
+  assert.equal(isApplicationDatabaseConfigured(missingHost), false);
+  assert.match(getApplicationDatabaseTargetError(missingHost), /Expected database host and name are required/);
+  assert.throws(() => getApplicationDatabaseUrl(missingHost), /target is not verified/);
+
+  const wrongHost = { ...verified, EXPECTED_DATABASE_HOST: "ep-prod.example.neon.tech" };
+  assert.equal(isApplicationDatabaseConfigured(wrongHost), false);
+  assert.match(getApplicationDatabaseTargetError(wrongHost), /host does not match/);
+  assert.throws(() => getApplicationDatabaseUrl(wrongHost), /target is not verified/);
+
+  const wrongDatabase = { ...verified, EXPECTED_DATABASE_NAME: "production" };
+  assert.equal(isApplicationDatabaseConfigured(wrongDatabase), false);
+  assert.match(getApplicationDatabaseTargetError(wrongDatabase), /database does not match/);
+  assert.throws(() => getApplicationDatabaseUrl(wrongDatabase), /target is not verified/);
+  const messages = [missingHost, wrongHost, wrongDatabase]
+    .map((env) => getApplicationDatabaseTargetError(env)).join(" ");
+  assert.doesNotMatch(messages, /secret|ep-dev|ep-prod|neondb|production/);
+});
+
+test("all runtime Neon entrypoints use the verified database target guard", async () => {
+  const [client, drafts, revisions, verifier] = await Promise.all([
+    readFile(new URL("../db/client.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/editor/drafts/route.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/editor/revisions/route.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/verify-schema.mjs", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(client, /neon\(getApplicationDatabaseUrl\(\)\)/);
+  assert.match(drafts, /neon\(getApplicationDatabaseUrl\(\)\)/);
+  assert.match(revisions, /neon\(getApplicationDatabaseUrl\(\)\)/);
+  assert.match(verifier, /requireExpected:\s*true/);
+});
