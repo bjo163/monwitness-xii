@@ -16,6 +16,7 @@ const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.m
 const handoverDoc = await readFile(new URL("../docs/HANDOVER_V11.md", import.meta.url), "utf8");
 const implementationChecklist = await readFile(new URL("../docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md", import.meta.url), "utf8");
 const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
+const migrationReconciliationDoc = await readFile(new URL("../docs/MIGRATION_LEDGER_RECONCILIATION_V11.md", import.meta.url), "utf8");
 const finalizationPlan = await readFile(new URL("../docs/FINALIZATION_V11_RELEASE_PLAN.md", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
@@ -118,11 +119,12 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /122 \/ 122/);
+  assert.match(handoverPage, /123 \/ 123/);
+  assert.match(smokeScript, /t\.includes\("123 \/ 123"\)/);
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Current checkout · Node 24\.19\.0 \+ 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /The current checkout passes 122\/122 tests on Node 24\.19\.0 and 26\.5\.0, including sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
+  assert.match(handoverPage, /The current checkout passes 123\/123 tests on Node 24\.19\.0 and 26\.5\.0, including sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
@@ -157,8 +159,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
   assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3040\/handover`/);
-  assert.match(releaseGatesDoc, /Latest local checkpoint — commit `86ca26a`/);
-  assert.match(releaseGatesDoc, /122\/122 tests on Node 24\.19\.0 and Node 26\.5\.0/);
+  assert.match(releaseGatesDoc, /Latest local checkpoint — commit `8c454d5` plus current dashboard follow-up/);
+  assert.match(releaseGatesDoc, /123\/123 tests on Node 24\.19\.0/);
+  assert.match(releaseGatesDoc, /Node 26\.5\.0 passed the 122-test suite\/build\/smoke before the latest added runbook contract test/);
   assert.match(releaseGatesDoc, /All eight gates below remain OPEN/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
@@ -170,6 +173,15 @@ test("handover automated-test metric matches the declared Node test suite size",
   const dashboardCount = Number(handoverPage.match(/value: "(\d+) \/ \d+", label: "automated tests"/)?.[1]);
   assert.ok(Number.isFinite(dashboardCount), "handover must declare its automated-test count");
   assert.equal(dashboardCount, declaredTests, "dashboard count must follow the actual declared test suite");
+});
+
+test("populated development migration runbook accounts for the entire current journal", () => {
+  assert.match(migrationReconciliationDoc, /journal now contains migrations `0001` through `0004`/);
+  assert.match(migrationReconciliationDoc, /do not stop after applying only `0001`\/`0002`/);
+  assert.match(migrationReconciliationDoc, /complete ordered plan for all four migrations/);
+  assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
+  assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);
+  assert.match(migrationReconciliationDoc, /No step in this document grants approval to write/);
 });
 
 test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
