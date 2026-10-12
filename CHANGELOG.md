@@ -2,6 +2,11 @@
 
 This file records user-visible and operational changes for MoonWitness XII.
 
+## 2026-10-12 — Grand Plan source inventory
+
+- Rechecked the attached master prompt, local Codex attachments, and nearby project folders for the missing authoritative Grand Master Plan V11/V11.2 files. None were found.
+- Recorded the ten module areas exactly as named in the attached prompt and kept GOV-01/SCOPE-01 blocked until the original plan is available; no detailed requirements were inferred.
+
 ## 2026-10-12 — Migration ledger verification
 
 - Added a local PGlite data-directory backup/restore regression with synthetic public/private Archive records, revisions, media/evidence, ledger checks, public projection, and the retained-revision FK invariant. It is synthetic engine evidence only and does not close Neon recovery/retention gates.
