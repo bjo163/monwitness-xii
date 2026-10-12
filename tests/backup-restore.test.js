@@ -8,6 +8,9 @@ import { evidence, mediaAssets, stories, storyRevisions } from "../db/schema.js"
 import { listPublicEpisodes } from "../lib/public-archive-query.js";
 import { hasMigrationLedgerDrift } from "../lib/migration-ledger-verification.js";
 import { readMigrationFiles } from "drizzle-orm/migrator";
+import { readFile } from "node:fs/promises";
+
+const backupRunbook = await readFile(new URL("../docs/BACKUP_RESTORE_RUNBOOK_V11.md", import.meta.url), "utf8");
 
 test("PGlite data-directory backup restores representative Archive state and invariants", async (t) => {
   const source = new PGlite();
@@ -76,4 +79,10 @@ test("PGlite data-directory backup restores representative Archive state and inv
     restored.query("DELETE FROM archive.stories WHERE id = $1", [published.id]),
     /violates RESTRICT setting of foreign key constraint/,
   );
+});
+
+test("backup runbook states the current synthetic restore coverage and its limits", () => {
+  assert.match(backupRunbook, /synthetic dataset included one published index, one private draft, two revisions, media, evidence, and all five migration ledger rows/);
+  assert.match(backupRunbook, /does not prove Neon snapshot recovery, provider Auth recovery, production data restoration, scheduled retention, or cutover\/rollback/);
+  assert.match(backupRunbook, /DB-03 remains open/);
 });
