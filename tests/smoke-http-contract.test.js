@@ -131,6 +131,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /npm ls reports invalid peer versions inside the Neon Auth SDK transitive UI bundle/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
+  assert.match(handoverPage, /The Neon rehearsal covers migrations 0000–0002 only\. Review and rehearse 0003\/0004 on an isolated clone/);
+  assert.match(handoverPage, /The freeze runbook requires an independently verified provider\/application write stop before destructive recovery/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
   assert.match(handoverPage, /Schema verification detects untracked RLS, CHECK, policy, and trigger drift/);
   assert.match(handoverStyles, /@media\(max-width:620px\)\{[\s\S]*?\.nav\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
