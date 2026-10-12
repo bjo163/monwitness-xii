@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Editor session response minimization
+
+- The editor session API now sets `Cache-Control: no-store` on signed-out, authenticated, and unavailable responses. It returns only authentication state, normalized role, and editor eligibility; it does not serialize the session, user ID, email, or tokens.
+- Added response-contract tests for signed-out, allowed/disallowed admin, unexpected role, and unavailable-service cases.
+- Validation: 91/91 tests, production build, local smoke 32/32; the live local session endpoint returned 401/no-store/`authenticated:false`. Production remains NO-GO.
+
 ## 2026-10-12 — Editor write-surface audit
 
 - Added a repository-wide API route contract that identifies data writers, permits only the guarded editor draft/revision POSTs, and checks authorization precedes SQL writes. This prevents a new route from silently bypassing the owner allowlist.
