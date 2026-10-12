@@ -1,79 +1,107 @@
 import Link from "next/link";
+import styles from "./handover.module.css";
 
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
-const verified = [
-  "79 automated tests pass, including Archive, editor-policy, migration-ledger, auth-config, and recovery checks",
-  "Neon Auth signed session-data cache is explicitly limited to 60 seconds",
-  "Migration generation and PostgreSQL replay check pass",
-  "Read-only schema verifier checks every migration ledger hash and timestamp in journal order",
-  "Full dependency audit reports zero vulnerabilities",
-  "CI actions are SHA-pinned and Dependabot tracks updates weekly",
-  "Production build and local HTTP smoke pass (31 checks)",
-  "Public Archive response is limited to five editorial fields and excludes drafts",
-  "Editor writes require an Auth admin role, exact owner allowlist, and same-origin request",
-  "Every HTML page uses a fresh script CSP nonce; local smoke verifies all script tags and nonce rotation",
+const checks = [
+  { value: "79 / 79", label: "automated tests", detail: "Auth · Archive · migrations · recovery", tone: "pink" },
+  { value: "32 / 32", label: "local HTTP checks", detail: "Routes · artwork · CSP · signed-out auth", tone: "cyan" },
+  { value: "0", label: "audit findings", detail: "Full dependency tree · local audit", tone: "lime" },
+  { value: "PASS", label: "migration replay", detail: "Generated schema matches journal", tone: "gold" },
 ];
 
-const openGates = [
-  "Verify owner sign-in, admin onboarding, authenticated writes, and audit attribution",
-  "Run live session and role-revocation checks; the signed cache can remain valid for up to 60 seconds",
-  "Development Auth still permits direct provider signup; app signup routes alone return 404",
-  "Reconcile and apply migrations to persistent development only after exact target verification and approval",
-  "Daily snapshots with 30-day retention are not configured on the selected Free plan; representative-data recovery and RPO/RTO remain unverified",
-  "All 15 development Archive entries remain source-needed pending originals, credits, and rights evidence",
-  "Style CSP still permits inline styles; home and handover now use dynamic rendering and Hobby runtime usage needs monitoring",
-  "Complete independent review and integration checks for PR #4 and PR #2; latest local commits have no remote CI result",
-  "Obtain the authoritative Grand Master Plan V11/V11.2 source before claiming full module traceability",
+const verified = [
+  "Every HTML page receives a fresh script CSP nonce; smoke checks nonce rotation and every script tag.",
+  "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
+  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, and actor-attributed audit SQL.",
+  "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
+  "CI workflow actions use immutable commit SHAs and Dependabot checks for action updates weekly.",
+];
+
+const gates = [
+  { id: "SEC-01", title: "Verify CSP on the exact release preview", text: "Local smoke requires nonce-only script and style policies and checks every rendered script/style block. This worktree has no remote CI or Preview result; repeat on the exact reviewed release head." },
+  { id: "AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in, admin onboarding, authenticated draft/revision writes, audit attribution, and session/role-revocation checks." },
+  { id: "AUTH-02", title: "Identity policy", text: "Direct provider sign-up remains enabled and Managed Auth has no MFA here. Choose and verify an identity path suitable for production." },
+  { id: "DB-02", title: "Persistent development migration", text: "Confirm the exact application database target, reconcile its existing schema and missing ledger, then apply only through an approved migration plan." },
+  { id: "DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
+  { id: "ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
+  { id: "REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
+  { id: "PLAN-01", title: "Full V11 traceability", text: "The authoritative Grand Master Plan V11/V11.2 source is missing from this checkout. Full module coverage cannot yet be claimed." },
 ];
 
 export default function HandoverPage() {
   return (
-    <main style={{ background: "#0f1427", color: "#f8fafc", minHeight: "100vh", padding: "32px clamp(20px,5vw,80px)", fontFamily: "system-ui" }}>
-      <nav aria-label="Main navigation" style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
-        <Link href="/" style={{ color: "#72e6ed" }}>← HOME</Link>
-        <Link href="/episodes" style={{ color: "#72e6ed" }}>STORY ARCHIVE</Link>
-        <Link href="/team" style={{ color: "#72e6ed" }}>THE BATTERIES</Link>
-      </nav>
+    <main className={styles.page}>
+      <header className={styles.topbar}>
+        <Link className={styles.wordmark} href="/">MOONWITNESS <span>XII</span></Link>
+        <nav aria-label="Main navigation" className={styles.nav}>
+          <Link href="/episodes">STORY ARCHIVE</Link>
+          <Link href="/team">THE BATTERIES</Link>
+          <a href="#release-gates">RELEASE GATES <span>08</span></a>
+        </nav>
+        <span className={styles.localBadge}><i /> LOCAL REVIEW</span>
+      </header>
 
-      <section style={{ maxWidth: 1050, margin: "72px auto 32px" }}>
-        <p style={{ color: "#c9fa62", fontWeight: 800, letterSpacing: 3 }}>LOCAL RELEASE CONTROL • V11 HANDOVER</p>
-        <h1 style={{ fontSize: "clamp(42px,7vw,88px)", lineHeight: 1.05, margin: "12px 0" }}>
-          MISSION CONTROL <span style={{ color: "#6ee6ef" }}>V11</span>
-        </h1>
-        <p style={{ fontSize: 20, maxWidth: 780 }}>
-          A local engineering review of the MoonWitness XII story universe, security boundaries, and release evidence.
-        </p>
-
-        <div style={{ background: "#4a2d35", borderLeft: "5px solid #ffbb74", padding: 22, margin: "26px 0", borderRadius: 10 }}>
-          <b>LOCAL REVIEW • NO-GO FOR PRODUCTION</b>
-          <p>
-            This checkout is for local review only. No push or deployment was made. Local tests, migration checks, production build, and HTTP smoke pass with the updated read-only verifier. Live owner authentication, persistent development migration, backup recovery, and Archive source review remain open. Production promotion requires a separate owner approval after those gates pass.
-          </p>
-          <p style={{ marginBottom: 0 }}>
-            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>79/79</code> · Local smoke (last verified) <code>31/31</code>
-          </p>
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>ENGINEERING HANDOVER <span>V11 / 12 OCT 2026</span></p>
+          <h1>MISSION<br /><em>CONTROL</em></h1>
+          <p className={styles.intro}>A live snapshot of the work, evidence, and open gates for the MoonWitness XII release.</p>
+          <div className={styles.heroLinks}>
+            <a href="#release-gates" className={styles.primaryButton}>REVIEW THE GATES <span>↘</span></a>
+            <Link href="/team" className={styles.secondaryButton}>MEET THE BATTERIES <span>↗</span></Link>
+          </div>
         </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 20 }}>
-          <section aria-labelledby="verified-title" style={{ background: "#192f3c", padding: 25, borderRadius: 18, border: "1px solid #62e2c7" }}>
-            <h2 id="verified-title" style={{ color: "#8affdd" }}>✓ Verified locally</h2>
-            <ul style={{ lineHeight: 2 }}>{verified.map((item) => <li key={item}>{item}</li>)}</ul>
-          </section>
-          <section aria-labelledby="gates-title" style={{ background: "#322539", padding: 25, borderRadius: 18, border: "1px solid #e7abd1" }}>
-            <h2 id="gates-title" style={{ color: "#ffc2df" }}>◯ Release gates remaining</h2>
-            <ul style={{ lineHeight: 2 }}>{openGates.map((item) => <li key={item}>{item}</li>)}</ul>
-          </section>
+        <div className={styles.statusCard}>
+          <div className={styles.statusTop}><span>LOCAL REVIEW • NO-GO FOR PRODUCTION</span><span className={styles.statusLight}>● HOLD</span></div>
+          <div className={styles.statusStamp}>NO<span>GO</span></div>
+          <h2>Production release is on hold.</h2>
+          <p>Local code and visual review can continue. Production promotion waits for verified security, database recovery, source rights, independent review, and owner approval.</p>
+          <div className={styles.statusFoot}><span>BRANCH</span><code>codex/v11-release-readiness</code></div>
+          <div className={styles.statusFoot}><span>NETWORK</span><b>LOCAL ONLY · NO DEPLOY</b></div>
         </div>
-
-        <div style={{ marginTop: 40, display: "flex", flexWrap: "wrap", gap: 14 }}>
-          <Link href="/episodes" style={{ background: "#d5ff69", color: "#161b27", padding: "14px 20px", fontWeight: 800, borderRadius: 10 }}>VIEW STORY ARCHIVE</Link>
-          <Link href="/team" style={{ border: "2px solid #6be7e9", color: "#6be7e9", padding: "12px 20px", fontWeight: 800, borderRadius: 10 }}>MEET THE BATTERIES</Link>
-        </div>
-        <footer style={{ marginTop: 70, borderTop: "1px solid #536072", paddingTop: 24, color: "#bdd0df" }}>
-          FIND LIGHT IN DARKNESS · MERCY FIRST • HUMANITY FIRST • EGO LAST · COMEDY ON. SHALAWAT ON.
-        </footer>
+        <div className={styles.sunburst} aria-hidden="true">✳</div>
+        <span className={styles.heroIndex}>MW—12</span>
       </section>
+
+      <section className={styles.metrics} aria-label="Local verification results">
+        {checks.map((check, index) => (
+          <article className={`${styles.metric} ${styles[check.tone]}`} key={check.label}>
+            <span className={styles.metricIndex}>0{index + 1} / VERIFIED</span>
+            <strong>{check.value}</strong>
+            <h2>{check.label}</h2>
+            <p>{check.detail}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className={styles.evidenceSection}>
+        <div className={styles.sectionHeading}>
+          <p className={styles.eyebrow}>WHAT THE LOCAL EVIDENCE SAYS <span>CHECKPOINT · 12 OCT</span></p>
+          <h2>Built, checked,<br /><em>still in review.</em></h2>
+        </div>
+        <div className={styles.evidenceList}>
+          {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
+          <p className={styles.evidenceNote}>The browser HTTP smoke passed locally. Browser-console error review was not part of that check. Database endpoints return their expected safe-unavailable response without a local database URL.</p>
+        </div>
+      </section>
+
+      <section className={styles.gatesSection} id="release-gates" aria-label="Release gates remaining">
+        <div className={styles.gatesHeader}>
+          <div><p className={styles.eyebrow}>THE WORK STILL AHEAD <span>OWNER DECISIONS + VERIFIED EVIDENCE</span></p><h2>Eight open<br /><em>release gates.</em></h2></div>
+          <p>Each gate needs current, reviewable evidence before production status can change.</p>
+        </div>
+        <div className={styles.gateList}>
+          {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Open">○</span></article>)}
+        </div>
+        <div className={styles.docsRow}>
+          <div>RELEASE GATES <code>docs/RELEASE_GATES_V11.md</code></div>
+          <div>BACKUP / RESTORE <code>docs/BACKUP_RESTORE_RUNBOOK_V11.md</code></div>
+          <div>IMPLEMENTATION MAP <code>docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md</code></div>
+        </div>
+      </section>
+
+      <footer className={styles.footer}><span>MOONWITNESS XII · LOCAL ENGINEERING REVIEW</span><span>MERCY FIRST · HUMANITY FIRST · EGO LAST</span></footer>
     </main>
   );
 }

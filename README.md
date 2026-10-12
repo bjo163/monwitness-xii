@@ -9,8 +9,8 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 
 ## Quick links
 - [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
-- [Local release handover visual](http://localhost:3015/handover) — current local-only NO-GO status and verified release gates.
-- [Local Story Archive visual](http://localhost:3015/episodes) — current local production build; archive rows require a development-only database connection.
+- [Local release handover visual](http://127.0.0.1:3020/handover) — current local-only NO-GO status and verified release gates.
+- [Local Story Archive visual](http://127.0.0.1:3020/episodes) — current local production build; archive rows require a development-only database connection.
 - [Historical READY remote review visual: The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team) — protected Preview for checkpoint `d6c884b`; current local changes are not included.
 - [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
 - [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
@@ -51,9 +51,9 @@ For populated-development baseline preflight only, also set `EXPECTED_DATABASE_H
 
 `npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
 
-For a local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
+For a CSP-required local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; $env:SMOKE_BASE_URL = 'http://127.0.0.1:3020'; $env:SMOKE_EXPECT_CSP = '1'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
 
-The current local production build's [Story Archive page](http://localhost:3015/episodes) and [release handover](http://localhost:3015/handover) are running. The Archive shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible. These localhost links refer to the user's local review app; they do not imply a Preview or production deployment.
+The current local production build's [Story Archive page](http://127.0.0.1:3020/episodes) and [release handover](http://127.0.0.1:3020/handover) are running. The Archive shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible. These localhost links refer to the user's local review app; they do not imply a Preview or production deployment.
 
 The current local review includes an Archive notice explaining that a published index does not establish source provenance or reuse rights. Without a local development `DATABASE_URL`, the notice is visible but the database-backed episode cards show the safe retry state. This local review change is not in the remote Preview.
 
@@ -61,7 +61,7 @@ The current local review includes an Archive notice explaining that a published 
 
 `npm run db:verify` is read-only. It compares schema shape and checks that every Drizzle migration ledger row matches the repository journal by SHA-256 and timestamp in order. `--baseline-reconciliation` allows an absent ledger for preflight and fails when one already exists; both modes require a verified database URL, and baseline reconciliation additionally requires independently confirmed expected host and database values.
 
-The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), targeting `dev`. They have not been merged or released. Every HTML page uses a fresh per-request nonce in `script-src`; local smoke verifies nonce rotation and nonce attributes on all script tags. Nonces require dynamic page rendering, so the homepage and handover now use server rendering. The selected Vercel Hobby plan includes 1 million function invocations/month and 4 CPU-hours; monitor actual usage before promotion. `style-src` still allows inline styles. This change has no remote CI or Preview. See [CHANGELOG.md](CHANGELOG.md) for review changes and outstanding gates.
+The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), targeting `dev`. They have not been merged or released. Every HTML page uses one per-request nonce for both script and style policies; local smoke checks nonce rotation, matching directive/element nonces, no inline style attributes, and no page CSP on APIs or static assets. Nonces require dynamic page rendering, so all pages are server-rendered on demand. The selected Vercel Hobby plan includes 1 million function invocations/month and 4 CPU-hours; monitor actual usage before promotion. Current local CSP code has no remote CI or Preview result. See [CHANGELOG.md](CHANGELOG.md) for review changes and outstanding gates.
 
 For recovery operations, use the [V11 backup/restore runbook](docs/BACKUP_RESTORE_RUNBOOK_V11.md). It documents the isolated, unfinalized restore workflow and the remaining production-data/RPO/RTO gates.
 

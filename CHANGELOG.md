@@ -2,11 +2,18 @@
 
 This file records user-visible and operational changes for MoonWitness XII.
 
+## 2026-10-12 — Local mission-control handover and CSP source of truth
+
+- Reworked `/handover` into a responsive release dashboard with the current NO-GO decision, local verification figures, evidence notes, and eight explicit open gates. Kept all existing character and site artwork unchanged.
+- Removed the obsolete global CSP declaration containing `script-src 'unsafe-inline'` from `next.config.js`; the Next.js proxy is now the sole source of per-request nonce policies for HTML pages. Migrated the two remaining JSX style attributes to CSS classes and changed `style-src` to the matching request nonce, without `unsafe-inline`. Smoke confirms the script/style directives share a nonce and API/static responses carry no page CSP.
+- Refreshed the dashboard's smoke contract and local-only status. Browser-console review, remote CI, and Preview remain unverified; production remains NO-GO.
+- Validation: 79/79 tests, migration generation/replay check, full dependency audit (0 vulnerabilities), actionlint, production build, local HTTP smoke 32/32, and `git diff --check` pass. No push, deployment, or Neon access occurred.
+
 ## 2026-10-12 — Site-wide script CSP nonce
 
 - Extended the per-request nonce policy from editor pages to all HTML pages; API routes and static assets are excluded. Local smoke verifies strict script CSP and nonce attributes on all scripts across public routes, plus nonce rotation.
 - Next.js build confirmed all routes are now dynamically rendered; root layout opts into request-time rendering so statically optimized pages cannot emit HTML without the request nonce. The selected Vercel Hobby plan includes 1 million invocations and 4 CPU-hours per month, so usage must be monitored before promotion. [Vercel plan limits](https://vercel.com/docs/limits).
-- `style-src` still allows inline styles to preserve current layout and Google Fonts integration; script CSP is strict but full CSP hardening is incomplete. No push, deployment, or Neon access occurred.
+- At this earlier script-CSP checkpoint, `style-src` still allowed inline styles; follow-up nonce-based style hardening is recorded above. No push, deployment, or Neon access occurred.
 - Validation on `1d703d5`: 79/79 tests, migration replay, full audit (0 vulnerabilities), `actionlint`, production build, and loopback smoke 31/31 pass. This change has no remote CI or Preview result.
 
 ## 2026-10-12 — Editor script CSP nonce

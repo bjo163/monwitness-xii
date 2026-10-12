@@ -137,3 +137,4 @@ footer{background:var(--ink);padding:70px 5%}footer h2{font:900 clamp(30px,4.5vw
 @media(max-width:760px){.ribbon nav{flex-wrap:wrap;justify-content:center;gap:8px 14px}.ribbon nav a{font-size:11px;line-height:1.35;min-height:30px;display:flex;align-items:center}}
 @media(max-width:430px){.crewArt{height:205px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+.inlineLink{text-decoration:underline}

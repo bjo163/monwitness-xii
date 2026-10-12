@@ -30,7 +30,7 @@ export default async function EpisodeIndexEntry({ params }) {
     return <main className={styles.page}>
       <p className={styles.retry} role="alert">
         <strong>THE VAULT IS TAKING A BREATHER</strong>
-        <span style={{display:"block",margin:"12px 0"}}>The index entry could not be loaded. No private drafts are displayed.</span>
+        <span className={styles.retryHint}>The index entry could not be loaded. No private drafts are displayed.</span>
         <Link href={`/episodes/${encodeURIComponent(slug)}`} className={styles.entryLink}>TRY AGAIN ↻</Link>
       </p>
       <Link href="/episodes" className={styles.homeLink}>← BACK TO THE ARCHIVE</Link>

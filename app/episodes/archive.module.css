@@ -245,6 +245,11 @@
   box-shadow: 5px 5px var(--archive-coral);
 }
 
+.retryHint {
+  display: block;
+  margin: 12px 0;
+}
+
 .footer {
   max-width: 1360px;
   margin: 64px auto 0;

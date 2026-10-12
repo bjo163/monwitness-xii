@@ -55,21 +55,28 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(archivePage, /PUBLIC EDITORIAL INDEX/);
   assert.doesNotMatch(archivePage, /DEVELOPMENT VAULT/);
   assert.match(smokeScript, /\/episodes",\(r,b,t\)=>r\.status===200&&t\.includes\("PUBLIC EDITORIAL INDEX"\)&&t\.includes\(PUBLIC_ARCHIVE_NOTICE\)/);
-  assert.match(nextConfig, /Content-Security-Policy/);
-  assert.match(nextConfig, /process\.env\.NODE_ENV === "production"/);
-  assert.match(nextConfig, /fonts\.googleapis\.com/);
-  assert.match(nextConfig, /fonts\.gstatic\.com/);
+  assert.doesNotMatch(nextConfig, /Content-Security-Policy|unsafe-inline|process\.env\.NODE_ENV/);
   assert.match(smokeScript, /SMOKE_EXPECT_CSP/);
   assert.match(proxySource, /crypto\.randomUUID\(\)/);
   assert.match(proxySource, /source:\s*["']\/\(\(\?!api\|_next\/static\|_next\/image\|favicon\.ico\|characters\/\)\.\*\)["']/);
   assert.match(proxySource, /script-src 'self' 'nonce-\$\{nonce\}' 'strict-dynamic'/);
-  assert.doesNotMatch(proxySource, /script-src[^,]*unsafe-inline/);
+  assert.match(proxySource, /fonts\.googleapis\.com/);
+  assert.match(proxySource, /fonts\.gstatic\.com/);
+  assert.match(proxySource, /style-src 'self' 'nonce-\$\{nonce\}' https:\/\/fonts\.googleapis\.com/);
+  assert.doesNotMatch(proxySource, /(?:script|style)-src[^,]*unsafe-inline/);
   assert.match(rootLayout, /dynamic\s*=\s*["']force-dynamic["']/);
   assert.match(smokeScript, /function hasStrictPageCsp/);
+  assert.match(smokeScript, /scriptNonce!==styleNonce/);
+  assert.match(smokeScript, /scriptPolicy\.includes\("'strict-dynamic'"\)/);
+  assert.equal((smokeScript.match(/api\/health",\(r,b\)=>r\.status===200&&r\.headers\.get\("content-security-policy"\)===null/g) ?? []).length, 2);
+  assert.match(smokeScript, /content-security-policy"\)===null&&r\.headers\.get\("content-type"/);
+  assert.match(smokeScript, /styleBlocks\.every/);
+  assert.match(smokeScript, /style-src\[\^;\]\*'unsafe-inline'/);
+  assert.equal((smokeScript.match(/\/episodes\/tick-tock-on-the-clock",\(r,b,t\)=>r\.status===200&&hasStrictPageCsp/g) ?? []).length, 2);
   assert.match(smokeScript, /checkFreshPageNonce\("\/"\)/);
   assert.match(smokeScript, /scripts\.every/);
-  assert.match(handoverPage, /Every HTML page uses a fresh script CSP nonce/);
-  assert.match(handoverPage, /Style CSP still permits inline styles/);
+  assert.match(handoverPage, /Every HTML page receives a fresh script CSP nonce/);
+  assert.match(handoverPage, /nonce-only script and style policies/);
   assert.doesNotMatch(nextConfig, /unsafe-eval/);
 });
 
@@ -94,9 +101,9 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /79 automated tests pass/);
-  assert.match(handoverPage, /Daily snapshots with 30-day retention are not configured/);
-  assert.match(handoverPage, /All 15 development Archive entries remain source-needed/);
+  assert.match(handoverPage, /79 \/ 79/);
+  assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
+  assert.match(handoverPage, /All 15 entries remain source-needed/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
   assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
 });

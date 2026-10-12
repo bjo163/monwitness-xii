@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const pageContentSecurityPolicy = (nonce) => [
   "default-src 'self'",
   `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob:",
   "connect-src 'self'",
