@@ -66,7 +66,9 @@ test("real editor authorization composition rejects writes after a provider role
   const state = await db.query(`
     SELECT
       (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
-      (SELECT count(*)::int FROM system.audit_events) AS audit_events
+      (SELECT count(*)::int FROM system.audit_events) AS audit_events,
+      (SELECT request_count::int FROM system.editor_write_limits WHERE actor_id='owner-1') AS reserved_writes,
+      (SELECT count(*)::int FROM identity.users WHERE external_auth_id='owner-1') AS actor_rows
   `);
-  assert.deepEqual(state.rows[0], { revisions: 1, audit_events: 1 });
+  assert.deepEqual(state.rows[0], { revisions: 1, audit_events: 1, reserved_writes: 1, actor_rows: 1 });
 });
