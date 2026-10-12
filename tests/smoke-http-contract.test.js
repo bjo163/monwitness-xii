@@ -123,9 +123,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /125 \/ 125/);
   assert.match(smokeScript, /t\.includes\("125 \/ 125"\)/);
   assert.match(handoverPage, /34 \/ 34/);
-  assert.match(handoverPage, /Current checkout · Node 24\.19\.0/);
+  assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
   assert.match(handoverPage, /earlier clean Node 22\.23\.3 snapshot at commit 6a88a4b passed install, 95\/95 tests/);
-  assert.match(handoverPage, /The current checkout passes 125\/125 tests and CSP-required smoke 34\/34 on Node 24\.19\.0 and 26\.5\.0; Node 26\.5\.0 production build, migration replay, dependency audit, and actionlint pass\. A clean Node 22\.23\.3 snapshot refreshed with the current handover source at 912eae2 passes 125\/125 tests, migration replay, audit, production build, actionlint, and smoke 34\/34\. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup\/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed, regression coverage for all 100 AETHERION levels across ten realms and the first 33 open levels/);
+  assert.match(handoverPage, /Latest local verification at commit 81f8fe8 passes 125\/125 tests and CSP-required smoke 34\/34 on Node 26\.5\.0/);
+  assert.match(handoverPage, /A separate clean tracked-tree snapshot at commit 162693b/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
   assert.match(handoverPage, /effective failed-login throttling is unverified\. This SDK cannot configure a provider-wide limiter/);
@@ -180,15 +181,15 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
-  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3040\/handover`/);
+  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3050\/handover`/);
   assert.match(releaseGatesDoc, /Latest local checkpoint — 2026-10-12/);
-  assert.match(releaseGatesDoc, /current checkout passes 125\/125 tests and CSP-required local HTTP smoke \(34\/34\) on Node 24\.19\.0 and 26\.5\.0/);
-  assert.match(releaseGatesDoc, /source snapshot at `912eae2`.*freshly installed from the unchanged 239-package lockfile.*passed on Node 22\.23\.3 \/ npm 11\.17\.0: 125\/125 tests.*smoke 34\/34/);
-  assert.match(releaseGatesDoc, /All eight gates below remain OPEN/);
-  assert.match(releaseGatesDoc, /PR #4 is still draft\/open with no reviews and remote head `06e2a119377e46a735714608becf96e095846553`/);
-  assert.match(releaseGatesDoc, /PR #2 remains open\/unmergeable; a local merge-tree simulation/);
+  assert.match(releaseGatesDoc, /Latest local verification at commit `81f8fe8` passes 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
+  assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
+  assert.match(releaseGatesDoc, /shows all eight gates as open/);
+  assert.match(releaseGatesDoc, /Read-only GitHub review recorded PR #4 draft\/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`/);
+  assert.match(releaseGatesDoc, /local merge-tree simulation reported add\/add conflicts/);
   assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));
-  assert.match(releaseGatesDoc, /npm ls exits with ELSPROBLEMS/);
+  assert.match(releaseGatesDoc, /existing Neon Auth transitive UI peer conflicts/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 
