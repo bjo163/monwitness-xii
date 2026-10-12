@@ -168,13 +168,16 @@ test("local handover reports current local evidence and keeps production NO-GO",
   }
   assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs/);
   const promptCrosswalk = implementationChecklist.split("### Attached master-prompt execution crosswalk")[1]?.split("## Story Archive, identity, and data integrity")[0] ?? "";
-  const promptItems = promptCrosswalk.split("|").map((cell) => cell.trim().split(" ")[0]).filter((cell) => cell.startsWith("P3-") || cell.startsWith("DoD-"));
-  assert.equal(promptItems.length, 28);
-  assert.equal(new Set(promptItems).size, 28);
+  const promptItems = promptCrosswalk.split("|").map((cell) => cell.trim().split(" ")[0]).filter((cell) => cell.startsWith("P3-") || cell.startsWith("DoD-") || cell.startsWith("P7-"));
+  assert.equal(promptItems.length, 39);
+  assert.equal(new Set(promptItems).size, 39);
   for (let index = 1; index <= 14; index += 1) {
     assert.ok(promptItems.includes(`P3-${String(index).padStart(2, "0")}`));
     assert.ok(promptItems.includes(`DoD-${String(index).padStart(2, "0")}`));
   }
+  for (let index = 1; index <= 11; index += 1) assert.ok(promptItems.includes(`P7-${String(index).padStart(2, "0")}`));
+  assert.match(promptCrosswalk, /P7-01.*Not delivered to `dev` under the explicit local-only\/no-push instruction/);
+  assert.match(promptCrosswalk, /P7-11.*Keep NO-GO until every required gate is verified/);
   assert.match(promptCrosswalk, /P3-07.*isolated Neon rehearsal covers only `0000`–`0002`/s);
   assert.match(promptCrosswalk, /DoD-13.*No current exact-head Preview exists; user explicitly requested no deployment/);
   assert.match(promptCrosswalk, /DoD-14.*Maintain NO-GO until all gates are verified and owner separately approves promotion/);
