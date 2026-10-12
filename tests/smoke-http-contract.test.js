@@ -127,6 +127,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
   assert.match(handoverPage, /The current checkout passes 125\/125 tests on Node 24\.19\.0 and 26\.5\.0; both runtimes pass migration replay, full dependency audit, production build, and CSP-required loopback smoke 34\/34\. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup\/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed, regression coverage for all 100 AETHERION levels across ten realms and the first 33 open levels/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
+  assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
+  assert.match(handoverPage, /npm ls reports invalid peer versions inside the Neon Auth SDK transitive UI bundle/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
@@ -170,6 +172,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /PR #4 is still draft\/open with no reviews and remote head `06e2a119377e46a735714608becf96e095846553`/);
   assert.match(releaseGatesDoc, /PR #2 remains open\/unmergeable; a local merge-tree simulation/);
   assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));
+  assert.match(releaseGatesDoc, /npm ls exited with ELSPROBLEMS/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 

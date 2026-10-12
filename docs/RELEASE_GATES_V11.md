@@ -9,14 +9,14 @@ The current checkout passes 125/125 tests on Node 24.19.0 and 26.5.0. Both runti
 
 ### Current handover gate register
 
-The committed tree at `b68e11a` was exported without environment files and reproduced from a fresh `npm ci` (239 packages) on Node 26.5.0 / npm 11.17.0. It passed 125/125 tests, migration replay, full dependency audit (0 vulnerabilities), production build, `actionlint`, and loopback HTTP smoke 34/34. Auth and DB routes correctly showed their unconfigured states. npm emitted peer/deprecation warnings and withheld the `core-js`/`esbuild` install scripts. This clean local build does not close exact-head remote CI, Preview, database-target, or authenticated-provider gates.
+The committed tree at `b68e11a` was exported without environment files and reproduced from a fresh `npm ci` (239 packages) on Node 26.5.0 / npm 11.17.0. It passed 125/125 tests, migration replay, full dependency audit (0 vulnerabilities), production build, `actionlint`, and loopback HTTP smoke 34/34. Auth and DB routes correctly showed their unconfigured states. npm audit found 0 vulnerabilities, but npm ls exited with ELSPROBLEMS: @neondatabase/auth@0.5.0-beta brings @neondatabase/auth-ui@0.3.0-beta, whose nested Better Auth UI packages resolve better-auth@1.6.23 against peer ranges requiring 1.7.7 and mismatched better-call versions. Application source does not import the UI bundle. No override was added because the compatible Managed Auth SDK/server version pair is unverified. npm also withheld core-js/esbuild install scripts. This clean local build does not close exact-head remote CI, Preview, database-target, or authenticated-provider gates.
 
 These `G-`-prefixed IDs and open states are the source register rendered by `/handover`. The prefix separates release gates from similarly numbered implementation tasks in the Grand Master checklist. A gate stays open until its stated evidence exists for the exact release candidate and the owner accepts it. Local-only verification does not satisfy remote, provider, content-rights, or owner-approval requirements.
 
 | ID | Gate | Current state | Evidence required to close |
 | --- | --- | --- | --- |
 | G-SEC-01 | Exact release CSP | OPEN | Exact reviewed release Preview plus nonce/CSP and browser-console verification. |
-| G-AUTH-01 | Owner identity and editor access | OPEN | Owner-provisioned admin sign-in, authenticated draft/revision/audit writes, logout/session restoration, and role-revocation checks. |
+| G-AUTH-01 | Owner identity and editor access | OPEN | Owner-provisioned admin sign-in, authenticated draft/revision/audit writes, logout/session restoration, role-revocation checks, and review of the transitive Neon Auth SDK peer tree. |
 | G-AUTH-02 | Identity policy | OPEN | Owner-approved registration and credential-attempt policy, plus MFA-capable production identity evidence. |
 | G-DB-02 | Persistent development migration | OPEN | Independently verified app database target, baseline/ledger reconciliation, reviewed migration apply, schema and rollback checks. |
 | G-DB-03 | Recoverable backups | OPEN | Approved retention/RPO/RTO plan and representative-data restore with verified cutover/rollback. Daily snapshots with 30-day retention remain unavailable on the selected Free plan. |
