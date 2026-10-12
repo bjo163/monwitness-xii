@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Confirm revoked writes consume no resources
+
+- Extended the post-revocation PGlite regression to assert a denied editor request creates no revision or audit event, reserves no rate-limit quota, and creates no actor row.
+- The full 111/111 test suite passes; this remains a simulated provider change and does not close live Neon Auth verification.
+- Local only; no push or deployment. Production remains NO-GO.
+
 ## 2026-10-12 — Verify role revocation at the editor write boundary
 
 - Extracted the production editor authorizer composition so it can be exercised with an isolated provider and database fixture.
