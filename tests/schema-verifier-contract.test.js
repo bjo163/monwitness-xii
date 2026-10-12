@@ -34,9 +34,48 @@ test("schema verifier covers table, column, default, key, and index drift", () =
 
 test("normal verification selects the latest migration snapshot and reconciliation selects the baseline", async () => {
   const { selectSchemaSnapshot } = await import("../lib/schema-snapshot-selection.js");
-  assert.equal(selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: migrationJournal.entries }), "0002_snapshot.json");
-  assert.equal(selectSchemaSnapshot({ baselineReconciliation: true, migrationEntries: migrationJournal.entries }), "0000_snapshot.json");
-  assert.throws(() => selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: [] }), /no entries/);
+  const metadata = { journalVersion: migrationJournal.version, journalDialect: migrationJournal.dialect };
+  assert.equal(selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: migrationJournal.entries, ...metadata }), "0002_snapshot.json");
+  assert.equal(selectSchemaSnapshot({ baselineReconciliation: true, migrationEntries: migrationJournal.entries, ...metadata }), "0000_snapshot.json");
+  assert.throws(() => selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: [], ...metadata }), /no entries/);
+});
+
+test("schema verification rejects malformed or unsafe migration journal order before choosing a snapshot", async () => {
+  const { selectSchemaSnapshot } = await import("../lib/schema-snapshot-selection.js");
+  const metadata = { journalVersion: migrationJournal.version, journalDialect: migrationJournal.dialect };
+  const altered = (change) => migrationJournal.entries.map((entry, index) => change({ ...entry }, index));
+
+  assert.throws(() => selectSchemaSnapshot({
+    baselineReconciliation: false,
+    migrationEntries: altered((entry, index) => index === 1 ? { ...entry, idx: 4 } : entry),
+    ...metadata,
+  }), /indices must be contiguous and ordered/);
+  assert.throws(() => selectSchemaSnapshot({
+    baselineReconciliation: false,
+    migrationEntries: altered((entry, index) => index === 1 ? { ...entry, when: migrationJournal.entries[0].when } : entry),
+    ...metadata,
+  }), /timestamps must be positive, unique, and increasing/);
+  assert.throws(() => selectSchemaSnapshot({
+    baselineReconciliation: false,
+    migrationEntries: altered((entry, index) => index === 1 ? { ...entry, tag: "../outside" } : entry),
+    ...metadata,
+  }), /tags must be unique safe filenames/);
+  assert.throws(() => selectSchemaSnapshot({
+    baselineReconciliation: false,
+    migrationEntries: altered((entry) => ({ ...entry, tag: "same_migration" })),
+    ...metadata,
+  }), /tags must be unique safe filenames/);
+  assert.throws(() => selectSchemaSnapshot({
+    baselineReconciliation: false,
+    migrationEntries: altered((entry, index) => index === 1 ? { ...entry, version: "unknown" } : entry),
+    ...metadata,
+  }), /entries have invalid metadata/);
+  assert.throws(() => selectSchemaSnapshot({
+    baselineReconciliation: false,
+    migrationEntries: migrationJournal.entries,
+    journalVersion: migrationJournal.version,
+    journalDialect: "mysql",
+  }), /journal has invalid version or dialect metadata/);
 });
 
 test("schema verification fails on a missing migration ledger and any inventory drift", () => {

@@ -32,14 +32,18 @@ if (targetError) {
   process.exit(2);
 }
 
-const db = neon(uri);
 const root = fileURLToPath(new URL("..", import.meta.url));
 const journal = JSON.parse(await readFile(join(root, "drizzle", "meta", "_journal.json"), "utf8"));
+const snapshotFile = selectSchemaSnapshot({
+  baselineReconciliation,
+  migrationEntries: journal.entries,
+  journalVersion: journal.version,
+  journalDialect: journal.dialect,
+});
 const expectedMigrationEntries = await Promise.all(journal.entries.map(async (entry) => {
   const sql = await readFile(join(root, "drizzle", `${entry.tag}.sql`));
   return { hash: createHash("sha256").update(sql).digest("hex"), created_at: entry.when };
 }));
-const snapshotFile = selectSchemaSnapshot({ baselineReconciliation, migrationEntries: journal.entries });
 const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", snapshotFile), "utf8"));
 const expectedTables = snapshot.tables;
 const schemas = [...new Set(Object.values(expectedTables).map((table) => table.schema))].sort();
@@ -48,6 +52,7 @@ if (schemas.some((schema) => !/^[a-z_][a-z0-9_]*$/.test(schema))) {
   throw new Error("Unexpected schema identifier in Drizzle snapshot");
 }
 const schemaSql = schemas.map((schema) => `'${schema}'`).join(",");
+const db = neon(uri);
 
 const actualTables = await db`SELECT table_schema, table_name FROM information_schema.tables
 WHERE table_type = 'BASE TABLE' AND table_schema IN (${db.unsafe(schemaSql)})`;

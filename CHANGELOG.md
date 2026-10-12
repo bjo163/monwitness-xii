@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-12 — Validate migration journal before schema verification
+
+- Schema snapshot selection now rejects non-contiguous/out-of-order indices, duplicate or unsafe tags, non-increasing timestamps, and invalid migration metadata before reading migration SQL or querying the database.
+- Added malformed-journal regressions. The current checkout has 98 declared tests, and the dashboard contract now derives/guards its displayed suite count against those test declarations; HTTP smoke expects 98/98.
+- Clarified that alternate Drizzle `--config` files bypass the repository-default config guard and are outside the supported connected migration path; README and database setup point operators to guarded wrappers.
+- Validation: 98/98 tests, `db:check`, full dependency audit (0 vulnerabilities), production build, `actionlint`, `git diff --check`, and 32/32 local HTTP smoke all passed on the current checkout.
+- No Neon access, push, or deployment occurred; production remains NO-GO.
+
 ## 2026-10-12 — Keep current handover metrics exact
 
 - Updated `/handover` and its smoke contract from 95/95 to the current checkout's 96/96 after adding the README instruction regression. The page distinguishes this Node 26.5.0 result from the earlier Node 22.23.3 clean snapshot at 95/95.

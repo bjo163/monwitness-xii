@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 
 const script = fileURLToPath(new URL("../scripts/smoke-http.mjs", import.meta.url));
 const nextConfig = await readFile(new URL("../next.config.js", import.meta.url), "utf8");
@@ -17,6 +17,7 @@ const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", i
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
 const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
+const testsDirectory = new URL(".", import.meta.url);
 
 function runSmoke(env) {
   return spawnSync(process.execPath, [script], {
@@ -113,10 +114,10 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /96 \/ 96/);
+  assert.match(handoverPage, /98 \/ 98/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /current checkout adds a README contract test and passes 96\/96 tests, build, and loopback smoke 32\/32/);
+  assert.match(handoverPage, /current checkout adds README, migration-journal, and test-count regression coverage and passes 98\/98 tests, build, and loopback smoke 32\/32/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
@@ -129,10 +130,21 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
 });
 
+test("handover automated-test metric matches the declared Node test suite size", async () => {
+  const testFiles = (await readdir(testsDirectory)).filter((file) => file.endsWith(".test.js"));
+  const testSources = await Promise.all(testFiles.map((file) => readFile(new URL(file, testsDirectory), "utf8")));
+  const declaredTests = testSources.reduce((total, source) => total + (source.match(/\btest\(/g) ?? []).length, 0);
+  const dashboardCount = Number(handoverPage.match(/value: "(\d+) \/ \d+", label: "automated tests"/)?.[1]);
+  assert.ok(Number.isFinite(dashboardCount), "handover must declare its automated-test count");
+  assert.equal(dashboardCount, declaredTests, "dashboard count must follow the actual declared test suite");
+});
+
 test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
   assert.match(readme, /Local visual routes after starting the app/);
   assert.match(readme, /If port 3000 is occupied, choose an available port/);
   assert.match(readme, /Local pages do not imply a Preview or production deployment/);
+  assert.match(readme, /Do not pass a custom `--config` to a direct Drizzle command/);
+  assert.match(readme, /that file is outside the repository's default-config guard/);
   assert.doesNotMatch(readme, /\]\(https?:\/\/(?:127\.0\.0\.1|localhost):\d+|are running/);
 });
 
