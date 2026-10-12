@@ -4,7 +4,7 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "79 / 79", label: "automated tests", detail: "Auth · Archive · migrations · recovery", tone: "pink" },
+  { value: "83 / 83", label: "automated tests", detail: "Auth · Archive · migrations · recovery", tone: "pink" },
   { value: "32 / 32", label: "local HTTP checks", detail: "Routes · artwork · CSP · signed-out auth", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Full dependency tree · local audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Generated schema matches journal", tone: "gold" },

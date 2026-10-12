@@ -85,7 +85,7 @@ if(profile==="preview"){
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
  await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
- await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("32 / 32")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
+ await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("83 / 83")&&t.includes("32 / 32")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
  await checkFreshPageNonce("/");
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Migration preflight
+
+- Routed `npm run db:migrate` through a local fail-closed wrapper that requires a PostgreSQL URL, independently supplied expected host/database, and explicit `CONFIRM_DATABASE_MIGRATION=YES` before invoking Drizzle. Target errors do not reveal DSN values.
+- Added regression coverage for missing URL/target, mismatches, and missing confirmation. No migration was run and no database was contacted.
+- Updated the local handover test metric to 83/83 after the new tests were added; release status remains NO-GO.
+
 This file records user-visible and operational changes for MoonWitness XII.
 
 ## 2026-10-12 — Local mission-control handover and CSP source of truth

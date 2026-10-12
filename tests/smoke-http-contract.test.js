@@ -101,7 +101,7 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /79 \/ 79/);
+  assert.match(handoverPage, /83 \/ 83/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);

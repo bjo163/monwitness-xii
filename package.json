@@ -8,7 +8,7 @@
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:check": "node scripts/check-migration.mjs",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node scripts/migrate-safe.mjs",
     "db:studio": "drizzle-kit studio",
     "test": "node --test tests/*.test.js",
     "db:verify": "node scripts/verify-schema.mjs",
