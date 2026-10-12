@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Reproduce local review from a clean tracked tree
+
+- Exported local commit `6a88a4b` without `.env` or `.env.local`. A fresh `npm ci --no-audit --no-fund` installed 239 packages on Node 26.5.0 / npm 11.17.0; the clean export passed 117/117 tests, `db:check`, full audit (0 vulnerabilities), production build, `actionlint`, and CSP-required loopback smoke 33/33.
+- Auth/editor and database routes returned safe unconfigured responses in the clean export. npm reported existing peer/deprecation warnings and withheld `core-js`/`esbuild` install scripts. This confirms local reproducibility, not exact-head remote CI or a connected Neon/Auth test.
+
 ## 2026-10-12 — Reject nonstandard local database ports
 
 - Reject explicitly nonstandard PostgreSQL ports and cover standard/nonstandard ports in the database-target regression test.
