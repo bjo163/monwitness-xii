@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Fail closed on inconsistent Auth Fetch Metadata
+
+- Allowlisted Auth POSTs now reject every present `Sec-Fetch-Site` value except `same-origin`, including `same-site`, `none`, and unknown values; requests without that optional header still require an exact same-origin `Origin`.
+- Added unit and loopback HTTP regressions for the rejected values. Local production build smoke passes 40/40; provider-wide sign-in throttling, MFA, owner-auth E2E, and remote release checks remain open.
+
 ## 2026-10-12 — Rehearse the real Drizzle migration runner locally
 
 - Extended the PGlite migration regression to use `drizzle-orm/pglite/migrator` against the repository's actual five-entry migration folder. It checks ordered ledger hashes/timestamps and proves a rerun does not duplicate entries.

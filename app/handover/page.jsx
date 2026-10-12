@@ -5,7 +5,7 @@ export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
   { value: "127 / 127", label: "automated tests", detail: "Latest run · Node 26.5.0", tone: "pink" },
-  { value: "37 / 37", label: "local HTTP checks", detail: "Latest run · Node 26.5.0", tone: "cyan" },
+  { value: "40 / 40", label: "local HTTP checks", detail: "Latest run · Node 26.5.0", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];
@@ -13,7 +13,7 @@ const checks = [
 const verified = [
   "Every HTML page receives a fresh script CSP nonce; smoke checks nonce rotation and every script tag.",
   "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
-  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL. Sign-in/sign-out POSTs also require a same-origin Origin and reject cross-site Fetch Metadata; draft and revision writes share a database quota, and every handler response is no-store.",
+  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL. Sign-in/sign-out POSTs require a same-origin Origin and accept only same-origin Fetch Metadata when present; draft and revision writes share a database quota, and every handler response is no-store.",
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
   "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
   "Runtime database routes require independently supplied host and database values to match the URL before connecting; readiness reports connectivity only.",

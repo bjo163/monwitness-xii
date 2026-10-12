@@ -110,6 +110,9 @@ test("state-changing Auth requests require a same-origin browser request before 
     { origin: "https://attacker.example" },
     { origin: "null" },
     { "sec-fetch-site": "cross-site" },
+    { "sec-fetch-site": "same-site" },
+    { "sec-fetch-site": "none" },
+    { "sec-fetch-site": "unknown" },
   ]) {
     const response = await handlers.POST(request("POST", ["sign-in", "email"], headers), context(["sign-in", "email"]));
     assert.equal(response.status, 403);
@@ -119,6 +122,25 @@ test("state-changing Auth requests require a same-origin browser request before 
   const response = await handlers.POST(missingOrigin, context(["sign-out"]));
   assert.equal(response.status, 403);
   assert.equal(providerCalls(), 0);
+
+  const missingFetchMetadata = await handlers.POST(
+    request("POST", ["sign-in", "email"]),
+    context(["sign-in", "email"]),
+  );
+  assert.equal(missingFetchMetadata.status, 503);
+  assert.equal(providerCalls(), 1);
+
+  let forwarded = false;
+  const validHandlers = createAuthRouteHandlers({
+    isAuthConfigured: () => true,
+    getAuth: () => ({ handler: () => ({ POST: async () => { forwarded = true; return Response.json({ ok: true }); } }) }),
+  });
+  const sameOrigin = await validHandlers.POST(
+    request("POST", ["sign-in", "email"], { "sec-fetch-site": "same-origin" }),
+    context(["sign-in", "email"]),
+  );
+  assert.equal(sameOrigin.status, 200);
+  assert.equal(forwarded, true);
 });
 
 test("configured allowlisted requests dispatch once to the matching provider method", async () => {
