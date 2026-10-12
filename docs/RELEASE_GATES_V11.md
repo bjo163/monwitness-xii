@@ -5,7 +5,7 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 **Editor write quota response hardening:** draft and revision mutations share the per-actor database quota. The PGlite handler regression verifies a draft consumes quota used by a later revision request, then confirms that both denied draft and revision requests return 429 with `Retry-After` and `Cache-Control: no-store` without adding a story or revision. Handler regression passed 4/4 and the full suite passed 125/125 on Node 26.5.0. This does not evidence provider-level failed-login throttling or live database behavior; G-AUTH-02 remains open.
 
-**Editor response cache policy:** a wrapper now applies `Cache-Control: no-store` to every response produced by the draft and revision handlers, covering success and error status paths. PGlite tests assert the header on representative 201/403/404/409/429/503 responses. Re-run the full suite, clean production build, and local smoke against the current follow-up before recording its final verification.
+**Editor response cache policy:** a wrapper now applies `Cache-Control: no-store` to every response produced by the draft and revision handlers, covering success and error status paths. PGlite tests assert the header on representative 201/403/404/409/429/503 responses. The clean environment-free snapshot passed 126/126 tests, `db:check`, production build, and CSP-required local HTTP smoke 34/34 at loopback port 3056. Auth and DB endpoints returned designed unconfigured 503 responses. This is local-only evidence; no deploy, push, or persistent Neon operation occurred.
 
 ### Fresh exact-HEAD clean reproduction — `2f43d146a68f8e70823f055afc4cc34bc7575d21`
 
