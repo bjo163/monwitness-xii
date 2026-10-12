@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Editor write-surface audit
+
+- Added a repository-wide API route contract that identifies data writers, permits only the guarded editor draft/revision POSTs, and checks authorization precedes SQL writes. This prevents a new route from silently bypassing the owner allowlist.
+- Validation: 89/89 tests, production build, CSP-required local smoke 32/32. `/editor/login` and `/handover` render their access requirements, 89/89 metric, and production NO-GO. No database, remote CI, push, or deployment action occurred.
+
 ## 2026-10-12 — Editor access feedback
 
 - The sign-in page now states all access requirements: owner-provisioned account, Neon Auth `admin` role, and exact user ID in the server-side allowlist. It clarifies that provider registration is separate and alone grants no editor access.
