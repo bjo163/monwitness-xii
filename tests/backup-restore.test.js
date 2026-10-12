@@ -3,8 +3,9 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
+import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/pglite/migrator";
-import { evidence, mediaAssets, stories, storyRevisions } from "../db/schema.js";
+import { auditEvents, editorWriteControls, editorWriteLimits, evidence, mediaAssets, stories, storyRevisions } from "../db/schema.js";
 import { listPublicEpisodes } from "../lib/public-archive-query.js";
 import { hasMigrationLedgerDrift } from "../lib/migration-ledger-verification.js";
 import { readMigrationFiles } from "drizzle-orm/migrator";
@@ -46,6 +47,16 @@ test("PGlite data-directory backup restores representative Archive state and inv
   await sourceDb.insert(evidence).values({
     storyId: published.id, sourceLabel: "Synthetic evidence", sourceUrl: "https://example.invalid/fixture", claim: "Synthetic evidence claim",
   });
+  await sourceDb.update(editorWriteControls).set({
+    writesFrozen: true, changedBy: "synthetic-recovery-operator", changeReason: "synthetic recovery rehearsal",
+  }).where(eq(editorWriteControls.singletonId, "global"));
+  await sourceDb.insert(editorWriteLimits).values({
+    actorId: "synthetic-recovery-operator", requestCount: 3, windowStartedAt: new Date("2026-10-12T00:00:00.000Z"),
+  });
+  await sourceDb.insert(auditEvents).values({
+    event: "synthetic.recovery-checkpoint", entity: "archive.story", entityId: published.id,
+    payload: { fixture: true, purpose: "restore verification" },
+  });
 
   const snapshot = await source.dumpDataDir("gzip");
   const restored = await PGlite.create({ loadDataDir: snapshot });
@@ -66,6 +77,25 @@ test("PGlite data-directory backup restores representative Archive state and inv
       (SELECT count(*)::int FROM research.evidence) AS evidence
   `);
   assert.deepEqual(relatedRows.rows[0], { revisions: 2, media: 1, evidence: 1 });
+  const controlsAndAudit = await restored.query(`
+    SELECT
+      (SELECT count(*)::int FROM system.editor_write_controls) AS controls,
+      (SELECT writes_frozen FROM system.editor_write_controls WHERE singleton_id = 'global') AS writes_frozen,
+      (SELECT changed_by FROM system.editor_write_controls WHERE singleton_id = 'global') AS changed_by,
+      (SELECT count(*)::int FROM system.editor_write_limits WHERE actor_id = 'synthetic-recovery-operator') AS operator_limits,
+      (SELECT request_count FROM system.editor_write_limits WHERE actor_id = 'synthetic-recovery-operator') AS request_count,
+      (SELECT count(*)::int FROM system.audit_events WHERE event = 'synthetic.recovery-checkpoint') AS audit_events,
+      (SELECT payload FROM system.audit_events WHERE event = 'synthetic.recovery-checkpoint') AS audit_payload
+  `);
+  assert.deepEqual(controlsAndAudit.rows[0], {
+    controls: 1,
+    writes_frozen: true,
+    changed_by: "synthetic-recovery-operator",
+    operator_limits: 1,
+    request_count: 3,
+    audit_events: 1,
+    audit_payload: { fixture: true, purpose: "restore verification" },
+  });
 
   const ledger = await restored.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at");
   const expectedMigrations = readMigrationFiles(migrationConfig).map(({ hash, folderMillis }) => ({ hash, created_at: folderMillis }));
@@ -82,7 +112,7 @@ test("PGlite data-directory backup restores representative Archive state and inv
 });
 
 test("backup runbook states the current synthetic restore coverage and its limits", () => {
-  assert.match(backupRunbook, /synthetic dataset included one published index, one private draft, two revisions, media, evidence, and all five migration ledger rows/);
+  assert.match(backupRunbook, /synthetic dataset included one published index, one private draft, two revisions, media, evidence, all five migration ledger rows.*a frozen editor-write control.*an editor quota counter.*an audit event/);
   assert.match(backupRunbook, /does not prove Neon snapshot recovery, provider Auth recovery, production data restoration, scheduled retention, or cutover\/rollback/);
   assert.match(backupRunbook, /This repository does not currently provide a verified write-stop mechanism for any persistent database/);
   assert.match(backupRunbook, /If writes cannot be proven stopped, do not claim a freeze or proceed with destructive recovery\/cutover/);
