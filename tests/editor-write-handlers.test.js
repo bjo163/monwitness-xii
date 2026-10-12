@@ -274,6 +274,17 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   assert.equal(rateLimitedResponse.headers.get("cache-control"), "no-store");
   const rejectedRateLimitedDraft = await db.query("SELECT count(*)::int AS count FROM archive.stories WHERE slug='rate-story-two'");
   assert.equal(rejectedRateLimitedDraft.rows[0].count, 0);
+  const rateLimitedRevisionResponse = await revisionHandler(post("/api/editor/revisions", {
+    slug: "rate-story-one", body: "Must not append after quota exhaustion",
+  }));
+  assert.equal(rateLimitedRevisionResponse.status, 429);
+  assert.ok(Number(rateLimitedRevisionResponse.headers.get("retry-after")) >= 1);
+  assert.equal(rateLimitedRevisionResponse.headers.get("cache-control"), "no-store");
+  const unchangedRateLimitedRevisions = await db.query(`
+    SELECT count(*)::int AS count FROM archive.story_revisions
+    WHERE story_id=(SELECT id FROM archive.stories WHERE slug='rate-story-one')
+  `);
+  assert.equal(unchangedRateLimitedRevisions.rows[0].count, 2);
 
   let unavailableLimiterCalls = 0;
   const databaseUnavailableHandler = createEditorDraftHandler({

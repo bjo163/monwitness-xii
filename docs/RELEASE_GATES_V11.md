@@ -3,7 +3,7 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
-**Editor write quota response hardening:** draft and revision mutations continue to share the per-actor database quota. A 429 now returns `Retry-After` and `Cache-Control: no-store`; the PGlite handler regression verifies a draft consumes quota used by a later revision request and that a denied follow-up draft creates no row. Handler regression passed 4/4; full local suite passed 125/125 on Node 26.5.0. This does not evidence provider-level failed-login throttling or live database behavior; G-AUTH-02 remains open.
+**Editor write quota response hardening:** draft and revision mutations share the per-actor database quota. The PGlite handler regression verifies a draft consumes quota used by a later revision request, then confirms that both denied draft and revision requests return 429 with `Retry-After` and `Cache-Control: no-store` without adding a story or revision. Handler regression passed 4/4 and the full suite passed 125/125 on Node 26.5.0. This does not evidence provider-level failed-login throttling or live database behavior; G-AUTH-02 remains open.
 
 ### Fresh exact-HEAD clean reproduction — `2f43d146a68f8e70823f055afc4cc34bc7575d21`
 
