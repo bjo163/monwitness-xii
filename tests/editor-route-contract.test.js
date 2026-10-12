@@ -5,6 +5,7 @@ import { relative, sep } from "node:path";
 
 const draftRoute = await readFile(new URL("../app/api/editor/drafts/route.js", import.meta.url), "utf8");
 const revisionRoute = await readFile(new URL("../app/api/editor/revisions/route.js", import.meta.url), "utf8");
+const writeHandlers = await readFile(new URL("../lib/editor-write-handlers.js", import.meta.url), "utf8");
 const schema = await readFile(new URL("../db/schema.js", import.meta.url), "utf8");
 const retentionMigration = await readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8");
 const apiRoot = new URL("../app/api/", import.meta.url);
@@ -19,34 +20,30 @@ async function listRouteFiles(directory = apiRoot) {
   return nested.flat();
 }
 
-test("draft, first revision, and audit are inserted by one SQL statement", () => {
-  assert.match(draftRoute, /WITH actor AS \([\s\S]*draft AS \([\s\S]*first_revision AS \([\s\S]*audit AS \([\s\S]*SELECT draft\.id, draft\.slug/);
-  assert.match(draftRoute, /story\.draft\.created/);
-  assert.match(draftRoute,/await authorizeEditor\(request\)/);
-  assert.match(draftRoute,/INSERT INTO system\.audit_events\(actor_id,event/);
-  assert.match(draftRoute,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
-  assert.match(draftRoute,/reserveEditorWrite\(\{sql,actorId:auth\.user\.id\}\)/);
-  assert.match(draftRoute,/status:429,headers:\{"Retry-After"/);
-  assert.ok(draftRoute.indexOf("await authorizeEditor(request)") < draftRoute.indexOf("await readJsonBody(request)"));
-  assert.ok(draftRoute.indexOf("await readJsonBody(request)") < draftRoute.indexOf("validateDraft(input)"));
-  assert.ok(draftRoute.indexOf("validateDraft(input)") < draftRoute.indexOf("reserveEditorWrite("));
-  assert.ok(draftRoute.indexOf("reserveEditorWrite(") < draftRoute.indexOf("WITH actor AS"));
+test("draft, first revision, and audit are inserted atomically after validation and rate limiting", () => {
+  assert.match(draftRoute, /createEditorDraftHandler\(\{[\s\S]*authorizeEditor,/);
+  assert.match(writeHandlers, /WITH draft AS \([\s\S]*first_revision AS \([\s\S]*actor AS \([\s\S]*audit AS \([\s\S]*SELECT draft\.id, draft\.slug/);
+  assert.match(writeHandlers, /story\.draft\.created/);
+  assert.match(writeHandlers,/await authorizeEditor\(request\)/);
+  assert.match(writeHandlers,/INSERT INTO system\.audit_events\(actor_id,event/);
+  assert.match(writeHandlers,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
+  assert.match(writeHandlers,/reserveEditorWrite\(\{ sql, actorId: auth\.user\.id \}\)/);
+  assert.ok(writeHandlers.indexOf("await authorizeEditor(request)") < writeHandlers.indexOf("await readJsonBody(request)"));
+  assert.ok(writeHandlers.indexOf("await readJsonBody(request)") < writeHandlers.indexOf("!validate(body.value)"));
+  assert.ok(writeHandlers.indexOf("!validate(body.value)") < writeHandlers.indexOf("reserveEditorWrite("));
+  assert.ok(writeHandlers.indexOf("reserveEditorWrite(") < writeHandlers.indexOf("WITH draft AS"));
+  assert.match(writeHandlers, /SELECT \$\{auth\.user\.id\},\$\{auth\.user\.name\} FROM first_revision LIMIT 1/);
 });
 
-test("revision allocation locks the draft row and writes audit with the revision", () => {
-  assert.match(revisionRoute, /SELECT id FROM archive\.stories[\s\S]*FOR UPDATE/);
-  assert.match(revisionRoute, /MAX\(r\.revision\),0\)\+1/);
-  assert.match(revisionRoute, /story\.revision\.created/);
-  assert.match(revisionRoute, /JOIN audit ON audit\.entity_id=inserted\.story_id/);
-  assert.match(revisionRoute,/await authorizeEditor\(request\)/);
-  assert.match(revisionRoute,/INSERT INTO system\.audit_events\(actor_id,event/);
-  assert.match(revisionRoute,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
-  assert.match(revisionRoute,/reserveEditorWrite\(\{sql,actorId:auth\.user\.id\}\)/);
-  assert.match(revisionRoute,/status:429,headers:\{"Retry-After"/);
-  assert.ok(revisionRoute.indexOf("await authorizeEditor(request)") < revisionRoute.indexOf("await readJsonBody(request)"));
-  assert.ok(revisionRoute.indexOf("await readJsonBody(request)") < revisionRoute.indexOf("validateRevision(input)"));
-  assert.ok(revisionRoute.indexOf("validateRevision(input)") < revisionRoute.indexOf("reserveEditorWrite("));
-  assert.ok(revisionRoute.indexOf("reserveEditorWrite(") < revisionRoute.indexOf("WITH actor AS"));
+test("revision allocation locks the draft and audits only an inserted revision", () => {
+  assert.match(revisionRoute, /createEditorRevisionHandler\(\{[\s\S]*authorizeEditor,/);
+  assert.match(writeHandlers, /WITH target AS MATERIALIZED \([\s\S]*SELECT id FROM archive\.stories[\s\S]*FOR UPDATE/);
+  assert.match(writeHandlers, /MAX\(r\.revision\),0\)\+1/);
+  assert.match(writeHandlers, /story\.revision\.created/);
+  assert.match(writeHandlers, /JOIN audit ON audit\.entity_id=inserted\.story_id/);
+  assert.match(writeHandlers,/INSERT INTO system\.audit_events\(actor_id,event/);
+  assert.match(writeHandlers,/INSERT INTO identity\.users\(external_auth_id,display_name\)/);
+  assert.match(writeHandlers,/SELECT \$\{auth\.user\.id\},\$\{auth\.user\.name\} FROM inserted LIMIT 1/);
 });
 
 test("revision rows cannot cascade away with their story", () => {
@@ -56,25 +53,23 @@ test("revision rows cannot cascade away with their story", () => {
   assert.match(retentionMigration, /ON DELETE restrict/);
 });
 
-test("every API data writer is an editor POST protected by the owner allowlist", async () => {
+test("every API write route delegates only to guarded editor POST handlers", async () => {
   const routes = await listRouteFiles();
   const inspected = await Promise.all(routes.map(async (path) => ({
     name: relative(new URL("../app/api/", import.meta.url).pathname, path.pathname).split(sep).join("/"),
     source: await readFile(path, "utf8"),
   })));
-  const writers = inspected.filter(({ source }) =>
+  const routeWriters = inspected.filter(({ source }) =>
     /\b(?:INSERT INTO|UPDATE\s+[a-z_]|DELETE FROM|TRUNCATE\s|db\.(?:insert|update|delete))\b/i.test(source));
-  assert.deepEqual(writers.map(({ name }) => name).sort(), [
-    "editor/drafts/route.js",
-    "editor/revisions/route.js",
-  ]);
+  assert.deepEqual(routeWriters, [], "API route modules must not contain unreviewed write SQL");
+  assert.match(draftRoute, /export const POST = createEditorDraftHandler\(\{\s*authorizeEditor,/);
+  assert.match(revisionRoute, /export const POST = createEditorRevisionHandler\(\{\s*authorizeEditor,/);
+
   for (const { name, source } of inspected) {
     const methods = [...source.matchAll(/export\s+(?:async\s+function\s+(POST|PUT|PATCH|DELETE)\s*\(|const\s+(POST|PUT|PATCH|DELETE)\s*=)/g)]
       .map((match) => match[1] ?? match[2]);
     if (name === "editor/drafts/route.js" || name === "editor/revisions/route.js") {
       assert.deepEqual(methods, ["POST"]);
-      assert.match(source, /await authorizeEditor\(request\)/);
-      assert.ok(source.indexOf("await authorizeEditor(request)") < source.indexOf("WITH actor AS"));
     } else {
       assert.deepEqual(methods, [], `${name} must not add an unguarded write method`);
     }

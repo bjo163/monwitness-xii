@@ -117,10 +117,10 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /98 \/ 98/);
+  assert.match(handoverPage, /99 \/ 99/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /current checkout adds README, migration-journal, and test-count regression coverage and passes 98\/98 tests, build, and loopback smoke 32\/32/);
+  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 99\/99 tests, build, and loopback smoke 32\/32/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
@@ -131,7 +131,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   const docGateRows = [...releaseGatesDoc.matchAll(/^\| ([A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
   assert.deepEqual(uiGateIds, ["SEC-01", "AUTH-01", "AUTH-02", "DB-02", "DB-03", "ARC-01", "REL-01", "PLAN-01"]);
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
-  assert.match(handoverDoc, /Current local review update.*checkout `f63d643`/);
+  assert.match(handoverDoc, /^### Current local review update/m);
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-12 — Exercise actual editor write handlers against PGlite
+
+- Extracted draft and revision POST logic into injectable handlers so the application code itself can be run against an isolated PostgreSQL-compatible test database.
+- The new route integration test verifies atomic draft/revision/audit writes, append-only revision numbering, duplicate and missing-target responses, authorization-before-body/write behavior, the rate-limit response, and rollback when the audit insert fails.
+- Fixed a revision audit query parameter that lacked an explicit PostgreSQL text type; before the fix, PostgreSQL could not infer the type for the JSON payload's slug parameter.
+- Validation: 99/99 tests and `db:check` on Node 26.5.0 and Node 24.19.0, full `npm audit` (0 vulnerabilities), production build, `actionlint`, diff check, and CSP-required loopback HTTP smoke 32/32. The rebuilt local handover reports 99/99.
+- This is local application/test work only. Persistent Neon, owner authentication, remote CI, push, and deployment remain untouched.
+
 ## 2026-10-12 — Reconcile active handover checkpoint references
 
 - Marked the older 95-test checkpoint as historical, aligned the current local URL to port 3036, and recorded the verified 98-test checkout in the handover and release tracker.
