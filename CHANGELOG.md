@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Local release gate register and README refresh (`6ac583e` + follow-up)
+
+- Added one release-gate register with all eight IDs, open states, and evidence needed to close them. The contract suite asserts that the handover dashboard has exactly the same ordered IDs and open statuses.
+- Repeated current-checkout CSP-required loopback smoke 32/32 and verified all eight gates, production NO-GO, and LOCAL ONLY in the served handover page. The clean Node 22.23.3 snapshot also passed 95/95 tests, migration replay, audit, build, and smoke 32/32.
+- Removed session-specific localhost ports from README quick links and replaced stale “currently running” claims with reusable local route and smoke instructions. Historical Preview links are explicitly labeled as old checkpoints.
+- Current checkout verification: 96/96 tests, production build, local smoke 32/32, and `git diff --check` pass. No push, deployment, or persistent database operation occurred.
+
 ## 2026-10-12 — Guard direct Drizzle database commands (`fdb8f1d`)
 
 - Moved database target validation into a shared helper used by the npm migration/Studio wrappers and the repository's default Drizzle config. Direct `migrate`, `studio`, and `introspect`/`pull` commands now require a URL, separately supplied expected host/database, and operation-specific confirmation.

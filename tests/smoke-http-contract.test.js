@@ -14,6 +14,7 @@ const editorLoginView = await readFile(new URL("../app/editor/login/view.jsx", i
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
 const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
+const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
 const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
 
@@ -126,6 +127,13 @@ test("local handover reports current local evidence and keeps production NO-GO",
   const docGateRows = [...releaseGatesDoc.matchAll(/^\| ([A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
   assert.deepEqual(uiGateIds, ["SEC-01", "AUTH-01", "AUTH-02", "DB-02", "DB-03", "ARC-01", "REL-01", "PLAN-01"]);
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
+});
+
+test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
+  assert.match(readme, /Local visual routes after starting the app/);
+  assert.match(readme, /If port 3000 is occupied, choose an available port/);
+  assert.match(readme, /Local pages do not imply a Preview or production deployment/);
+  assert.doesNotMatch(readme, /\]\(https?:\/\/(?:127\.0\.0\.1|localhost):\d+|are running/);
 });
 
 test("CI actions stay pinned to full SHAs and Dependabot tracks action updates", () => {

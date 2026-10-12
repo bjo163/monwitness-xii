@@ -8,12 +8,10 @@ MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG.
 > Neon Managed Auth is enabled on the isolated development branch. The sign-in flow and admin-only draft routes are implemented, but owner-admin session and authenticated-write E2E tests remain unverified. Production Auth, migrations and release have not been changed.
 
 ## Quick links
-- [Development frontend](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app)
-- [Local release handover visual](http://127.0.0.1:3020/handover) — current local-only NO-GO status and verified release gates.
-- [Local Story Archive visual](http://127.0.0.1:3020/episodes) — current local production build; archive rows require a development-only database connection.
-- [Historical READY remote review visual: The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team) — protected Preview for checkpoint `d6c884b`; current local changes are not included.
-- [Production frontend](https://monwitness-xii.vercel.app) — older production version; V11 changes are **not** released
-- [Story Archive](https://monwitness-xii-git-dev-bjo163s-projects.vercel.app/episodes)
+- Local visual routes after starting the app: `/`, `/team`, `/episodes`, and `/handover` (see [Local development](#local-development)). No port-specific localhost URL is recorded because local ports vary by session.
+- Historical Development Preview: `https://monwitness-xii-git-dev-bjo163s-projects.vercel.app` — this may not include the current local review commits.
+- Historical READY review Preview: [The Batteries roster](https://monwitness-ddqa9vtjb-bjo163s-projects.vercel.app/team), checkpoint `d6c884b`; protected and does not contain current local changes.
+- Existing production frontend: [moonwitness-xii.vercel.app](https://monwitness-xii.vercel.app) — V11 changes are **not** released.
 - [Grand Plan implementation checklist](docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md)
 - [Release gates](docs/RELEASE_GATES_V11.md)
 - [Go / No-Go](docs/FINALIZATION_V11_RELEASE_PLAN.md)
@@ -51,9 +49,9 @@ For populated-development baseline preflight only, also set `EXPECTED_DATABASE_H
 
 `npm test` includes an in-memory PostgreSQL migration execution test; it does not require Docker or a Neon connection.
 
-For a CSP-required local HTTP smoke without database credentials, use PowerShell: `$env:SMOKE_PROFILE = 'local'; $env:SMOKE_BASE_URL = 'http://127.0.0.1:3020'; $env:SMOKE_EXPECT_CSP = '1'; npm run smoke:http`. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
+For a CSP-required local HTTP smoke without database credentials, start the production build in one PowerShell window with `npm run start -- --hostname 127.0.0.1 --port 3000`. In a second window, set `$env:SMOKE_PROFILE = 'local'; $env:SMOKE_BASE_URL = 'http://127.0.0.1:3000'; $env:SMOKE_EXPECT_CSP = '1'; npm run smoke:http`. If port 3000 is occupied, choose an available port and use it in both commands. Local mode only permits loopback hosts. It accepts the safe database/archive `503` response when no local `DATABASE_URL` exists; this does not count as database connectivity verification. For an authorized connected Preview, leave the profile at its default and set `$env:SMOKE_BASE_URL = 'https://your-authorized-preview.example'` before running `npm run smoke:http`. Do not put credentials in the URL.
 
-The current local production build's [Story Archive page](http://127.0.0.1:3020/episodes) and [release handover](http://127.0.0.1:3020/handover) are running. The Archive shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible. These localhost links refer to the user's local review app; they do not imply a Preview or production deployment.
+Open `/episodes` for the Story Archive and `/handover` for the release dashboard after starting the local app. The Archive shows a safe unavailable/retry state when `.env.local` has no `DATABASE_URL`; its public-index and source-provenance notice remains visible. The local handover keeps production NO-GO and identifies the current release gates. Local pages do not imply a Preview or production deployment.
 
 The current local review includes an Archive notice explaining that a published index does not establish source provenance or reuse rights. Without a local development `DATABASE_URL`, the notice is visible but the database-backed episode cards show the safe retry state. This local review change is not in the remote Preview.
 
