@@ -157,6 +157,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
   assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3040\/handover`/);
+  assert.match(releaseGatesDoc, /Latest local checkpoint — commit `86ca26a`/);
+  assert.match(releaseGatesDoc, /122\/122 tests on Node 24\.19\.0 and Node 26\.5\.0/);
+  assert.match(releaseGatesDoc, /All eight gates below remain OPEN/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 
