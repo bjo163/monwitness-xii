@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Share scoped queries across Story Archive pages
+
+- Moved Archive list/detail page queries to shared published-only helpers with an explicit allowlist of the five editorial index fields plus `originalSourceStatus` for its visible provenance label.
+- The public API remains on its five-field projection. PGlite regression checks both page helpers against private drafts, manuscript revisions, evidence, media, and metadata fixtures; a contract keeps the Next.js pages wired to the helpers.
+- Local verification at code commit `b5982dc`: 112/112 tests, `db:check`, zero findings from full `npm audit`, production build, `actionlint`, and CSP-required loopback smoke 32/32.
+- No push or deployment. Live connected Archive success and provenance-source review remain open; production stays NO-GO.
+
 ## 2026-10-12 — Confirm revoked writes consume no resources
 
 - Extended the post-revocation PGlite regression to assert a denied editor request creates no revision or audit event, reserves no rate-limit quota, and creates no actor row.
