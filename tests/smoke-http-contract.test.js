@@ -202,6 +202,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3099\/handover` reports 127\/127, 40\/40, and all eight gates open/);
+  assert.match(releaseGatesDoc, /Editor mutation origin policy:/);
+  assert.match(releaseGatesDoc, /PGlite integration calls the actual authorizer and write handler/);
+  assert.match(releaseGatesDoc, /without adding a revision, audit event, actor row, or quota reservation/);
+  assert.match(handoverDoc, /editor handler integration confirms denied requests add no revision, audit event, actor row, or quota reservation/);
   assert.match(releaseGatesDoc, /Read-only GitHub review recorded PR #4 draft\/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`/);
   assert.match(releaseGatesDoc, /local merge-tree simulation reported add\/add conflicts/);
   assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));

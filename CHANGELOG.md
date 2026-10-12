@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Apply strict Fetch Metadata checks to editor writes
+
+- Editor draft/revision authorization now rejects every present `Sec-Fetch-Site` value except `same-origin`, matching the Auth proxy; an absent Fetch Metadata header remains supported when the exact same-origin `Origin` is present.
+- PGlite integration invokes the actual editor authorizer and write handler for cross-site, same-site, none, and unknown values, then verifies rejected attempts add no revision, audit event, actor row, or quota reservation.
+
 ## 2026-10-12 — Fail closed on inconsistent Auth Fetch Metadata
 
 - Allowlisted Auth POSTs now reject every present `Sec-Fetch-Site` value except `same-origin`, including `same-site`, `none`, and unknown values; requests without that optional header still require an exact same-origin `Origin`.

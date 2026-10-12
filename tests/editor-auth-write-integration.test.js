@@ -22,10 +22,12 @@ function taggedQuery(db) {
   };
 }
 
-function post(path, value) {
+function post(path, value, fetchSite = "same-origin") {
+  const headers = { "content-type": "application/json", origin: "http://localhost" };
+  if (fetchSite !== null) headers["sec-fetch-site"] = fetchSite;
   return new Request(`http://localhost${path}`, {
     method: "POST",
-    headers: { "content-type": "application/json", origin: "http://localhost", "sec-fetch-site": "same-origin" },
+    headers,
     body: JSON.stringify(value),
   });
 }
@@ -59,12 +61,29 @@ test("real editor authorization composition rejects writes after a provider role
   assert.equal(created.status, 201);
   assert.equal(sessionLookups, 1);
 
+  for (const fetchSite of ["cross-site", "same-site", "none", "unknown"]) {
+    const rejectedWrite = await appendRevision(post(
+      "/api/editor/revisions",
+      { slug: "revocable-editor", body: `Rejected ${fetchSite} request` },
+      fetchSite,
+    ));
+    assert.equal(rejectedWrite.status, 403, fetchSite);
+  }
+  const originGuardState = await db.query(`
+    SELECT
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
+      (SELECT count(*)::int FROM system.audit_events) AS audit_events,
+      (SELECT request_count::int FROM system.editor_write_limits WHERE actor_id='owner-1') AS reserved_writes,
+      (SELECT count(*)::int FROM identity.users WHERE external_auth_id='owner-1') AS actor_rows
+  `);
+  assert.deepEqual(originGuardState.rows[0], { revisions: 1, audit_events: 1, reserved_writes: 1, actor_rows: 1 });
+
   role = "user";
   const revokedWrite = await appendRevision(post("/api/editor/revisions", {
     slug: "revocable-editor", body: "Must not be written after revocation",
   }));
   assert.equal(revokedWrite.status, 403);
-  assert.equal(sessionLookups, 2);
+  assert.equal(sessionLookups, 6);
 
   const state = await db.query(`
     SELECT

@@ -32,7 +32,10 @@ test("admin role and same-origin browser request are authorized with actor ident
 test("missing or cross-origin requests are rejected",()=>{
  assert.equal(resolveEditorAuthorization(context({origin:null})).status,403);
  assert.equal(resolveEditorAuthorization(context({origin:"https://attacker.example"})).status,403);
- assert.equal(resolveEditorAuthorization(context({fetchSite:"cross-site"})).status,403);
+ for(const fetchSite of ["cross-site","same-site","none","unknown"]){
+  assert.equal(resolveEditorAuthorization(context({fetchSite})).status,403,fetchSite);
+ }
+ assert.deepEqual(resolveEditorAuthorization(context({fetchSite:null})),{ok:true,user:{id:"auth-user-7",name:"Moon Editor"}});
 });
 test("invalid identity identifiers fail closed",()=>{
  assert.equal(resolveEditorAuthorization(context({session:{user:{id:" ",role:"admin"}}})).status,403);
