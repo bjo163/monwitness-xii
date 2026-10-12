@@ -125,7 +125,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
   assert.match(handoverPage, /earlier clean Node 22\.23\.3 snapshot at commit 6a88a4b passed install, 95\/95 tests/);
-  assert.match(handoverPage, /Latest local verification at commit 81f8fe8 passes 125\/125 tests and CSP-required smoke 34\/34 on Node 26\.5\.0/);
+  assert.match(handoverPage, /Prior local verification at commit 81f8fe8 passes 125\/125 tests and CSP-required smoke 34\/34 on Node 26\.5\.0/);
+  assert.match(handoverPage, /fresh exact tracked-tree snapshot at commit 9d054ff passed on Node 22\.23\.3 \/ npm 11\.17\.0/);
   assert.match(handoverPage, /A separate clean tracked-tree snapshot at commit 162693b/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
@@ -181,7 +182,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
-  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3050\/handover`/);
+  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3051\/handover`/);
   assert.match(releaseGatesDoc, /Prior local checkpoint — superseded by the verification above/);
   assert.match(releaseGatesDoc, /Latest local verification at commit `81f8fe8` passes 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
