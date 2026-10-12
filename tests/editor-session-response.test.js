@@ -12,29 +12,29 @@ test("editor session response is no-store and exposes only the caller's role and
     {
       result: {
         ok: true,
-        session: { user: { id: "private-id", email: "private@example.test", role: "admin", token: "private-token" } },
+        session: { user: { id: "private-id", email: "private@example.test", role: "admin", emailVerified: false, token: "private-token" } },
         isEditorAdmin: false,
       },
       status: 200,
-      body: { authenticated: true, role: "admin", canEdit: false },
+      body: { authenticated: true, role: "admin", emailVerified: false, canEdit: false },
     },
     {
       result: {
         ok: true,
-        session: { user: { id: "private-id", email: "private@example.test", role: "admin", token: "private-token" } },
+        session: { user: { id: "private-id", email: "private@example.test", role: "admin", emailVerified: true, token: "private-token" } },
         isEditorAdmin: true,
       },
       status: 200,
-      body: { authenticated: true, role: "admin", canEdit: true },
+      body: { authenticated: true, role: "admin", emailVerified: true, canEdit: true },
     },
     {
       result: {
         ok: true,
-        session: { user: { id: "private-id", email: "private@example.test", role: "unexpected", token: "private-token" } },
+        session: { user: { id: "private-id", email: "private@example.test", role: "unexpected", emailVerified: false, token: "private-token" } },
         isEditorAdmin: false,
       },
       status: 200,
-      body: { authenticated: true, role: "user", canEdit: false },
+      body: { authenticated: true, role: "user", emailVerified: false, canEdit: false },
     },
   ];
 

@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   EDITOR_ACCESS_DENIED_MESSAGE,
+  EDITOR_EMAIL_UNVERIFIED_MESSAGE,
   EDITOR_ACCESS_UNAVAILABLE_MESSAGE,
   getEditorLoginAccessDecision,
 } from "../lib/editor-login-feedback.js";
 
 test("approved editor session continues to the editor", () => {
-  assert.deepEqual(getEditorLoginAccessDecision({ status: 200, role: "admin", canEdit: true }), {
+  assert.deepEqual(getEditorLoginAccessDecision({ status: 200, role: "admin", emailVerified: true, canEdit: true }), {
     authorized: true,
     message: "",
   });
@@ -19,7 +20,8 @@ test("signed-out or disallowed accounts get the owner-provisioning guidance", ()
     message: EDITOR_ACCESS_DENIED_MESSAGE,
   });
   assert.match(getEditorLoginAccessDecision({ status: 200, role: "user", canEdit: false }).message, /administrator role/);
-  assert.match(getEditorLoginAccessDecision({ status: 200, role: "admin", canEdit: false }).message, /server-side editor allowlist/);
+  assert.equal(getEditorLoginAccessDecision({ status: 200, role: "admin", emailVerified: false, canEdit: true }).message, EDITOR_EMAIL_UNVERIFIED_MESSAGE);
+  assert.match(getEditorLoginAccessDecision({ status: 200, role: "admin", emailVerified: true, canEdit: false }).message, /server-side editor allowlist/);
 });
 
 test("server failures are not reported as account authorization denials", () => {

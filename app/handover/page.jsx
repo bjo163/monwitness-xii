@@ -4,8 +4,8 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "133 / 133", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
-  { value: "39 / 40", label: "local HTTP checks", detail: "Existing server · one stale handover metric", tone: "cyan" },
+  { value: "134 / 134", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
+  { value: "39 / 40", label: "local HTTP checks", detail: "Existing process · stale 129-test bundle", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];
@@ -13,7 +13,7 @@ const checks = [
 const verified = [
   "Every HTML page receives a fresh script CSP nonce; smoke checks nonce rotation and every script tag.",
   "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
-  "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL. Sign-in/sign-out POSTs require a same-origin Origin and accept only same-origin Fetch Metadata when present; draft and revision writes share a database quota, and every handler response is no-store.",
+  "Editor writes require a verified email, an Auth admin role, the exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL. Sign-in/sign-out POSTs require a same-origin Origin and accept only same-origin Fetch Metadata when present; draft and revision writes share a database quota, and every handler response is no-store.",
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
   "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
   "Database routes require independent host/database matches, reject connection-identity query overrides, and require TLS; readiness reports connectivity only.",
@@ -23,7 +23,7 @@ const verified = [
 
 const gates = [
   { id: "G-SEC-01", title: "Verify CSP on the exact release preview", text: "Local smoke requires nonce-only script and style policies and checks every rendered script/style block. This worktree has no remote CI or Preview result; repeat on the exact reviewed release head." },
-  { id: "G-AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in, admin onboarding, authenticated draft/revision writes, audit attribution, session/role-revocation checks, and review Neon Auth SDK peer compatibility." },
+  { id: "G-AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in with verified email, admin onboarding, authenticated draft/revision writes, audit attribution, session/role-revocation checks, and review Neon Auth SDK peer compatibility." },
   { id: "G-AUTH-02", title: "Identity policy", text: "Direct provider sign-up remains enabled, MFA is unavailable here, and effective failed-login throttling is unverified. This SDK cannot configure a provider-wide limiter; verify Neon enforcement or choose an approved identity path." },
   { id: "G-DB-02", title: "Persistent development migration", text: "The Neon rehearsal covers migrations 0000–0002 only. Review and rehearse 0003/0004 on an isolated clone, confirm the exact application target, reconcile its schema and ledger, then apply only through an approved plan. The local freeze CLI is not a persistent incident control yet." },
   { id: "G-DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
@@ -94,7 +94,7 @@ export default function HandoverPage() {
           <div className={styles.limitsGrid} aria-label="Evidence boundaries">
             {evidenceLimits.map((item) => <article className={`${styles.limitCard} ${styles[item.tone]}`} key={item.label}><span>{item.label} · EVIDENCE BOUNDARY</span><strong>{item.value}</strong><p>{item.detail}</p></article>)}
           </div>
-          <div className={styles.evidenceNote}><strong>Latest local run · 13 Oct 2026</strong><p>Node 26.5.0: 133/133 tests; `db:check`; full dependency audit with 0 findings; production build; and `actionlint` pass. A fresh isolated install also builds successfully. Loopback smoke against the already-running app passed 39/40: every route, asset, CSP, Auth and Archive check passed; the only miss is the app still serving this dashboard's older 129/129 text. This source now records the current count. No new port or deployment was used.</p><p>Database target validation covers the installed driver's URL settings and `PGPORT`, `PGOPTIONS`, `PGREPLICATION`, `PGUSER`, and `PGPASSWORD` fallbacks. Tests exercise the real driver parser offline; no Neon URL is configured locally. The Neon rehearsal remains limited to `0000`–`0002`; `0003`/`0004` are not Neon-rehearsed. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, connected local Neon target, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
+          <div className={styles.evidenceNote}><strong>Latest local run · 13 Oct 2026</strong><p>Node 26.5.0: 134/134 tests; `db:check`; full dependency audit with 0 findings; production build; and `actionlint` pass. A fresh isolated install also builds successfully. The editor session now requires an explicitly verified email in addition to the Neon administrator role and exact server-side user allowlist. The hosted dev provider still allows public signup and does not require email verification, so this local application check does not close provider identity policy. Local HTTP smoke must be rerun against the updated bundle. No deployment was performed.</p><p>Database target validation covers the installed driver's URL settings and `PGPORT`, `PGOPTIONS`, `PGREPLICATION`, `PGUSER`, and `PGPASSWORD` fallbacks. Tests exercise the real driver parser offline; no Neon URL is configured locally. The Neon rehearsal remains limited to `0000`–`0002`; `0003`/`0004` are not Neon-rehearsed. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, connected local Neon target, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
         </div>
       </section>
 

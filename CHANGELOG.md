@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13 — Require verified email for editor authorization
+
+- Editor session authorization now fails closed unless the authenticated Neon user has `emailVerified === true`, in addition to the existing administrator role and exact owner allowlist.
+- The session endpoint exposes only a boolean verification status; login feedback explains how to resolve an unverified account. Regression tests cover verified, unverified, and missing provider values.
+- Updated the handover dashboard count to the actual 134 declared tests. Hosted provider signup and email-verification settings remain unchanged; release identity gates stay open.
+- Verification: `npm test` 134/134, `npm run db:check`, full `npm audit` (0 findings), `actionlint`, and an isolated fresh `npm ci` + production build all pass. Existing server was left untouched on port 3199, so its older bundle still needs a same-port refresh before current HTTP smoke.
+
 ## 2026-10-13 — Close PostgreSQL driver fallback gaps and refresh the handover
 
 - The shared database target guard now requires explicit URL credentials and effective port 5432, rejects PostgreSQL startup/environment fallbacks that can alter the connection, and allows only the reviewed TLS and Neon channel-binding options. Regressions exercise the installed driver parser, guarded migration wrapper, and direct Drizzle flags.

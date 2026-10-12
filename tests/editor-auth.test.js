@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {isEditorAdmin,parseEditorAdminUserIds,resolveEditorAuthorization} from "../lib/editor-auth-policy.js";
 
-const admin={user:{id:"auth-user-7",name:"Moon Editor",role:"admin"}};
+const admin={user:{id:"auth-user-7",name:"Moon Editor",role:"admin",emailVerified:true}};
 const context=(overrides={})=>({
  authConfigured:true,session:admin,adminUserIds:new Set(["auth-user-7"]),origin:"http://localhost:3000",
  expectedOrigin:"http://localhost:3000",fetchSite:"same-origin",...overrides,
@@ -21,9 +21,14 @@ test("an admin role alone cannot grant editor access without the owner allowlist
  assert.equal(resolveEditorAuthorization(context({adminUserIds:new Set()})).status,403);
  assert.equal(resolveEditorAuthorization(context({adminUserIds:new Set(["another-user"])})).status,403);
 });
+test("editor access requires an explicitly verified admin email",()=>{
+ assert.equal(resolveEditorAuthorization(context({session:{user:{id:"auth-user-7",role:"admin",emailVerified:false}}})).status,403);
+ assert.equal(resolveEditorAuthorization(context({session:{user:{id:"auth-user-7",role:"admin"}}})).status,403);
+});
 test("editor allowlist parsing is exact and ignores empty values",()=>{
  assert.deepEqual([...parseEditorAdminUserIds(" first, ,second,first ")],["first","second"]);
- assert.equal(isEditorAdmin({id:"first",role:"admin"},parseEditorAdminUserIds("first")),true);
+ assert.equal(isEditorAdmin({id:"first",role:"admin",emailVerified:true},parseEditorAdminUserIds("first")),true);
+ assert.equal(isEditorAdmin({id:"first",role:"admin",emailVerified:false},parseEditorAdminUserIds("first")),false);
  assert.equal(isEditorAdmin({id:"first",role:"user"},parseEditorAdminUserIds("first")),false);
 });
 test("admin role and same-origin browser request are authorized with actor identity",()=>{

@@ -95,9 +95,11 @@ test("editor login explains owner provisioning and all editor-access requirement
   assert.match(editorLoginView, /owner-provisioned account/);
   assert.match(editorLoginView, /Neon Auth administrator role/);
   assert.match(editorLoginView, /server-side editor allowlist/);
+  assert.match(handoverPage, /Editor writes require a verified email, an Auth admin role/);
   assert.match(editorLoginView, /Provider registration is managed separately/);
   assert.match(editorLoginView, /getEditorLoginAccessDecision/);
-  assert.match(editorLoginView, /role:data\?\.role,canEdit:data\?\.canEdit/);
+  assert.match(editorLoginView, /role:data\?\.role,emailVerified:data\?\.emailVerified,canEdit:data\?\.canEdit/);
+  assert.match(editorLoginView, /verified email/);
 });
 
 test("local and Preview smoke enforce per-route Neon Auth methods", () => {
@@ -131,14 +133,14 @@ test("local smoke checks editor write responses are not cacheable", () => {
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /133 \/ 133/);
-  assert.match(smokeScript, /t\.includes\("133 \/ 133"\)/);
+  assert.match(handoverPage, /134 \/ 134/);
+  assert.match(smokeScript, /t\.includes\("134 \/ 134"\)/);
   assert.match(handoverPage, /39 \/ 40/);
   assert.match(handoverPage, /NOT CONNECTED/);
   assert.match(handoverPage, /This checkout is ahead of the remote PR head/);
   assert.match(handoverPage, /8 GATES OPEN/);
   assert.match(handoverPage, /Latest local run · 13 Oct 2026/);
-  assert.match(handoverPage, /every route, asset, CSP, Auth and Archive check passed; the only miss is the app still serving this dashboard's older 129\/129 text/);
+  assert.match(handoverPage, /Local HTTP smoke must be rerun against the updated bundle/);
   assert.doesNotMatch(handoverPage, /Fresh exact tracked-tree reproduction at commit 2f43d14/);
   assert.match(handoverPage, /Revalidated locally · Node 26\.5\.0/);
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);

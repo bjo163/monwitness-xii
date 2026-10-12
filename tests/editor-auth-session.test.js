@@ -10,7 +10,7 @@ const configured = (getSession, adminUserIds = new Set()) => resolveEditorSessio
 
 test("editor session lookup bypasses the signed session-data cache", async () => {
   let options;
-  const expected = { data: { user: { id: "owner-1", role: "admin" } }, error: null };
+  const expected = { data: { user: { id: "owner-1", role: "admin", emailVerified: true } }, error: null };
   const result = await getFreshEditorAuthSession({
     getSession: async (value) => { options = value; return expected; },
   });
@@ -23,7 +23,7 @@ test("editor authorization observes a provider role change on the next lookup", 
   const auth = {
     getSession: async (options) => {
       assert.deepEqual(options, { query: { disableCookieCache: "true" } });
-      return { data: { user: { id: "owner-1", role } }, error: null };
+      return { data: { user: { id: "owner-1", role, emailVerified: true } }, error: null };
     },
   };
   const getSession = () => getFreshEditorAuthSession(auth);
@@ -64,19 +64,21 @@ test("empty provider session remains signed out", async () => {
 
 test("provider error fields cannot be mistaken for a valid admin session", async () => {
   const result = await configured(async () => ({
-    data: { user: { id: "owner-1", role: "admin" } },
+    data: { user: { id: "owner-1", role: "admin", emailVerified: true } },
     error: new Error("session verification failed"),
   }), new Set(["owner-1"]));
   assert.deepEqual(result, { ok: false, status: 503, message: "Authentication service unavailable" });
 });
 
 test("editor access requires both the provider admin role and exact owner allowlist ID", async () => {
-  const session = { user: { id: "owner-1", role: "admin" } };
+  const session = { user: { id: "owner-1", role: "admin", emailVerified: true } };
   const allowed = await configured(async () => ({ data: session, error: null }), new Set(["owner-1"]));
   const notAllowlisted = await configured(async () => ({ data: session, error: null }), new Set(["other-owner"]));
-  const wrongRole = await configured(async () => ({ data: { user: { id: "owner-1", role: "user" } }, error: null }), new Set(["owner-1"]));
+  const wrongRole = await configured(async () => ({ data: { user: { id: "owner-1", role: "user", emailVerified: true } }, error: null }), new Set(["owner-1"]));
+  const unverified = await configured(async () => ({ data: { user: { id: "owner-1", role: "admin", emailVerified: false } }, error: null }), new Set(["owner-1"]));
 
   assert.equal(allowed.isEditorAdmin, true);
   assert.equal(notAllowlisted.isEditorAdmin, false);
   assert.equal(wrongRole.isEditorAdmin, false);
+  assert.equal(unverified.isEditorAdmin, false);
 });

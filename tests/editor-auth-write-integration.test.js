@@ -46,7 +46,7 @@ test("real editor authorization composition rejects writes after a provider role
       getSession: async (options) => {
         sessionLookups += 1;
         assert.deepEqual(options, { query: { disableCookieCache: "true" } });
-        return { data: { user: { id: "owner-1", name: "Owner", role } }, error: null };
+        return { data: { user: { id: "owner-1", name: "Owner", role, emailVerified: true } }, error: null };
       },
     }),
   });
