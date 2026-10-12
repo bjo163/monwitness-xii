@@ -13,6 +13,8 @@ const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", i
 const editorLoginView = await readFile(new URL("../app/editor/login/view.jsx", import.meta.url), "utf8");
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
+const handoverDoc = await readFile(new URL("../docs/HANDOVER_V11.md", import.meta.url), "utf8");
+const implementationChecklist = await readFile(new URL("../docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md", import.meta.url), "utf8");
 const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
@@ -128,6 +130,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   const docGateRows = [...releaseGatesDoc.matchAll(/^\| ([A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
   assert.deepEqual(uiGateIds, ["SEC-01", "AUTH-01", "AUTH-02", "DB-02", "DB-03", "ARC-01", "REL-01", "PLAN-01"]);
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
+  assert.match(handoverDoc, /Current local review update.*checkout `f63d643`/);
+  assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
+  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3036\/handover`/);
+  assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35)\/handover/);
 });
 
 test("handover automated-test metric matches the declared Node test suite size", async () => {
