@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Reject control characters in editor-freeze audit metadata
+
+- The database write-freeze helper now rejects C0/DEL control characters in operator references and change reasons so stored audit metadata cannot contain forged line breaks or tabs.
+- PGlite regression cases verify both invalid fields are rejected before the freeze state is changed.
+
 ## 2026-10-12 — Make editor-freeze CLI validation actionable
 
 - Preserve sanitized usage and confirmation guidance for invalid operator input while continuing to mask target/configuration and database errors.

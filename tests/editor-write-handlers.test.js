@@ -42,6 +42,8 @@ test("editor write freeze reads the singleton control and fails closed if it is 
   const audit = await db.query("SELECT changed_by,change_reason FROM system.editor_write_controls WHERE singleton_id='global'");
   assert.deepEqual(audit.rows[0], { changed_by: "on-call", change_reason: "INC-104" });
   await assert.rejects(setEditorWriteFreezeState({ sql, frozen: false, operator: "", reason: "resume" }), /operator reference is required/);
+  await assert.rejects(setEditorWriteFreezeState({ sql, frozen: false, operator: "on-call\nforged-entry", reason: "resume" }), /operator reference must not contain control characters/);
+  await assert.rejects(setEditorWriteFreezeState({ sql, frozen: false, operator: "on-call", reason: "INC-104\tforged-entry" }), /change reason must not contain control characters/);
   assert.equal(await setEditorWriteFreezeState({ sql, frozen: false, operator: "on-call", reason: "INC-104-resolved" }), false);
   assert.equal(await isEditorWriteFrozen({ sql }), false);
   await sql`DELETE FROM system.editor_write_controls WHERE singleton_id='global'`;
