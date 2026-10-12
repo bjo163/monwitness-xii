@@ -22,6 +22,12 @@ This rehearsal validates Drizzle's timestamp-based baseline-stamp sequence on a 
 
 The additive `0002` migration was also applied to this same authorized disposable clone. A PostgreSQL rehearsal admitted exactly 30 writes for one editor, rejected the next five, reset the count after an expired window, and removed the temporary test row. A second rehearsal sent 35 independent SQL upserts concurrently through the Neon connector to the same actor key; exactly 30 returned an admitted row, five returned no row, and the stored counter was 30. The test actor and table were then removed; a read-only check confirmed 15 stories, zero revisions, and no rate-limit table. This proves atomic reservation at the SQL level on Neon, not end-to-end concurrency through authenticated application requests. The persistent dev branch has not received `0001` or `0002`.
 
+## Local reverse-DDL rehearsal across migrations 0001–0004
+
+The PGlite migration execution test starts with the `0000` schema populated with synthetic public/private stories, revisions, an authenticated-editor audit event, and linked Archive records. It applies `0001`–`0004`, verifies the write-freeze control defaults and writes an operator/reason plus quota counter, then simulates reverse DDL in order: drop `0004`'s two audit columns, drop `0003`'s control table, drop `0002`'s quota table, and restore `0001`'s prior `CASCADE` FK. The test checks that the frozen flag survives the `0004` column rollback and that story, revision, and audit counts are unchanged after the feature-table rollbacks and FK restoration.
+
+This is a PGlite reverse-DDL simulation, not a published downgrade command, Drizzle-ledger rollback workflow, or Neon rehearsal. It does not establish safe operational rollback on a persistent database. The destructive reverse steps must be reviewed and tested against a fresh isolated clone before any persistent apply; DB-02 remains open.
+
 ## Read-only preflight before any dev stamp
 
 After securely obtaining the development-branch connection string, independently verify its endpoint host and database name against the selected Neon development branch in the Neon control plane. The baseline preflight requires these values separately so it can reject a copied production or unrelated DSN before opening a connection. Do not populate the expected values by extracting them from `DATABASE_URL` alone. Run:

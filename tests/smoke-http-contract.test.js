@@ -209,6 +209,8 @@ test("populated development migration runbook accounts for the entire current jo
   assert.match(migrationReconciliationDoc, /complete ordered plan for all four migrations/);
   assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
   assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);
+  assert.match(migrationReconciliationDoc, /Local reverse-DDL rehearsal across migrations 0001–0004/);
+  assert.match(migrationReconciliationDoc, /PGlite reverse-DDL simulation, not a published downgrade command, Drizzle-ledger rollback workflow, or Neon rehearsal/);
   assert.match(migrationReconciliationDoc, /No step in this document grants approval to write/);
 });
 

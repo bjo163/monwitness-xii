@@ -81,6 +81,23 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
     entity_id:authored.rows[0].id,body:"Original words",
   });
 
+  const initializedFreezeControl = await db.query(`
+    SELECT singleton_id, writes_frozen, changed_by, change_reason
+    FROM system.editor_write_controls
+  `);
+  assert.deepEqual(initializedFreezeControl.rows, [{
+    singleton_id: "global", writes_frozen: false, changed_by: "migration", change_reason: "initialization",
+  }]);
+  await db.query(`
+    UPDATE system.editor_write_controls
+    SET writes_frozen=true, changed_by='synthetic-operator', change_reason='rollback rehearsal'
+    WHERE singleton_id='global'
+  `);
+  await db.query(`
+    INSERT INTO system.editor_write_limits(actor_id,request_count)
+    VALUES ('synthetic-operator',3)
+  `);
+
   const publicStory = await db.query(`
     INSERT INTO archive.stories(slug,title,season,synopsis,status,experience_type,original_source_status)
     VALUES ($1,$2,$3,$4,'published','comic','source_needed') RETURNING slug
@@ -119,6 +136,29 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
     /violates RESTRICT setting of foreign key constraint/,
   );
 
+  const retainedAppRows = await db.query(`
+    SELECT
+      (SELECT count(*)::int FROM archive.stories) AS stories,
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
+      (SELECT count(*)::int FROM system.audit_events) AS audit_events
+  `);
+  assert.deepEqual(retainedAppRows.rows[0], { stories: 4, revisions: 3, audit_events: 1 });
+
+  // Exercise the reverse DDL order for local rehearsal only. The project has no
+  // production downgrade scripts; this guards the reviewed destructive steps.
+  await db.exec(`
+    ALTER TABLE system.editor_write_controls DROP COLUMN change_reason;
+    ALTER TABLE system.editor_write_controls DROP COLUMN changed_by;
+  `);
+  const rolledBackAuditColumns = await db.query(`
+    SELECT writes_frozen FROM system.editor_write_controls WHERE singleton_id='global'
+  `);
+  assert.deepEqual(rolledBackAuditColumns.rows, [{ writes_frozen: true }]);
+  await db.exec(`
+    DROP TABLE system.editor_write_controls;
+    DROP TABLE system.editor_write_limits;
+  `);
+
   await db.exec(`
     ALTER TABLE archive.story_revisions DROP CONSTRAINT story_revisions_story_id_stories_id_fk;
     ALTER TABLE archive.story_revisions
@@ -133,6 +173,13 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
   assert.equal(fkRolledBack.rows.length, 1);
   assert.equal(fkRolledBack.rows[0].conname, "story_revisions_story_id_fkey");
   assert.equal(fkRolledBack.rows[0].confdeltype, "c");
+  const afterFeatureRollback = await db.query(`
+    SELECT
+      (SELECT count(*)::int FROM archive.stories) AS stories,
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
+      (SELECT count(*)::int FROM system.audit_events) AS audit_events
+  `);
+  assert.deepEqual(afterFeatureRollback.rows[0], { stories: 4, revisions: 3, audit_events: 1 });
   await db.query("DELETE FROM archive.stories WHERE id=$1", [restrictedStory.rows[0].id]);
   const revisions = await db.query(
     "SELECT count(*)::int AS total FROM archive.story_revisions WHERE story_id=$1",
