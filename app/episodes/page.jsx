@@ -2,7 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { getDatabase } from "../../db/client";
 import { stories } from "../../db/schema";
-import { desc, eq } from "drizzle-orm";
+import { listPublicArchivePageEntries } from "../../lib/public-archive-query.js";
 import { getSourceProvenanceNotice, PUBLIC_ARCHIVE_NOTICE } from "../../lib/source-provenance.js";
 import { crew } from "../universe-data.js";
 import styles from "./archive.module.css";
@@ -17,10 +17,7 @@ export default async function EpisodesPage() {
   let episodes = [];
   let connectionIssue = false;
   try {
-    episodes = await getDatabase().select({
-      slug: stories.slug, title: stories.title, season: stories.season,
-      synopsis: stories.synopsis, originalSourceStatus: stories.originalSourceStatus,
-    }).from(stories).where(eq(stories.status, "published")).orderBy(desc(stories.createdAt)).limit(100);
+    episodes = await listPublicArchivePageEntries(getDatabase(), stories);
   } catch { connectionIssue = true; }
   return <main className={styles.page}>
     <nav className={styles.topbar} aria-label="Main navigation">

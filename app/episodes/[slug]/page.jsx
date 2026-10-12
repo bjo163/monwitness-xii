@@ -2,7 +2,7 @@ import Link from "next/link";
 import { connection, notFound } from "next/server";
 import { getDatabase } from "../../../db/client";
 import { stories } from "../../../db/schema";
-import { and, eq } from "drizzle-orm";
+import { findPublicArchivePageEntry } from "../../../lib/public-archive-query.js";
 import { getSourceProvenanceNotice } from "../../../lib/source-provenance.js";
 import styles from "../archive.module.css";
 
@@ -15,17 +15,7 @@ export default async function EpisodeIndexEntry({ params }) {
 
   let episode;
   try {
-    const [row] = await getDatabase().select({
-      slug: stories.slug,
-      title: stories.title,
-      season: stories.season,
-      synopsis: stories.synopsis,
-      experienceType: stories.experienceType,
-      originalSourceStatus: stories.originalSourceStatus,
-    }).from(stories)
-      .where(and(eq(stories.slug, slug), eq(stories.status, "published")))
-      .limit(1);
-    episode = row;
+    episode = await findPublicArchivePageEntry(getDatabase(), stories, slug);
   } catch {
     return <main className={styles.page}>
       <p className={styles.retry} role="alert">

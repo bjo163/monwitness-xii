@@ -4,7 +4,12 @@ import test from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { evidence, mediaAssets, stories, storyRevisions } from "../db/schema.js";
-import { findPublicEpisode, listPublicEpisodes } from "../lib/public-archive-query.js";
+import {
+  findPublicArchivePageEntry,
+  findPublicEpisode,
+  listPublicArchivePageEntries,
+  listPublicEpisodes,
+} from "../lib/public-archive-query.js";
 import { createPublicEpisodeResponse, createPublicEpisodesResponse } from "../lib/public-archive-response.js";
 import { createPublicEpisodeRouteHandler } from "../lib/public-archive-route.js";
 
@@ -14,6 +19,15 @@ const migrationFiles = [
   "../drizzle/0002_editor_write_limits.sql",
 ];
 const migrations = await Promise.all(migrationFiles.map((file) => readFile(new URL(file, import.meta.url), "utf8")));
+const archivePageSource = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
+const episodePageSource = await readFile(new URL("../app/episodes/[slug]/page.jsx", import.meta.url), "utf8");
+
+test("Archive pages use the scoped published-index query helpers", () => {
+  assert.match(archivePageSource, /listPublicArchivePageEntries\(getDatabase\(\),\s*stories\)/);
+  assert.match(episodePageSource, /findPublicArchivePageEntry\(getDatabase\(\),\s*stories,\s*slug\)/);
+  assert.doesNotMatch(archivePageSource, /\.select\s*\(/);
+  assert.doesNotMatch(episodePageSource, /\.select\s*\(/);
+});
 
 test("public archive Drizzle queries expose only published editorial fields from a PostgreSQL fixture", async (t) => {
   const client = new PGlite();
@@ -80,6 +94,19 @@ test("public archive Drizzle queries expose only published editorial fields from
   assert.equal(await findPublicEpisode(db, stories, "draft-must-stay-private"), null);
   assert.equal(await findPublicEpisode(db, stories, "unknown-story"), null);
 
+  const pageList = await listPublicArchivePageEntries(db, stories);
+  assert.equal(pageList.length, 1);
+  assert.deepEqual(Object.keys(pageList[0]).sort(), [
+    "experienceType", "originalSourceStatus", "season", "slug", "synopsis", "title",
+  ]);
+  assert.equal(pageList[0].originalSourceStatus, "source_needed");
+  const pageDetail = await findPublicArchivePageEntry(db, stories, "source-needed-public-index");
+  assert.deepEqual(Object.keys(pageDetail).sort(), [
+    "experienceType", "originalSourceStatus", "season", "slug", "synopsis", "title",
+  ]);
+  assert.equal(pageDetail.originalSourceStatus, "source_needed");
+  assert.equal(await findPublicArchivePageEntry(db, stories, "draft-must-stay-private"), null);
+
   const detailRoute = createPublicEpisodeRouteHandler({ getDatabase: () => db, stories });
   const routeResponse = await detailRoute(
     new Request("http://localhost/api/episodes/source-needed-public-index"),
@@ -119,7 +146,7 @@ test("public archive Drizzle queries expose only published editorial fields from
   assert.equal(invalidSlugResponse.headers.get("cache-control"), "no-store");
   assert.equal(invalidSlugDatabaseCalls, 0);
 
-  const publicJson = JSON.stringify({ list, detail });
+  const publicJson = JSON.stringify({ list, detail, pageList, pageDetail });
   for (const privateValue of [
     "PRIVATE ORIGINAL MANUSCRIPT TEXT",
     "PRIVATE EDITOR NOTES",
