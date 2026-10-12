@@ -2,6 +2,13 @@
 
 This file records user-visible and operational changes for MoonWitness XII.
 
+## 2026-10-12 — Site-wide script CSP nonce
+
+- Extended the per-request nonce policy from editor pages to all HTML pages; API routes and static assets are excluded. Local smoke verifies strict script CSP and nonce attributes on all scripts across public routes, plus nonce rotation.
+- Next.js build confirmed all routes are now dynamically rendered; root layout opts into request-time rendering so statically optimized pages cannot emit HTML without the request nonce. The selected Vercel Hobby plan includes 1 million invocations and 4 CPU-hours per month, so usage must be monitored before promotion. [Vercel plan limits](https://vercel.com/docs/limits).
+- `style-src` still allows inline styles to preserve current layout and Google Fonts integration; script CSP is strict but full CSP hardening is incomplete. No push, deployment, or Neon access occurred.
+- Validation on `1d703d5`: 79/79 tests, migration replay, full audit (0 vulnerabilities), `actionlint`, production build, and loopback smoke 31/31 pass. This change has no remote CI or Preview result.
+
 ## 2026-10-12 — Editor script CSP nonce
 
 - Added a Next.js 16 `proxy.js` boundary for editor pages that generates a unique nonce per request and sets an editor-only strict CSP. Public pages retain their existing rendering and CSP behavior.
