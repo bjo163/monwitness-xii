@@ -126,7 +126,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
   assert.match(handoverPage, /draft and revision writes share a database quota and rate-limit replies are no-store/);
   assert.match(handoverPage, /Earlier clean Node 22\.23\.3 snapshots at commits 6a88a4b and 9d054ff passed their recorded workflow checks/);
-  assert.match(handoverPage, /Fresh exact tracked-tree reproduction at commit 8a808b5 passed 125\/125 tests, migration replay, full npm audit \(0 vulnerabilities\), actionlint, production build, and CSP-required loopback smoke 34\/34 on Node 26\.5\.0 \/ npm 11\.17\.0 after a clean 239-package install/);
+  assert.match(handoverPage, /Fresh exact tracked-tree reproduction at commit 2f43d14 passed 125\/125 tests, migration replay, full npm audit \(0 vulnerabilities\), actionlint, production build, and CSP-required loopback smoke 34\/34 on Node 26\.5\.0 \/ npm 11\.17\.0 after a clean 239-package install/);
+  assert.match(handoverPage, /draft and revision writes share one actor quota and the rate-limit 429 response is no-store/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
   assert.match(handoverPage, /effective failed-login throttling is unverified\. This SDK cannot configure a provider-wide limiter/);
