@@ -3,8 +3,9 @@ import Link from "next/link";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const verified = [
-  "73 automated tests pass, including isolated Archive and editor-policy checks",
+  "76 automated tests pass, including isolated Archive, editor-policy, and migration-ledger checks",
   "Migration generation and PostgreSQL replay check pass",
+  "Read-only schema verifier checks every migration ledger hash and timestamp in journal order",
   "Full dependency audit reports zero vulnerabilities",
   "CI actions are SHA-pinned and Dependabot tracks updates weekly",
   "Production build and local HTTP smoke pass (30 checks)",
@@ -43,10 +44,10 @@ export default function HandoverPage() {
         <div style={{ background: "#4a2d35", borderLeft: "5px solid #ffbb74", padding: 22, margin: "26px 0", borderRadius: 10 }}>
           <b>LOCAL REVIEW • NO-GO FOR PRODUCTION</b>
           <p>
-            This checkout is for local review only. No push or deployment was made. Local tests, migration checks, audit, build, and HTTP smoke pass; live owner authentication, persistent development migration, backup recovery, and Archive source review remain open. Production promotion requires a separate owner approval after those gates pass.
+            This checkout is for local review only. No push or deployment was made. Local tests, migration checks, production build, and HTTP smoke pass with the updated read-only verifier. Live owner authentication, persistent development migration, backup recovery, and Archive source review remain open. Production promotion requires a separate owner approval after those gates pass.
           </p>
           <p style={{ marginBottom: 0 }}>
-            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>73/73</code> · Local smoke <code>30/30</code>
+            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>76/76</code> · Local smoke (last verified) <code>30/30</code>
           </p>
         </div>
 

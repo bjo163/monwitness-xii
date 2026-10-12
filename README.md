@@ -59,6 +59,8 @@ The current local review includes an Archive notice explaining that a published 
 
 `npm run db:generate` and `npm run db:migrate` exist. SQL migration artifacts are reproducible and were replayed against an isolated Neon rehearsal database; the development branch already has its schema but lacks a Drizzle migration ledger, so baseline stamping remains a release blocker. **Do not run migrations against production without review and approval.**
 
+`npm run db:verify` is read-only. It compares schema shape and checks that every Drizzle migration ledger row matches the repository journal by SHA-256 and timestamp in order. `--baseline-reconciliation` allows an absent ledger for preflight and fails when one already exists; both modes require a verified database URL, and baseline reconciliation additionally requires independently confirmed expected host and database values.
+
 The current V11 hardening changes are in draft [PR #4](https://github.com/bjo163/monwitness-xii/pull/4), targeting `dev`. They have not been merged or released. See [CHANGELOG.md](CHANGELOG.md) for this review's changes and outstanding gates.
 
 For recovery operations, use the [V11 backup/restore runbook](docs/BACKUP_RESTORE_RUNBOOK_V11.md). It documents the isolated, unfinalized restore workflow and the remaining production-data/RPO/RTO gates.

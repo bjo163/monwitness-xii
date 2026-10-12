@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
+import { hasMigrationLedgerDrift } from "../lib/migration-ledger-verification.js";
 
 const verifier = await readFile(new URL("../scripts/verify-schema.mjs", import.meta.url), "utf8");
 const migrationJournal = JSON.parse(await readFile(new URL("../drizzle/meta/_journal.json", import.meta.url), "utf8"));
@@ -25,6 +26,9 @@ test("schema verifier covers table, column, default, key, and index drift", () =
   assert.match(verifier, /pg_index/);
   assert.match(verifier, /equivalentUniqueIndexConstraints/);
   assert.match(verifier, /hasSchemaDrift\(result, \{ requireLedger: !baselineReconciliation \}\)/);
+  assert.match(verifier, /createHash\("sha256"\)/);
+  assert.match(verifier, /SELECT hash, created_at FROM drizzle\.__drizzle_migrations ORDER BY created_at/);
+  assert.match(verifier, /migrationLedgerDrift \|\| hasSchemaDrift/);
 });
 
 test("normal verification selects the latest migration snapshot and reconciliation selects the baseline", async () => {
@@ -42,6 +46,44 @@ test("schema verification fails on a missing migration ledger and any inventory 
   assert.equal(hasSchemaDrift({ ...clean, migrationLedgerPresent: false, missingForeignKeys: [{}] }, { requireLedger: false }), true);
   assert.equal(hasSchemaDrift({ ...clean, missingForeignKeys: [{}] }), true);
   assert.equal(hasSchemaDrift({ ...clean, mismatchedDefaults: [{}] }), true);
+});
+
+test("migration ledger verification requires every journal hash and timestamp in order", () => {
+  const expectedEntries = [
+    { hash: "hash-0000", created_at: 100 },
+    { hash: "hash-0001", created_at: 200 },
+  ];
+  const matching = expectedEntries.map((entry) => ({ ...entry }));
+  assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: matching, expectedEntries }), false);
+  assert.equal(hasMigrationLedgerDrift({ present: false, actualEntries: [], expectedEntries }), true);
+  assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: [], expectedEntries }), true);
+  assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: [matching[0]], expectedEntries }), true);
+  assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: [...matching, matching[1]], expectedEntries }), true);
+  assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: [matching[1], matching[0]], expectedEntries }), true);
+  assert.equal(hasMigrationLedgerDrift({
+    present: true, actualEntries: [{ ...matching[0], hash: "wrong-hash" }, matching[1]], expectedEntries,
+  }), true);
+  assert.equal(hasMigrationLedgerDrift({
+    present: true, actualEntries: [{ ...matching[0], created_at: 101 }, matching[1]], expectedEntries,
+  }), true);
+});
+
+test("expected ledger hashes match Drizzle's own migration reader", async () => {
+  const { readMigrationFiles } = await import("drizzle-orm/migrator");
+  const migrations = readMigrationFiles({ migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
+  const expectedEntries = migrations.map(({ hash, folderMillis }) => ({ hash, created_at: folderMillis }));
+  const sqlFiles = await Promise.all(migrationJournal.entries.map((entry) =>
+    readFile(new URL(`../drizzle/${entry.tag}.sql`, import.meta.url))));
+  const { createHash } = await import("node:crypto");
+  assert.deepEqual(expectedEntries, sqlFiles.map((sql, index) => ({
+    hash: createHash("sha256").update(sql).digest("hex"),
+    created_at: migrationJournal.entries[index].when,
+  })));
+});
+
+test("baseline reconciliation refuses an existing migration ledger", () => {
+  assert.equal(hasMigrationLedgerDrift({ present: false, baselineReconciliation: true }), false);
+  assert.equal(hasMigrationLedgerDrift({ present: true, baselineReconciliation: true }), true);
 });
 
 test("schema verifier exits explicitly without a database URL", () => {

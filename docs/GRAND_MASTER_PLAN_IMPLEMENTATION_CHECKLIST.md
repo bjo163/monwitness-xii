@@ -14,6 +14,8 @@ Historical contract note: both smoke profiles assert exact `Allow` headers for m
 
 **Latest verification at app/test checkpoint `1a2dadf` (2026-10-12):** 73/73 tests, migration replay check, full dependency audit (0 vulnerabilities), `actionlint`, production build, and CSP-required local smoke (30/30) pass. A clean tracked-tree snapshot repeated the workflow sequence under Node `22.23.3` / npm `11.17.0`; the main review server also passes smoke 30/30 at `127.0.0.1:3015`. The public detail handler's PGlite coverage and the preceding Auth method/token checks are described in the historical checkpoint below. Current local links use port 3015. No push or deployment occurred.
 
+**Local verifier hardening (2026-10-12):** `scripts/verify-schema.mjs` checks migration hashes and timestamps against every journal entry in order and rejects existing ledgers during baseline preflight. Contract tests compare these hashes to Drizzle's own reader. The local suite passes 76/76, `db:check` and production build pass, and local smoke passes 30/30 at `127.0.0.1:3015`; persistent Neon verification has not been run. DB/archive APIs return safe unavailable responses locally without a configured `DATABASE_URL`.
+
 ## Source documents and scope
 
 The repository contains the V11 handover, finalization release plan, V11.1 fast-track checklist, release gates, and engineering fast-track report. A separate Grand Master Plan V11 or V11.2 narrative/checklist is not present in this checkout. GitHub Issue #3 remains open and PR #2 remains open/unmergeable as verified at the last checkpoint. Do not reconstruct missing narrative or mark its scope complete by inference.

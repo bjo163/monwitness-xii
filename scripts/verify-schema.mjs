@@ -1,8 +1,10 @@
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { hasSchemaDrift } from "../lib/schema-verification-status.js";
+import { hasMigrationLedgerDrift } from "../lib/migration-ledger-verification.js";
 import { selectSchemaSnapshot } from "../lib/schema-snapshot-selection.js";
 import { getDatabaseTargetError } from "../lib/database-target.js";
 
@@ -33,6 +35,10 @@ if (targetError) {
 const db = neon(uri);
 const root = fileURLToPath(new URL("..", import.meta.url));
 const journal = JSON.parse(await readFile(join(root, "drizzle", "meta", "_journal.json"), "utf8"));
+const expectedMigrationEntries = await Promise.all(journal.entries.map(async (entry) => {
+  const sql = await readFile(join(root, "drizzle", `${entry.tag}.sql`));
+  return { hash: createHash("sha256").update(sql).digest("hex"), created_at: entry.when };
+}));
 const snapshotFile = selectSchemaSnapshot({ baselineReconciliation, migrationEntries: journal.entries });
 const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", snapshotFile), "utf8"));
 const expectedTables = snapshot.tables;
@@ -221,6 +227,16 @@ const unexpectedUniqueConstraints = actualUniqueConstraintShapes.filter((constra
   && !equivalentUniqueConstraintSignatures.has(uniqueConstraintSignature(constraint)));
 
 const migrationLedger = await db`SELECT to_regclass('drizzle.__drizzle_migrations') IS NOT NULL AS present`;
+const migrationLedgerPresent = migrationLedger[0].present;
+const actualMigrationEntries = migrationLedgerPresent
+  ? await db`SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at`
+  : [];
+const migrationLedgerDrift = hasMigrationLedgerDrift({
+  present: migrationLedgerPresent,
+  actualEntries: actualMigrationEntries,
+  expectedEntries: expectedMigrationEntries,
+  baselineReconciliation,
+});
 const storyCounts = actualTableNames.has("archive.stories")
   ? (await db`SELECT count(*)::int AS total, count(*) FILTER (WHERE status='draft')::int AS drafts FROM archive.stories`)[0]
   : { total: null, drafts: null };
@@ -251,9 +267,12 @@ const result = {
   actualUniqueConstraints: actualUniqueConstraintShapes.length,
   missingUniqueConstraints,
   unexpectedUniqueConstraints,
-  migrationLedgerPresent: migrationLedger[0].present,
+  migrationLedgerPresent,
+  expectedMigrationEntries: expectedMigrationEntries.length,
+  actualMigrationEntries: actualMigrationEntries.length,
+  migrationLedgerDrift,
   stories: storyCounts.total,
   drafts: storyCounts.drafts,
 };
 console.log(JSON.stringify(result, null, 2));
-if (hasSchemaDrift(result, { requireLedger: !baselineReconciliation })) process.exit(1);
+if (migrationLedgerDrift || hasSchemaDrift(result, { requireLedger: !baselineReconciliation })) process.exit(1);

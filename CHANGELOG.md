@@ -2,6 +2,11 @@
 
 This file records user-visible and operational changes for MoonWitness XII.
 
+## 2026-10-12 — Migration ledger verification
+
+- `db:verify` now checks every Drizzle ledger row against the journal's migration hash and timestamp, in order, including row count; baseline preflight rejects an existing ledger.
+- Added contract tests against Drizzle's migration reader and updated migration runbook and README. Persistent development and production databases were not queried or changed; the change is verified locally only.
+
 ## 2026-10-12 — Local review updates
 
 - Updated local visual links and release handover evidence to the current review app on port 3015; local-only direction remains in force, with no push or deployment.
