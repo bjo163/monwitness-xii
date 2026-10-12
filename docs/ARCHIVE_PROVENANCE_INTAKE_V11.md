@@ -4,6 +4,8 @@
 
 **Development metadata inventory:** read-only query of Neon project `proud-surf-04547637`, branch `br-green-butterfly-b51kp4b1` (`mw-v11-development`), database `neondb`, on 2026-10-12. Queried only `slug`, `status`, and `original_source_status` from `archive.stories`; no synopsis, manuscript, personal, or evidence content was read. All 15 rows were `published` indexes with `original_source_status=source_needed`. The stable slot-to-slug mapping below records inventory only; it is not a source/rights review. Re-run the inventory before applying this register to a changed database.
 
+**Read-only status/schema refresh (2026-10-13):** the same development branch remains ready. `archive.stories` still has a unique, non-null `slug`, non-null `status`, and non-null `original_source_status` with a `source_needed` default. A fresh projection of only `slug`, `status`, and `original_source_status` returned the same 15 rows, all `published`/`source_needed`. No synopsis, manuscript, metadata values, revision bodies, or evidence contents were selected. This confirms the current status mapping; it does not validate rights or source identity.
+
 ## Handling rules
 
 - Keep original manuscripts, source copies, witness details, permissions, and other private evidence in an owner-approved private store. This repository may be public.
