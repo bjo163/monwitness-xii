@@ -6,6 +6,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 
 - `db:verify` now checks every Drizzle ledger row against the journal's migration hash and timestamp, in order, including row count; baseline preflight rejects an existing ledger.
 - Added contract tests against Drizzle's migration reader and updated migration runbook and README. Persistent development and production databases were not queried or changed; the change is verified locally only.
+- Reduced Neon Auth signed session-data cookie caching from the SDK default 300 seconds to an explicit 60 seconds to narrow stale role/session data exposure; live sign-in and revocation remain unverified.
 
 ## 2026-10-12 — Local review updates
 

@@ -3,7 +3,8 @@ import Link from "next/link";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const verified = [
-  "76 automated tests pass, including isolated Archive, editor-policy, and migration-ledger checks",
+  "78 automated tests pass, including isolated Archive, editor-policy, migration-ledger, and auth-config checks",
+  "Neon Auth signed session-data cache is explicitly limited to 60 seconds",
   "Migration generation and PostgreSQL replay check pass",
   "Read-only schema verifier checks every migration ledger hash and timestamp in journal order",
   "Full dependency audit reports zero vulnerabilities",
@@ -15,6 +16,7 @@ const verified = [
 
 const openGates = [
   "Verify owner sign-in, admin onboarding, authenticated writes, and audit attribution",
+  "Run live session and role-revocation checks; the signed cache can remain valid for up to 60 seconds",
   "Development Auth still permits direct provider signup; app signup routes alone return 404",
   "Reconcile and apply migrations to persistent development only after exact target verification and approval",
   "Daily snapshots with 30-day retention are not configured on the selected Free plan; representative-data recovery and RPO/RTO remain unverified",
@@ -47,7 +49,7 @@ export default function HandoverPage() {
             This checkout is for local review only. No push or deployment was made. Local tests, migration checks, production build, and HTTP smoke pass with the updated read-only verifier. Live owner authentication, persistent development migration, backup recovery, and Archive source review remain open. Production promotion requires a separate owner approval after those gates pass.
           </p>
           <p style={{ marginBottom: 0 }}>
-            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>76/76</code> · Local smoke (last verified) <code>30/30</code>
+            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>78/78</code> · Local smoke (last verified) <code>30/30</code>
           </p>
         </div>
 
