@@ -3,6 +3,8 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
+- **Current local documentation checkpoint (2026-10-12, source HEAD `e317f62`):** the review checkout is clean and remains local by owner direction. The running production-mode handover at `127.0.0.1:3015/handover` returns HTTP 200 and shows 79 automated tests, 30 local smoke checks, and **NO-GO FOR PRODUCTION**. This docs-only commit does not change the latest code validation at `d626a84`. No push, deployment, or persistent Neon query/write occurred. Auth, persistent-dev migration, representative Neon recovery, source-rights, and independent review gates remain open.
+
 - **Synthetic local recovery test:** PGlite data-directory dump/restore now covers a published row, private draft, revisions, media, evidence, ledger reconciliation, public projection, and FK retention. `npm test` is 79/79; `db:check`, audit, `actionlint`, production build, and local smoke 30/30 pass. This does not close DB-03 because the Neon rehearsal restored an empty production database and automatic daily/30-day retention remains unavailable under the selected Free plan.
 
 - **Local Auth cache hardening:** app config sets `cookies.sessionDataTtl` to 60 seconds (the installed SDK default is 300; 0 is rejected). SDK config validation passes in tests. This narrows the stale signed session-data window but increases upstream session revalidation; no live role/session revocation test has been performed. Official SDK option: [Neon Auth Next.js guide](https://github.com/neondatabase/neon-js/blob/main/packages/auth/NEXT-JS.md).
