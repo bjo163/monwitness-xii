@@ -10,7 +10,7 @@
 1. Set `DATABASE_URL` securely in your local environment and Vercel for each target (preview/production).
 2. Install dependencies with `npm install`.
 3. Generate migration SQL using `npm run db:generate` and review it.
-4. Before `npm run db:migrate`, independently verify the exact Neon development endpoint and database name in the control plane. Set `EXPECTED_DATABASE_HOST`, `EXPECTED_DATABASE_NAME`, and `CONFIRM_DATABASE_MIGRATION=YES` only after reviewing the target and migration plan. The wrapper rejects missing/mismatched target details and missing confirmation before invoking Drizzle; it never prints the connection URL. Run it only against the approved disposable or development branch, never production.
+4. Before `npm run db:migrate` or `npm run db:studio`, independently verify the exact Neon development endpoint and database name in the control plane. Set `EXPECTED_DATABASE_HOST` and `EXPECTED_DATABASE_NAME`; then set only the command's operation-specific confirmation (`CONFIRM_DATABASE_MIGRATION=YES` or `CONFIRM_DATABASE_STUDIO=YES`) after reviewing the target and intended action. The wrapper rejects missing/mismatched target details and missing confirmation before invoking Drizzle; it never prints the connection URL. Run database tools only against the approved disposable or development branch, never production.
 5. Test archive CRUD, authorization, unique constraints, foreign keys and migrations in a disposable branch.
 6. Back up production, approve schema migration, then apply to production.
 
