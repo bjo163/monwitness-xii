@@ -201,6 +201,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3199\/handover` reports 129\/129, 40\/40, and all eight gates open/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
   assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
+  assert.match(implementationChecklist, /Latest local-only workflow and UX evidence \(clean source snapshot `4607504`; documentation follow-ups through checkpoint `09d4147`\)/);
+  assert.match(implementationChecklist, /fresh `npm ci --no-audit --no-fund` on Node 22\.23\.3\/npm 10\.9\.4 \(241 packages\).*passed 129\/129 tests, `db:check`, full dependency audit \(0 findings\), `actionlint`, production build, and CSP-required HTTP smoke 40\/40/);
+  assert.match(implementationChecklist, /remote exact-head Preview\/CI and connected Archive count remain open/);
+  assert.match(implementationChecklist, /production remains NO-GO/);
   assert.match(releaseGatesDoc, /Editor mutation origin policy:/);
   assert.match(releaseGatesDoc, /PGlite integration calls the actual authorizer and write handler/);
   assert.match(releaseGatesDoc, /without adding a revision, audit event, actor row, or quota reservation/);
