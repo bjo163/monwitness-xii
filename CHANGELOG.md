@@ -4,6 +4,7 @@
 
 - Mapped all 15 development Archive slugs into the provenance intake register from a read-only Neon query of `slug`, `status`, and `original_source_status`; no synopsis or manuscript text was read. All entries remain `source_needed` pending source, rights, credit, and privacy review.
 - Corrected the release-gate criteria to reflect completed slug mapping and mark old dashboard ports/test counts as historical. The current local dashboard reports 126/126 tests, 34/34 HTTP checks, and eight open release gates.
+- Added a regression-checked Phase 7 crosswalk for all 11 final deliverables, including explicit status that source delivery to `dev` and exact-head remote CI are still pending under the local-only instruction.
 - Clarified that the editor PostgreSQL write quota does not limit sign-in attempts; app-level sign-in throttling, provider-wide throttling, signup policy, MFA, and owner-authenticated E2E remain unverified.
 - Refreshed read-only PR/CI evidence. PR #4 remains draft with no reviews; Actions passed on its old remote head while Vercel reported the daily deployment cap. PR #2 remains unmergeable. No push, deployment, database migration, or persistent write occurred.
 
