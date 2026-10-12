@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { PGlite } from "@electric-sql/pglite";
+import { drizzle } from "drizzle-orm/pglite";
+import { migrate } from "drizzle-orm/pglite/migrator";
+import { readMigrationFiles } from "drizzle-orm/migrator";
 
 const initial = await readFile(new URL("../drizzle/0000_0000_initial_v11.sql", import.meta.url), "utf8");
 const retention = await readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8");
@@ -217,4 +221,26 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
     [restrictedStory.rows[0].id],
   );
   assert.equal(revisions.rows[0].total, 0);
+
+  const drizzleClient = new PGlite();
+  t.after(() => drizzleClient.close());
+  const migrationsFolder = fileURLToPath(new URL("../drizzle", import.meta.url));
+  const migrationConfig = { migrationsFolder };
+  const expectedLedger = readMigrationFiles(migrationConfig).map(({ hash, folderMillis }) => ({
+    hash,
+    created_at: folderMillis,
+  }));
+  assert.equal(expectedLedger.length, 5);
+
+  await migrate(drizzle(drizzleClient), migrationConfig);
+  const appliedLedger = await drizzleClient.query(`
+    SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at
+  `);
+  assert.deepEqual(appliedLedger.rows, expectedLedger);
+
+  await migrate(drizzle(drizzleClient), migrationConfig);
+  const rerunLedger = await drizzleClient.query(`
+    SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at
+  `);
+  assert.deepEqual(rerunLedger.rows, expectedLedger, "re-running Drizzle must not duplicate migration ledger entries");
 });

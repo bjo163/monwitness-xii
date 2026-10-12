@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Rehearse the real Drizzle migration runner locally
+
+- Extended the PGlite migration regression to use `drizzle-orm/pglite/migrator` against the repository's actual five-entry migration folder. It checks ordered ledger hashes/timestamps and proves a rerun does not duplicate entries.
+- This local evidence does not replace Neon apply/rollback rehearsal for `0003`/`0004` or authorize migrations to persistent development.
+
 ## 2026-10-12 — Keep the release review local and harden Auth POSTs
 
 - Added same-origin `Origin` and Fetch Metadata checks to the allowlisted Neon Auth sign-in/sign-out proxy requests, with tests proving rejected requests never reach the provider.

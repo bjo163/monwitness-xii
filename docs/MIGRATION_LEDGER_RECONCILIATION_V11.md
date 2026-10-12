@@ -28,6 +28,8 @@ The PGlite migration execution test starts from the `0000` schema with 15 synthe
 
 This is a PGlite reverse-DDL simulation, not a published downgrade command, Drizzle-ledger rollback workflow, or Neon rehearsal. It does not establish safe operational rollback on a persistent database. The destructive reverse steps must be reviewed and tested against a fresh isolated clone before any persistent apply; DB-02 remains open.
 
+The same local test also runs Drizzle's actual PGlite migrator against a second, empty PGlite database using the repository migration folder. It verifies all five ordered `hash`/`created_at` ledger entries against Drizzle's migration reader, then reruns the migrator and confirms no duplicate ledger rows. This strengthens local migration-runner and ledger evidence; it does not verify the Neon PostgreSQL environment, remote migration state, or a Drizzle rollback workflow.
+
 ## Read-only preflight before any dev stamp
 
 After securely obtaining the development-branch connection string, independently verify its endpoint host and database name against the selected Neon development branch in the Neon control plane. The baseline preflight requires these values separately so it can reject a copied production or unrelated DSN before opening a connection. Do not populate the expected values by extracting them from `DATABASE_URL` alone. Run:
