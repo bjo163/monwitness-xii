@@ -63,7 +63,7 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(proxySource, /script-src 'self' 'nonce-\$\{nonce\}' 'strict-dynamic'/);
   assert.match(proxySource, /matcher:\s*["']\/editor\/:path\*["']/);
   assert.match(smokeScript, /function hasStrictEditorCsp/);
-  assert.match(smokeScript, /inlineScripts\.every/);
+  assert.match(smokeScript, /scripts\.every/);
   assert.doesNotMatch(nextConfig, /unsafe-eval/);
 });
 

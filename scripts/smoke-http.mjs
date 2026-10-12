@@ -30,9 +30,8 @@ function hasStrictEditorCsp(response,_body,html){
  const policy=response.headers.get("content-security-policy")??"";
  const nonce=policy.match(/'nonce-([^']+)'/)?.[1];
  if(!nonce||/script-src[^;]*'unsafe-inline'/.test(policy))return false;
- const inlineScripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
-  .filter(([,attributes,body])=>!/\bsrc=/.test(attributes)&&body.trim());
- return inlineScripts.length>0&&inlineScripts.every(([,attributes])=>attributes.includes(`nonce="${nonce}"`)||attributes.includes(`nonce='${nonce}'`));
+ const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+ return scripts.length>0&&scripts.every(([,attributes])=>attributes.includes(`nonce="${nonce}"`)||attributes.includes(`nonce='${nonce}'`));
 }
 async function checkFreshEditorNonce(){
  const label="/editor/login fresh per-request CSP nonce";
