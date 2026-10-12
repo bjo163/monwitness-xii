@@ -207,6 +207,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Current local tip `ea3ab93` \(application checkpoint `5bae423`; documentation\/test-only commits followed; not pushed\).*134-test suite passes.*isolated clean-install production build/);
   assert.match(releaseGatesDoc, /single loopback listener `127\.0\.0\.1:3199` \(PID 36756\).*current-source HTTP smoke is therefore pending/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
+  assert.match(releaseGatesDoc, /Read-only dev database refresh \(2026-10-13\).*15 stories, all 15 `source_needed`; `drizzle\.__drizzle_migrations` and `system\.editor_write_controls` are absent.*G-DB-02 remains open/);
   assert.match(releaseGatesDoc, /Previous runtime snapshot \(superseded by commit `5bae423`\)/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
   assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
