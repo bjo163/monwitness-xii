@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-12 — Verify AETHERION catalog and clean local release reproduction
+
+- Extracted the homepage's AETHERION realm/level catalog into `lib/aetherion-codex.js`. Regression coverage verifies ten realms, 100 sequential levels, correct realm assignment, and exactly the first 33 levels open.
+- Reproduced committed tree `b68e11a` from a clean archive without `.env` files. Fresh `npm ci` installed 239 packages; on Node 26.5.0 / npm 11.17.0 the clean copy passed 125/125 tests, migration replay, full `npm audit` (0 findings), production build, `actionlint`, and local CSP-required HTTP smoke 34/34.
+- The clean dependency tree also exposed an unresolved `npm ls` `ELSPROBLEMS`: `@neondatabase/auth@0.5.0-beta` installs the transitive Neon Auth UI package whose nested Better Auth peer versions conflict with the wrapper's pinned versions. The app uses a custom login UI and imports no Neon Auth UI components. The registry still lists `0.5.0-beta` as the latest SDK tag; no local override was added without a verified Managed Auth SDK/server compatibility pair. Track this under `G-AUTH-01`.
+- After the handover note change, the current source passes 125/125 tests on Node 24.19.0 and 26.5.0, the Node 26.5.0 production build, and CSP-required smoke 34/34 on both runtimes. `db:check`, full npm audit (0 findings), and actionlint pass locally.
+- All changes are local. No push, deployment, or database/Auth configuration change occurred; eight release gates remain open and production remains NO-GO.
+
 ## 2026-10-12 — Add an editor sign-out action
 
 - Added a provider-backed sign-out button on the editor desk and signed-in access-denied screen. It returns the browser to `/editor/login` only after successful provider sign-out; failures use generic accessible feedback.
