@@ -13,6 +13,7 @@ const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", i
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
+const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
 
 function runSmoke(env) {
   return spawnSync(process.execPath, [script], {
@@ -50,7 +51,7 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /source:\s*["']\/api\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(nextConfig, /source:\s*["']\/editor\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(editorLoginPage, /export const dynamic\s*=\s*["']force-dynamic["']/);
-  assert.match(smokeScript, /\/editor\/login",\(r,b,t\)=>r\.status===200&&r\.headers\.get\("cache-control"\)==="no-store"&&hasStrictEditorCsp\(r,b,t\)/);
+  assert.match(smokeScript, /\/editor\/login",\(r,b,t\)=>r\.status===200&&r\.headers\.get\("cache-control"\)==="no-store"&&hasStrictPageCsp\(r,b,t\)/);
   assert.match(archivePage, /PUBLIC EDITORIAL INDEX/);
   assert.doesNotMatch(archivePage, /DEVELOPMENT VAULT/);
   assert.match(smokeScript, /\/episodes",\(r,b,t\)=>r\.status===200&&t\.includes\("PUBLIC EDITORIAL INDEX"\)&&t\.includes\(PUBLIC_ARCHIVE_NOTICE\)/);
@@ -60,10 +61,15 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(nextConfig, /fonts\.gstatic\.com/);
   assert.match(smokeScript, /SMOKE_EXPECT_CSP/);
   assert.match(proxySource, /crypto\.randomUUID\(\)/);
+  assert.match(proxySource, /source:\s*["']\/\(\(\?!api\|_next\/static\|_next\/image\|favicon\.ico\|characters\/\)\.\*\)["']/);
   assert.match(proxySource, /script-src 'self' 'nonce-\$\{nonce\}' 'strict-dynamic'/);
-  assert.match(proxySource, /matcher:\s*["']\/editor\/:path\*["']/);
-  assert.match(smokeScript, /function hasStrictEditorCsp/);
+  assert.doesNotMatch(proxySource, /script-src[^,]*unsafe-inline/);
+  assert.match(rootLayout, /dynamic\s*=\s*["']force-dynamic["']/);
+  assert.match(smokeScript, /function hasStrictPageCsp/);
+  assert.match(smokeScript, /checkFreshPageNonce\("\/"\)/);
   assert.match(smokeScript, /scripts\.every/);
+  assert.match(handoverPage, /Every HTML page uses a fresh script CSP nonce/);
+  assert.match(handoverPage, /Style CSP still permits inline styles/);
   assert.doesNotMatch(nextConfig, /unsafe-eval/);
 });
 

@@ -12,7 +12,7 @@ const verified = [
   "Production build and local HTTP smoke pass (31 checks)",
   "Public Archive response is limited to five editorial fields and excludes drafts",
   "Editor writes require an Auth admin role, exact owner allowlist, and same-origin request",
-  "Editor login uses a fresh per-request CSP nonce; inline scripts are checked against the response policy",
+  "Every HTML page uses a fresh script CSP nonce; local smoke verifies all script tags and nonce rotation",
 ];
 
 const openGates = [
@@ -22,6 +22,7 @@ const openGates = [
   "Reconcile and apply migrations to persistent development only after exact target verification and approval",
   "Daily snapshots with 30-day retention are not configured on the selected Free plan; representative-data recovery and RPO/RTO remain unverified",
   "All 15 development Archive entries remain source-needed pending originals, credits, and rights evidence",
+  "Style CSP still permits inline styles; home and handover now use dynamic rendering and Hobby runtime usage needs monitoring",
   "Complete independent review and integration checks for PR #4 and PR #2; latest local commits have no remote CI result",
   "Obtain the authoritative Grand Master Plan V11/V11.2 source before claiming full module traceability",
 ];

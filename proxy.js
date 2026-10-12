@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-const editorContentSecurityPolicy = (nonce) => [
+const pageContentSecurityPolicy = (nonce) => [
   "default-src 'self'",
   `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-  `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob:",
   "connect-src 'self'",
@@ -16,7 +16,7 @@ const editorContentSecurityPolicy = (nonce) => [
 
 export function proxy(request) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const contentSecurityPolicy = editorContentSecurityPolicy(nonce);
+  const contentSecurityPolicy = pageContentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
   requestHeaders.set("x-nonce", nonce);
@@ -26,4 +26,14 @@ export function proxy(request) {
   return response;
 }
 
-export const config = { matcher: "/editor/:path*" };
+export const config = {
+  matcher: [
+    {
+      source: "/((?!api|_next/static|_next/image|favicon.ico|characters/).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
+};

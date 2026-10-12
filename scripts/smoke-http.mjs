@@ -26,20 +26,20 @@ async function check(path,accept,method="GET"){
   process.exitCode=1;
  }
 }
-function hasStrictEditorCsp(response,_body,html){
+function hasStrictPageCsp(response,_body,html){
  const policy=response.headers.get("content-security-policy")??"";
  const nonce=policy.match(/'nonce-([^']+)'/)?.[1];
  if(!nonce||/script-src[^;]*'unsafe-inline'/.test(policy))return false;
  const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
  return scripts.length>0&&scripts.every(([,attributes])=>attributes.includes(`nonce="${nonce}"`)||attributes.includes(`nonce='${nonce}'`));
 }
-async function checkFreshEditorNonce(){
- const label="/editor/login fresh per-request CSP nonce";
+async function checkFreshPageNonce(path){
+ const label=`${path} fresh per-request CSP nonce`;
  try{
-  const responses=await Promise.all([0,1].map(()=>fetch(new URL("/editor/login",parsedBase),{headers,redirect:"manual",signal:AbortSignal.timeout(12000)})));
+  const responses=await Promise.all([0,1].map(()=>fetch(new URL(path,parsedBase),{headers,redirect:"manual",signal:AbortSignal.timeout(12000)})));
   const pages=await Promise.all(responses.map(async response=>({response,html:await response.text()})));
   const nonces=pages.map(({response})=>response.headers.get("content-security-policy")?.match(/'nonce-([^']+)'/)?.[1]);
-  const valid=pages.every(({response,html})=>response.status===200&&response.headers.get("cache-control")==="no-store"&&hasStrictEditorCsp(response,null,html));
+  const valid=pages.every(({response,html})=>response.status===200&&hasStrictPageCsp(response,null,html));
   if(!valid||!nonces[0]||!nonces[1]||nonces[0]===nonces[1]){console.error(label+" FAILED: nonce was missing, reused, or not applied");process.exitCode=1}
   else console.log(label+" PASSED");
  }catch(error){console.error(label+" FAILED: "+(error instanceof Error?error.name:"request failed"));process.exitCode=1}
@@ -50,8 +50,8 @@ if(profile==="preview"){
  await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE));
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
- await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictEditorCsp(r,b,t));
- await checkFreshEditorNonce();
+ await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
+ await checkFreshPageNonce("/");
  await check("/api/auth/get-session",(r,b)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&b===null);
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/sign-up/email",(r)=>r.status===404);
@@ -63,10 +63,11 @@ if(profile==="preview"){
  await check("/api/editor/session",(r,b)=>r.status===401&&r.headers.get("cache-control")==="no-store"&&b?.authenticated===false);
  await check("/api/editor/drafts",(r)=>r.status===405);
 }else{
- await check("/",(r)=>r.status===200&&r.headers.get("x-content-type-options")==="nosniff"&&r.headers.get("x-frame-options")==="DENY"&&r.headers.get("referrer-policy")==="strict-origin-when-cross-origin"&&r.headers.get("permissions-policy")==="camera=(), microphone=(), geolocation=()"&&(process.env.SMOKE_EXPECT_CSP!=="1"||Boolean(r.headers.get("content-security-policy"))));
- await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/crew/${name}.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6);
+ await check("/",(r,b,t)=>r.status===200&&r.headers.get("x-content-type-options")==="nosniff"&&r.headers.get("x-frame-options")==="DENY"&&r.headers.get("referrer-policy")==="strict-origin-when-cross-origin"&&r.headers.get("permissions-policy")==="camera=(), microphone=(), geolocation=()"&&(process.env.SMOKE_EXPECT_CSP!=="1"||hasStrictPageCsp(r,b,t)));
+ await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/crew/${name}.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6&&hasStrictPageCsp(r,b,t));
+ await checkFreshPageNonce("/");
  for(const route of ["/throwing-dice","/four-books","/aetherion","/witness-log","/the-lab"]){
-  await check(route,(r)=>r.status===200);
+  await check(route,(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
  }
  for(const asset of ["/characters/hero/eclipse-walker.webp","/characters/crew/four-lah.webp","/characters/crew/whalterwhite.webp","/characters/crew/isrockfeel.webp","/characters/crew/rock-soul.webp"]){
   await check(asset,(r)=>r.status===200&&r.headers.get("content-type")?.startsWith("image/webp"));
@@ -76,10 +77,10 @@ if(profile==="preview"){
  await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE&&JSON.stringify(Object.keys(b.episode).sort())===JSON.stringify(["experienceType","season","slug","synopsis","title"]))||(r.status===503&&b?.error==="Archive unavailable")));
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
- await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES")));
- await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("Local smoke")&&t.includes("Release gates remaining")&&!t.includes("Preview is live"));
- await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictEditorCsp(r,b,t));
- await checkFreshEditorNonce();
+ await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
+ await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("Local smoke")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
+ await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
+ await checkFreshPageNonce("/");
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/sign-up/email",(r,b)=>r.status===404&&b?.error==="Authentication route unavailable");
