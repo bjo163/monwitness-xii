@@ -1,7 +1,7 @@
 # MoonWitness XII — FAST TRACK EXECUTION BOARD (V11.1)
 **Historical snapshot:** 2026-10-11 Asia/Jakarta. Its task statuses and deployment notes are superseded by the current tracker and release gates.
 **Current sources of truth:** [Grand Plan implementation checklist](./GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md), [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3), and [release gates](./RELEASE_GATES_V11.md).
-**Source inventory:** this V11.1 execution board is present in the repository. A separate authoritative Grand Master Plan V11/V11.2 narrative/checklist is not present in this checkout; see GOV-01/SCOPE-01 in the current tracker. Do not use this historical snapshot as that missing source.
+**Source inventory:** this V11.1 execution board is present in the repository. `ENGINEERING_FAST_TRACK_V11.md` is also present, but it labels itself a superseded historical baseline. Neither file is the authoritative Grand Master Plan V11/V11.2 narrative/checklist; see GOV-01/SCOPE-01 in the current tracker. Do not use these historical snapshots as that missing source.
 **Interpretation:** checkmarks below reflect evidence known at the time; [ ] entries and all historical statuses must be reconciled against current records. Deployment READY does not imply API passed runtime tests.
 
 ## Foundation

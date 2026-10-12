@@ -203,6 +203,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3199\/handover` reports 129\/129, 40\/40, and all eight gates open/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
+  assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
   assert.match(releaseGatesDoc, /Editor mutation origin policy:/);
   assert.match(releaseGatesDoc, /PGlite integration calls the actual authorizer and write handler/);
   assert.match(releaseGatesDoc, /without adding a revision, audit event, actor row, or quota reservation/);
