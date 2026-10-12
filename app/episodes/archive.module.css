@@ -127,6 +127,143 @@
   line-height: 1.65;
 }
 
+.crewSpotlight {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(220px, .75fr) minmax(0, 1.4fr);
+  gap: clamp(24px, 4vw, 52px);
+  max-width: 1360px;
+  margin: 18px auto 48px;
+  padding: clamp(22px, 4vw, 42px);
+  overflow: hidden;
+  border: 2px solid var(--archive-ink);
+  border-radius: 16px;
+  background: radial-gradient(ellipse at 0 100%, #334060 0, transparent 45%), #191a2d;
+  box-shadow: 8px 9px 0 var(--archive-coral);
+  color: var(--archive-paper);
+}
+
+.crewSpotlight::before {
+  position: absolute;
+  top: -145px;
+  right: -95px;
+  width: 300px;
+  aspect-ratio: 1;
+  border: 1px solid #53dfe050;
+  border-radius: 50%;
+  box-shadow: 0 0 0 24px #53dfe018, 0 0 0 50px #53dfe010;
+  content: "";
+  pointer-events: none;
+}
+
+.crewSpotlightIntro,
+.crewGrid { position: relative; z-index: 1; }
+
+.crewEyebrow {
+  margin: 0 0 16px;
+  color: var(--archive-aqua);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.crewSpotlightIntro h2 {
+  max-width: 350px;
+  margin: 0;
+  font-family: "Barlow Condensed", Impact, sans-serif;
+  font-size: clamp(38px, 5vw, 64px);
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: .9;
+}
+
+.crewSpotlightIntro > p:not(.crewEyebrow) {
+  max-width: 400px;
+  color: #e3deef;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.crewSpotlightIntro .crewScope {
+  padding-left: 11px;
+  border-left: 3px solid var(--archive-gold);
+  color: #ffdf81;
+  font-size: 11px;
+}
+
+.crewLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 10px 13px;
+  border: 1px solid var(--archive-aqua);
+  border-radius: 4px;
+  color: var(--archive-paper);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-decoration: none;
+}
+
+.crewLink:hover { background: #53dfe01f; }
+.crewLink:focus-visible { outline: 3px solid var(--archive-gold); outline-offset: 4px; }
+
+.crewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: center;
+  gap: 12px;
+}
+
+.crewCard {
+  min-width: 0;
+  overflow: hidden;
+  border: 1.5px solid #fff8ea;
+  border-radius: 8px;
+  background: #fff8ea;
+  box-shadow: 3px 4px 0 var(--crew-accent);
+  color: var(--archive-ink);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.crewCard:hover { transform: translateY(-4px); box-shadow: 4px 8px 0 var(--crew-accent); }
+.cyan { --crew-accent: #53dfe0; }
+.pink { --crew-accent: #f26a91; }
+.lime { --crew-accent: #b8e64c; }
+.gold { --crew-accent: #ffd159; }
+
+.crewPortrait {
+  position: relative;
+  height: clamp(145px, 18vw, 214px);
+  overflow: hidden;
+  background: repeating-conic-gradient(from 0deg at 50% 30%, #17182e 0deg 1deg, var(--crew-accent) 1deg 12deg);
+}
+
+.crewPortrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  mix-blend-mode: multiply;
+}
+
+.crewPortrait > span {
+  position: absolute;
+  right: 7px;
+  bottom: 6px;
+  color: #fff8ea;
+  font-family: "Barlow Condensed", Impact, sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 2px 2px var(--archive-ink);
+}
+
+.crewName { display: grid; gap: 4px; padding: 10px 9px 12px; }
+.crewName strong { overflow-wrap: anywhere; font-size: clamp(10px, 1vw, 13px); font-weight: 900; }
+.crewName span { color: #655879; font-size: 8px; font-weight: 900; letter-spacing: .06em; line-height: 1.4; }
+
 .countLine {
   display: flex;
   align-items: baseline;
@@ -289,9 +426,15 @@
   .provenanceNotice { grid-template-columns: 30px 1fr; padding: 15px; }
   .noticeMark { width: 28px; height: 28px; font-size: 15px; }
   .card { padding: 18px; }
+  .crewSpotlight { grid-template-columns: 1fr; gap: 24px; padding: 22px 16px; }
+  .crewGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .crewPortrait { height: 190px; }
+  .crewName { padding-inline: 10px; }
+  .crewName strong { font-size: 13px; }
+  .crewName span { font-size: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card { transition: none; }
-  .card:hover { transform: none; }
+  .card, .crewCard { transition: none; }
+  .card:hover, .crewCard:hover { transform: none; }
 }

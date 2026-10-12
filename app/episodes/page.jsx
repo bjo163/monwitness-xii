@@ -4,7 +4,10 @@ import { getDatabase } from "../../db/client";
 import { stories } from "../../db/schema";
 import { desc, eq } from "drizzle-orm";
 import { getSourceProvenanceNotice, PUBLIC_ARCHIVE_NOTICE } from "../../lib/source-provenance.js";
+import { crew } from "../universe-data.js";
 import styles from "./archive.module.css";
+
+const crewArt = ["four-lah", "whalterwhite", "isrockfeel", "rock-soul"];
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -33,6 +36,24 @@ export default async function EpisodesPage() {
         <div><strong>PUBLIC INDEX DOES NOT MEAN SOURCE VERIFIED</strong><p>{PUBLIC_ARCHIVE_NOTICE}</p></div>
       </aside>
     </header>
+    <section className={styles.crewSpotlight} aria-labelledby="crew-spotlight-title">
+      <div className={styles.crewSpotlightIntro}>
+        <p className={styles.crewEyebrow}>THE BATTERIES · CHARACTER FILES 001—004</p>
+        <h2 id="crew-spotlight-title">THE CREW KEEPS WATCH.</h2>
+        <p>Four recurring characters from the MoonWitness universe, each recognized by their gear, colors, and way of moving. Their faces stay hidden by design.</p>
+        <p className={styles.crewScope}>These are universe portraits, not claims that a specific character appears in an indexed story.</p>
+        <Link href="/team" className={styles.crewLink}>MEET THE CREW <span aria-hidden="true">↗</span></Link>
+      </div>
+      <div className={styles.crewGrid}>
+        {crew.map((member, index) => <article className={`${styles.crewCard} ${styles[member.tone]}`} key={member.name}>
+          <div className={styles.crewPortrait}>
+            <img src={`/characters/styles/faceless-visor/${crewArt[index]}--faceless-visor.webp`} alt="" aria-hidden="true" loading="lazy" />
+            <span aria-hidden="true">0{index + 1}</span>
+          </div>
+          <div className={styles.crewName}><strong>{member.name}</strong><span>{member.role}</span></div>
+        </article>)}
+      </div>
+    </section>
     {connectionIssue?<section className={styles.retry} role="alert"><h2>THE VAULT IS TAKING A BREATHER</h2><p>Archive database is temporarily unavailable. No private drafts are displayed.</p><Link href="/episodes" className={styles.entryLink}>TRY AGAIN ↻</Link></section>:
     <><p className={styles.countLine}><strong>{episodes.length}</strong> INDEXED EPISODES</p>
     <div className={styles.grid}>

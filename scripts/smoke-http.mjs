@@ -70,12 +70,12 @@ if(profile==="preview"){
  await check("/api/editor/drafts",(r)=>r.status===405);
 }else{
  await check("/",(r,b,t)=>r.status===200&&r.headers.get("x-content-type-options")==="nosniff"&&r.headers.get("x-frame-options")==="DENY"&&r.headers.get("referrer-policy")==="strict-origin-when-cross-origin"&&r.headers.get("permissions-policy")==="camera=(), microphone=(), geolocation=()"&&(process.env.SMOKE_EXPECT_CSP!=="1"||hasStrictPageCsp(r,b,t)));
- await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/crew/${name}.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6&&hasStrictPageCsp(r,b,t));
+ await check("/team",(r,b,t)=>r.status===200&&t.includes('<html lang="en"')&&['four-lah','whalterwhite','isrockfeel','rock-soul'].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&[...t.matchAll(/lang="id"/g)].length>=6&&hasStrictPageCsp(r,b,t));
  await checkFreshPageNonce("/");
  for(const route of ["/throwing-dice","/four-books","/aetherion","/witness-log","/the-lab"]){
   await check(route,(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
  }
- for(const asset of ["/characters/hero/eclipse-walker.webp","/characters/crew/four-lah.webp","/characters/crew/whalterwhite.webp","/characters/crew/isrockfeel.webp","/characters/crew/rock-soul.webp"]){
+ for(const asset of ["/characters/hero/eclipse-walker.webp","/characters/styles/faceless-visor/four-lah--faceless-visor.webp","/characters/styles/faceless-visor/whalterwhite--faceless-visor.webp","/characters/styles/faceless-visor/isrockfeel--faceless-visor.webp","/characters/styles/faceless-visor/rock-soul--faceless-visor.webp"]){
   await check(asset,(r)=>r.status===200&&r.headers.get("content-security-policy")===null&&r.headers.get("content-type")?.startsWith("image/webp"));
  }
  await check("/api/health",(r,b)=>r.status===200&&r.headers.get("content-security-policy")===null&&b?.status==="ok"&&b?.service==="moonwitness-xii");
@@ -83,7 +83,7 @@ if(profile==="preview"){
  await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE&&JSON.stringify(Object.keys(b.episode).sort())===JSON.stringify(["experienceType","season","slug","synopsis","title"]))||(r.status===503&&b?.error==="Archive unavailable")));
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
- await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
+ await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&t.includes("THE CREW KEEPS WATCH.")&&t.includes("These are universe portraits, not claims that a specific character appears in an indexed story.")&&["four-lah","whalterwhite","isrockfeel","rock-soul"].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
  await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
  await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("107 / 107")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("32 / 32")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
