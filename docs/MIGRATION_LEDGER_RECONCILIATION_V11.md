@@ -2,7 +2,7 @@
 
 ## Current state
 
-The persistent development branch `br-green-butterfly-b51kp4b1` contains the original 16 application tables and 15 published editorial indexes, but has no `drizzle.__drizzle_migrations` table. Its revision foreign key is still `ON DELETE CASCADE`, which matches migration `0000` and differs from migration `0001` (`RESTRICT`). Migration `0002` adds a per-editor write-limit table. The development branch has not been stamped or migrated.
+The persistent development branch `br-green-butterfly-b51kp4b1` contains the original 16 application tables and 15 published editorial indexes, but has no `drizzle.__drizzle_migrations` table. Its revision foreign key is still `ON DELETE CASCADE`, which matches migration `0000` and differs from migration `0001` (`RESTRICT`). Migration `0002` adds a per-editor write-limit table. Local-only migrations `0003` and `0004` add the editor write-freeze singleton and its operator/reason audit fields. These two files have not been applied to any database. The development branch has not been stamped or migrated.
 
 The migration journal records these exact files and timestamps:
 
@@ -11,6 +11,8 @@ The migration journal records these exact files and timestamps:
 | Baseline | `drizzle/0000_0000_initial_v11.sql` | `6ec01f3cd4578803ca87ef32cb87ad31d71ee95ac93082238ba109fcc569928e` | `1791729329809` |
 | Retention | `drizzle/0001_initial_v11.sql` | `d61ccc5ae7d2105e2171913721c6e7b0fdac57b41e73f3328b9a6d6c862c391a` | `1791729410459` |
 | Editor write limits | `drizzle/0002_editor_write_limits.sql` | `1e900d5e610c813b50c5e451af486ecb0b53c4e2dff066124522cfd53506386e` | `1791742779447` |
+| Editor write freeze | `drizzle/0003_editor_write_controls.sql` | `c616759e0ac1a2e213e2632bfaeb0c3df6654cf319f23e6489c961395e973916` | `1791781566106` |
+| Freeze operator audit | `drizzle/0004_editor_write_control_audit.sql` | `4628355bd4e7bfa29d2fcaf1a77fec658dffc862963b2528bc1e2479358fc548` | `1791781623168` |
 
 ## Isolated rehearsal evidence
 

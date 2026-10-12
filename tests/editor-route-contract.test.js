@@ -6,6 +6,8 @@ import { relative, sep } from "node:path";
 const draftRoute = await readFile(new URL("../app/api/editor/drafts/route.js", import.meta.url), "utf8");
 const revisionRoute = await readFile(new URL("../app/api/editor/revisions/route.js", import.meta.url), "utf8");
 const writeHandlers = await readFile(new URL("../lib/editor-write-handlers.js", import.meta.url), "utf8");
+const writeFreeze = await readFile(new URL("../lib/editor-write-freeze.js", import.meta.url), "utf8");
+const writeFreezeScript = await readFile(new URL("../scripts/editor-write-freeze.mjs", import.meta.url), "utf8");
 const editorAuth = await readFile(new URL("../lib/editor-auth.js", import.meta.url), "utf8");
 const editorAuthorizer = await readFile(new URL("../lib/editor-authorizer.js", import.meta.url), "utf8");
 const schema = await readFile(new URL("../db/schema.js", import.meta.url), "utf8");
@@ -31,7 +33,7 @@ test("production editor authorizer uses uncached sessions and current owner allo
 
 test("draft, first revision, and audit are inserted atomically after validation and rate limiting", () => {
   assert.match(draftRoute, /createEditorDraftHandler\(\{[\s\S]*authorizeEditor,/);
-  assert.match(writeHandlers, /WITH draft AS \([\s\S]*first_revision AS \([\s\S]*actor AS \([\s\S]*audit AS \([\s\S]*SELECT draft\.id, draft\.slug/);
+  assert.match(writeHandlers, /WITH control AS MATERIALIZED \([\s\S]*SELECT writes_frozen[\s\S]*draft AS \([\s\S]*first_revision AS \([\s\S]*actor AS \([\s\S]*audit AS \([\s\S]*SELECT draft\.id, draft\.slug/);
   assert.match(writeHandlers, /story\.draft\.created/);
   assert.match(writeHandlers,/await authorizeEditor\(request\)/);
   assert.match(writeHandlers,/INSERT INTO system\.audit_events\(actor_id,event/);
@@ -40,13 +42,28 @@ test("draft, first revision, and audit are inserted atomically after validation 
   assert.ok(writeHandlers.indexOf("await authorizeEditor(request)") < writeHandlers.indexOf("await readJsonBody(request)"));
   assert.ok(writeHandlers.indexOf("await readJsonBody(request)") < writeHandlers.indexOf("!validate(body.value)"));
   assert.ok(writeHandlers.indexOf("!validate(body.value)") < writeHandlers.indexOf("reserveEditorWrite("));
-  assert.ok(writeHandlers.indexOf("reserveEditorWrite(") < writeHandlers.indexOf("WITH draft AS"));
+  assert.ok(writeHandlers.indexOf("reserveEditorWrite(") < writeHandlers.indexOf("WITH control AS MATERIALIZED", writeHandlers.indexOf("createEditorDraftHandler")));
   assert.match(writeHandlers, /SELECT \$\{auth\.user\.id\},\$\{auth\.user\.name\} FROM first_revision LIMIT 1/);
+});
+
+test("production editor routes require the database write-freeze gate and lock it in each mutation statement", () => {
+  assert.match(draftRoute, /isWriteFrozen:\s*isEditorWriteFrozen/);
+  assert.match(revisionRoute, /isWriteFrozen:\s*isEditorWriteFrozen/);
+  assert.match(writeFreeze, /FROM system\.editor_write_controls[\s\S]*FOR SHARE/);
+  assert.equal((writeHandlers.match(/FOR SHARE/g) ?? []).length, 2);
+  assert.match(writeHandlers, /FROM control WHERE NOT control\.writes_frozen/);
+  assert.match(writeHandlers, /NOT control\.writes_frozen[\s\S]*FOR UPDATE OF stories/);
+  assert.ok(writeHandlers.indexOf("await isWriteFrozen({ sql })") < writeHandlers.indexOf("reserveEditorWrite("));
+  assert.match(writeFreezeScript, /getApplicationDatabaseUrl\(\)/);
+  assert.match(writeFreezeScript, /CONFIRM_EDITOR_WRITE_FREEZE !== action/);
+  assert.match(writeFreezeScript, /operator: parsed\.get\("actor"\)/);
+  assert.match(writeFreezeScript, /reason: parsed\.get\("reason"\)/);
+  assert.doesNotMatch(writeFreezeScript, /console\.log\(process\.env|DATABASE_URL/);
 });
 
 test("revision allocation locks the draft and audits only an inserted revision", () => {
   assert.match(revisionRoute, /createEditorRevisionHandler\(\{[\s\S]*authorizeEditor,/);
-  assert.match(writeHandlers, /WITH target AS MATERIALIZED \([\s\S]*SELECT id FROM archive\.stories[\s\S]*FOR UPDATE/);
+  assert.match(writeHandlers, /WITH control AS MATERIALIZED \([\s\S]*target AS MATERIALIZED \([\s\S]*SELECT stories\.id FROM archive\.stories[\s\S]*FOR UPDATE OF stories/);
   assert.match(writeHandlers, /MAX\(r\.revision\),0\)\+1/);
   assert.match(writeHandlers, /story\.revision\.created/);
   assert.match(writeHandlers, /JOIN audit ON audit\.entity_id=inserted\.story_id/);

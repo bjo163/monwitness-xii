@@ -2,6 +2,11 @@
 
 **As of:** 2026-10-12 • **Owner repository:** bjo163/monwitness-xii • **Release verdict:** NO-GO for production promotion.
 
+### Current local-only follow-up — 2026-10-12 (uncommitted checkout)
+
+- Added a database-backed editor write freeze in local migrations `0003`/`0004`. The singleton control records enabled/frozen state, operator reference, reason, and time. A guarded local script requires the independent database target check and action-specific confirmation. Both editor mutations hold a shared lock on the control row, so a freeze waits for in-flight writes and later writes are rejected atomically; absent control state fails closed. PGlite covers frozen requests, no quota reservation/data mutation, and the preflight-to-write race. The backup/restore runbook documents operator commands and verification. These migrations are not applied to persistent dev, Preview, or production.
+- Current local verification: 117/117 tests, `db:check`, full `npm audit` (0 vulnerabilities), production build, `actionlint`, diff check, and CSP-required loopback smoke 32/32 pass on Node 26.5.0 / npm 11.17.0. The refreshed dashboard is open at `http://127.0.0.1:3039/handover`. Production remains NO-GO; the owner requested local-only work with no deploy or push.
+
 ### Current local review update — 2026-10-12 (local review checkout; Node 22 comparison is historical)
 
 - The `/handover` dashboard now presents the local checkpoint and eight open gates in a responsive MoonWitness visual treatment. Its `G-`-prefixed gate IDs are separate from implementation-task IDs such as `DB-02`, which records a completed disposable migration rehearsal. Latest rebuilt browser-visible page is `http://127.0.0.1:3039/handover`; existing character/site artwork was preserved. The previous server on port 3037 remains untouched and serves its earlier build.

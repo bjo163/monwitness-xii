@@ -4,11 +4,14 @@ import { PGlite } from "@electric-sql/pglite";
 import test from "node:test";
 import { createEditorDraftHandler, createEditorRevisionHandler } from "../lib/editor-write-handlers.js";
 import { reserveEditorWrite } from "../lib/editor-write-limit.js";
+import { isEditorWriteFrozen, setEditorWriteFreezeState } from "../lib/editor-write-freeze.js";
 
 const migrations = await Promise.all([
   readFile(new URL("../drizzle/0000_0000_initial_v11.sql", import.meta.url), "utf8"),
   readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8"),
   readFile(new URL("../drizzle/0002_editor_write_limits.sql", import.meta.url), "utf8"),
+  readFile(new URL("../drizzle/0003_editor_write_controls.sql", import.meta.url), "utf8"),
+  readFile(new URL("../drizzle/0004_editor_write_control_audit.sql", import.meta.url), "utf8"),
 ]);
 
 function taggedQuery(db) {
@@ -26,6 +29,133 @@ function post(path, value) {
   });
 }
 
+test("editor write freeze reads the singleton control and fails closed if it is missing", async (t) => {
+  const db = new PGlite();
+  t.after(() => db.close());
+  for (const migration of migrations) await db.exec(migration);
+  const sql = taggedQuery(db);
+  const initial = await db.query("SELECT singleton_id,writes_frozen,changed_by,change_reason FROM system.editor_write_controls");
+  assert.deepEqual(initial.rows, [{ singleton_id: "global", writes_frozen: false, changed_by: "migration", change_reason: "initialization" }]);
+  assert.equal(await isEditorWriteFrozen({ sql }), false);
+  assert.equal(await setEditorWriteFreezeState({ sql, frozen: true, operator: "on-call", reason: "INC-104" }), true);
+  assert.equal(await isEditorWriteFrozen({ sql }), true);
+  const audit = await db.query("SELECT changed_by,change_reason FROM system.editor_write_controls WHERE singleton_id='global'");
+  assert.deepEqual(audit.rows[0], { changed_by: "on-call", change_reason: "INC-104" });
+  await assert.rejects(setEditorWriteFreezeState({ sql, frozen: false, operator: "", reason: "resume" }), /operator reference is required/);
+  assert.equal(await setEditorWriteFreezeState({ sql, frozen: false, operator: "on-call", reason: "INC-104-resolved" }), false);
+  assert.equal(await isEditorWriteFrozen({ sql }), false);
+  await sql`DELETE FROM system.editor_write_controls WHERE singleton_id='global'`;
+  await assert.rejects(isEditorWriteFrozen({ sql }), /Editor write control row is unavailable/);
+});
+
+test("frozen editor draft and revision handlers stop before auth, quota, and database access", async () => {
+  let authCalls = 0;
+  let quotaCalls = 0;
+  let databaseCalls = 0;
+  const dependencies = {
+    isWriteFrozen: () => true,
+    authorizeEditor: async () => { authCalls += 1; return { ok: true, user: { id: "owner", name: "Owner" } }; },
+    reserveEditorWrite: async () => { quotaCalls += 1; return { allowed: true }; },
+    getSql: () => { databaseCalls += 1; return async () => []; },
+  };
+  const draftResponse = await createEditorDraftHandler(dependencies)(post("/api/editor/drafts", {
+    slug: "frozen-draft", title: "Paused", body: "Must not write",
+  }));
+  const revisionResponse = await createEditorRevisionHandler(dependencies)(post("/api/editor/revisions", {
+    slug: "existing-draft", body: "Must not write",
+  }));
+
+  for (const response of [draftResponse, revisionResponse]) {
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.deepEqual(await response.json(), { error: "Editor writes are paused" });
+  }
+  assert.equal(authCalls, 2);
+  assert.equal(quotaCalls, 0);
+  assert.equal(databaseCalls, 2);
+});
+
+test("database write freeze blocks both handlers and closes the preflight race", async (t) => {
+  const db = new PGlite();
+  t.after(() => db.close());
+  for (const migration of migrations) await db.exec(migration);
+  const sql = taggedQuery(db);
+  const dependencies = {
+    authorizeEditor: async () => ({ ok: true, user: { id: "freeze-owner", name: "Owner" } }),
+    reserveEditorWrite: (options) => reserveEditorWrite({ ...options, limit: 20 }),
+    getSql: () => sql,
+    isWriteFrozen: isEditorWriteFrozen,
+  };
+  const draftHandler = createEditorDraftHandler(dependencies);
+  const revisionHandler = createEditorRevisionHandler(dependencies);
+
+  const initialDraft = await draftHandler(post("/api/editor/drafts", {
+    slug: "before-freeze", title: "Before freeze", body: "First immutable revision",
+  }));
+  assert.equal(initialDraft.status, 201);
+  await sql`UPDATE system.editor_write_controls
+    SET writes_frozen=true, updated_at=now(), changed_by='test-operator', change_reason='incident-test'
+    WHERE singleton_id='global'`;
+  assert.equal(await isEditorWriteFrozen({ sql }), true);
+
+  const beforeFreezeState = await db.query(`
+    SELECT
+      (SELECT count(*)::int FROM archive.stories) AS stories,
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
+      (SELECT count(*)::int FROM system.audit_events) AS events,
+      (SELECT sum(request_count)::int FROM system.editor_write_limits) AS reserved
+  `);
+  const pausedDraft = await draftHandler(post("/api/editor/drafts", {
+    slug: "during-freeze", title: "During freeze", body: "Must not write",
+  }));
+  const pausedRevision = await revisionHandler(post("/api/editor/revisions", {
+    slug: "before-freeze", body: "Must not revise",
+  }));
+  for (const response of [pausedDraft, pausedRevision]) {
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.deepEqual(await response.json(), { error: "Editor writes are paused" });
+  }
+  const afterFrozenState = await db.query(`
+    SELECT
+      (SELECT count(*)::int FROM archive.stories) AS stories,
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
+      (SELECT count(*)::int FROM system.audit_events) AS events,
+      (SELECT sum(request_count)::int FROM system.editor_write_limits) AS reserved
+  `);
+  assert.deepEqual(afterFrozenState.rows[0], beforeFreezeState.rows[0]);
+
+  await sql`UPDATE system.editor_write_controls
+    SET writes_frozen=false, updated_at=now(), changed_by='test-operator', change_reason='resume-test'
+    WHERE singleton_id='global'`;
+  let racedFreeze = false;
+  const racingDraftHandler = createEditorDraftHandler({
+    ...dependencies,
+    reserveEditorWrite: async (options) => {
+      const reservation = await reserveEditorWrite({ ...options, limit: 20 });
+      racedFreeze = true;
+      await sql`UPDATE system.editor_write_controls
+        SET writes_frozen=true, updated_at=now(), changed_by='test-operator', change_reason='race-test'
+        WHERE singleton_id='global'`;
+      return reservation;
+    },
+  });
+  const racedDraft = await racingDraftHandler(post("/api/editor/drafts", {
+    slug: "freeze-race", title: "Freeze race", body: "Must be blocked by mutation guard",
+  }));
+  assert.equal(racedFreeze, true);
+  assert.equal(racedDraft.status, 503);
+  assert.deepEqual(await racedDraft.json(), { error: "Editor writes are paused" });
+  const racedState = await db.query(`
+    SELECT
+      (SELECT count(*)::int FROM archive.stories WHERE slug='freeze-race') AS stories,
+      (SELECT count(*)::int FROM archive.story_revisions revisions JOIN archive.stories stories ON stories.id=revisions.story_id WHERE stories.slug='freeze-race') AS revisions,
+      (SELECT count(*)::int FROM system.audit_events events JOIN archive.stories stories ON stories.id=events.entity_id WHERE stories.slug='freeze-race') AS events,
+      (SELECT writes_frozen FROM system.editor_write_controls WHERE singleton_id='global') AS frozen
+  `);
+  assert.deepEqual(racedState.rows[0], { stories: 0, revisions: 0, events: 0, frozen: true });
+});
+
 test("actual editor handlers preserve atomic writes, authorization, rate limits, and revision concurrency", async (t) => {
   const db = new PGlite();
   t.after(() => db.close());
@@ -36,6 +166,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     authorizeEditor: async () => authorization,
     reserveEditorWrite: (options) => reserveEditorWrite({ ...options, limit: 2 }),
     getSql: () => sql,
+    isWriteFrozen: isEditorWriteFrozen,
   };
   const draftHandler = createEditorDraftHandler(dependencies);
   const revisionHandler = createEditorRevisionHandler(dependencies);

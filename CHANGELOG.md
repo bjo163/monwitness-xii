@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Add a local editor write freeze
+
+- Added singleton database write control with operator/reason audit metadata. Editor draft and revision mutations take a shared row lock, so freeze activation waits for in-flight writes and blocks later mutations atomically; missing control state fails closed.
+- Added target-guarded `status`, `freeze`, and `unfreeze` commands, action-specific confirmation, PGlite race/failure tests, and operator steps to the backup/restore runbook. Migrations `0003`/`0004` remain local and have not been applied to persistent dev, Preview, or production.
+- Verification: 117/117 tests, `db:check`, full dependency audit (0 vulnerabilities), production build, `actionlint`, and local CSP-required smoke 32/32 passed on Node 26.5.0 / npm 11.17.0. Production remains NO-GO; no push or deployment.
+
 ## 2026-10-12 — Reproduce the exact review head from a clean snapshot
 
 - Exported tracked commit `85e63ea` into a fresh temporary directory without `.env.local`; `npm ci --no-audit --no-fund` installed 239 packages under Node 26.5.0 / npm 11.17.0.

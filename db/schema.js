@@ -103,3 +103,10 @@ export const editorWriteLimits = system.table("editor_write_limits", {
   windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull().defaultNow(),
   requestCount: integer("request_count").notNull().default(0)
 });
+export const editorWriteControls = system.table("editor_write_controls", {
+  singletonId: text("singleton_id").primaryKey().default("global"),
+  writesFrozen: boolean("writes_frozen").notNull().default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  changedBy: text("changed_by").notNull().default("migration"),
+  changeReason: text("change_reason").notNull().default("initialization")
+});

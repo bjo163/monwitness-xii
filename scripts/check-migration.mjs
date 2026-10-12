@@ -11,8 +11,10 @@ const schema = await readFile(join(root, "db", "schema.js"), "utf8");
 const initial = await readFile(join(root, "drizzle", "0000_0000_initial_v11.sql"), "utf8");
 const retention = await readFile(join(root, "drizzle", "0001_initial_v11.sql"), "utf8");
 const writeLimits = await readFile(join(root, "drizzle", "0002_editor_write_limits.sql"), "utf8");
+const writeControls = await readFile(join(root, "drizzle", "0003_editor_write_controls.sql"), "utf8");
+const writeControlAudit = await readFile(join(root, "drizzle", "0004_editor_write_control_audit.sql"), "utf8");
 const journal = JSON.parse(await readFile(join(root, "drizzle", "meta", "_journal.json"), "utf8"));
-const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", "0002_snapshot.json"), "utf8"));
+const snapshot = JSON.parse(await readFile(join(root, "drizzle", "meta", "0004_snapshot.json"), "utf8"));
 
 assert.match(schema, /references\(\(\)=>stories\.id,\{onDelete:"restrict"\}\)/, "revision FK must retain source stories");
 const schemas = [...initial.matchAll(/CREATE SCHEMA "([^"]+)"/g)].map((match) => match[1]);
@@ -22,11 +24,15 @@ assert.match(retention, /DROP CONSTRAINT IF EXISTS "story_revisions_story_id_fke
 assert.match(retention, /DROP CONSTRAINT IF EXISTS "story_revisions_story_id_stories_id_fk"/);
 assert.match(retention, /ON DELETE restrict/);
 assert.equal(snapshot.tables["archive.story_revisions"].foreignKeys.story_revisions_story_id_stories_id_fk.onDelete, "restrict");
-assert.equal(journal.entries.length, 3);
+assert.equal(journal.entries.length, 5);
 assert.equal(journal.entries[0].tag, "0000_0000_initial_v11");
 assert.equal(journal.entries[1].tag, "0001_initial_v11");
 assert.equal(journal.entries[2].tag, "0002_editor_write_limits");
+assert.equal(journal.entries[3].tag, "0003_editor_write_controls");
+assert.equal(journal.entries[4].tag, "0004_editor_write_control_audit");
 assert.ok(snapshot.tables["system.editor_write_limits"], "latest Drizzle snapshot must include write limits");
+assert.ok(snapshot.tables["system.editor_write_controls"], "latest Drizzle snapshot must include the editor write-freeze control");
+assert.match(writeControls, /VALUES \('global', false\)/);
 
 const temporaryBase = resolve(tmpdir());
 const temporaryDirectory = await mkdtemp(join(temporaryBase, "mw-v11-migration-check-"));
@@ -52,6 +58,8 @@ try {
     await migratedDb.exec(initial);
     await migratedDb.exec(retention);
     await migratedDb.exec(writeLimits);
+    await migratedDb.exec(writeControls);
+    await migratedDb.exec(writeControlAudit);
 
     const readSchema = async (db) => {
       const schemas = await db.query(`SELECT schema_name FROM information_schema.schemata WHERE schema_name IN ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system') ORDER BY schema_name`);
@@ -70,4 +78,4 @@ try {
   await rm(temporaryDirectory, { recursive: true, force: true });
 }
 
-console.log("Drizzle artifacts pass generation and PostgreSQL replay checks: the committed migration chain matches the full generated schema, including retained revisions and editor write limits. This local check does not execute SQL on Neon; see the engineering handover for environment-specific rehearsal evidence.");
+console.log("Drizzle artifacts pass generation and PostgreSQL replay checks: the committed migration chain matches the full generated schema, including retained revisions, editor write limits, and the audited write-freeze control. This local check does not execute SQL on Neon; see the engineering handover for environment-specific rehearsal evidence.");

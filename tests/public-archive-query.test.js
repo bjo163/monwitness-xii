@@ -17,6 +17,8 @@ const migrationFiles = [
   "../drizzle/0000_0000_initial_v11.sql",
   "../drizzle/0001_initial_v11.sql",
   "../drizzle/0002_editor_write_limits.sql",
+  "../drizzle/0003_editor_write_controls.sql",
+  "../drizzle/0004_editor_write_control_audit.sql",
 ];
 const migrations = await Promise.all(migrationFiles.map((file) => readFile(new URL(file, import.meta.url), "utf8")));
 const archivePageSource = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");

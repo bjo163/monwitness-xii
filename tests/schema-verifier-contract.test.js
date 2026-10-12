@@ -43,7 +43,7 @@ test("schema verifier covers table, column, default, key, and index drift", () =
 test("normal verification selects the latest migration snapshot and reconciliation selects the baseline", async () => {
   const { selectSchemaSnapshot } = await import("../lib/schema-snapshot-selection.js");
   const metadata = { journalVersion: migrationJournal.version, journalDialect: migrationJournal.dialect };
-  assert.equal(selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: migrationJournal.entries, ...metadata }), "0002_snapshot.json");
+  assert.equal(selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: migrationJournal.entries, ...metadata }), "0004_snapshot.json");
   assert.equal(selectSchemaSnapshot({ baselineReconciliation: true, migrationEntries: migrationJournal.entries, ...metadata }), "0000_snapshot.json");
   assert.throws(() => selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: [], ...metadata }), /no entries/);
 });
@@ -99,7 +99,7 @@ test("schema verification fails on a missing migration ledger and any inventory 
   assert.equal(hasSchemaDrift({ ...clean, unexpectedPolicies: [{}] }), true);
   assert.equal(hasSchemaDrift({ ...clean, unexpectedTriggers: [{}] }), true);
 
-  const snapshot = JSON.parse(await readFile(new URL("../drizzle/meta/0002_snapshot.json", import.meta.url), "utf8"));
+  const snapshot = JSON.parse(await readFile(new URL("../drizzle/meta/0004_snapshot.json", import.meta.url), "utf8"));
   const expectedTables = { "archive.stories": snapshot.tables["archive.stories"] };
   const db = new PGlite();
   try {

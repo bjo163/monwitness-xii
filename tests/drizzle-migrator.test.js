@@ -16,7 +16,7 @@ test("Drizzle migrator applies the journal in order and validates its ledger", a
   await migrate(db, config);
 
   const firstPass = await client.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at");
-  assert.equal(firstPass.rows.length, 3);
+  assert.equal(firstPass.rows.length, 5);
   const expectedEntries = readMigrationFiles(config).map(({ hash, folderMillis }) => ({ hash, created_at: folderMillis }));
   assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: firstPass.rows, expectedEntries }), false);
   assert.equal(hasMigrationLedgerDrift({
@@ -38,7 +38,7 @@ test("Drizzle migrator applies the journal in order and validates its ledger", a
     WHERE table_type='BASE TABLE' AND table_schema IN
       ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system')
   `);
-  assert.equal(tables.rows[0].total, 17);
+  assert.equal(tables.rows[0].total, 18);
 
   const foreignKey = await client.query(`
     SELECT confdeltype FROM pg_constraint

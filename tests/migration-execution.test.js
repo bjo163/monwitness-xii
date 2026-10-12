@@ -6,6 +6,8 @@ import { PGlite } from "@electric-sql/pglite";
 const initial = await readFile(new URL("../drizzle/0000_0000_initial_v11.sql", import.meta.url), "utf8");
 const retention = await readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8");
 const writeLimits = await readFile(new URL("../drizzle/0002_editor_write_limits.sql", import.meta.url), "utf8");
+const writeControls = await readFile(new URL("../drizzle/0003_editor_write_controls.sql", import.meta.url), "utf8");
+const writeControlAudit = await readFile(new URL("../drizzle/0004_editor_write_control_audit.sql", import.meta.url), "utf8");
 
 test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL", async (t) => {
   const db = new PGlite();
@@ -29,6 +31,8 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
 
   await db.exec(retention);
   await db.exec(writeLimits);
+  await db.exec(writeControls);
+  await db.exec(writeControlAudit);
   const rateLimitColumns = await db.query(`
     SELECT column_name FROM information_schema.columns
     WHERE table_schema='system' AND table_name='editor_write_limits'

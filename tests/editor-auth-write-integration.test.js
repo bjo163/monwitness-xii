@@ -5,11 +5,14 @@ import test from "node:test";
 import { createEditorAuthorizer } from "../lib/editor-authorizer.js";
 import { createEditorDraftHandler, createEditorRevisionHandler } from "../lib/editor-write-handlers.js";
 import { reserveEditorWrite } from "../lib/editor-write-limit.js";
+import { isEditorWriteFrozen } from "../lib/editor-write-freeze.js";
 
 const migrations = await Promise.all([
   readFile(new URL("../drizzle/0000_0000_initial_v11.sql", import.meta.url), "utf8"),
   readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8"),
   readFile(new URL("../drizzle/0002_editor_write_limits.sql", import.meta.url), "utf8"),
+  readFile(new URL("../drizzle/0003_editor_write_controls.sql", import.meta.url), "utf8"),
+  readFile(new URL("../drizzle/0004_editor_write_control_audit.sql", import.meta.url), "utf8"),
 ]);
 
 function taggedQuery(db) {
@@ -46,7 +49,7 @@ test("real editor authorization composition rejects writes after a provider role
     }),
   });
   const sql = taggedQuery(db);
-  const dependencies = { authorizeEditor, reserveEditorWrite, getSql: () => sql };
+  const dependencies = { authorizeEditor, reserveEditorWrite, getSql: () => sql, isWriteFrozen: isEditorWriteFrozen };
   const createDraft = createEditorDraftHandler(dependencies);
   const appendRevision = createEditorRevisionHandler(dependencies);
 

@@ -22,6 +22,20 @@
       "when": 1791742779447,
       "tag": "0002_editor_write_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791781566106,
+      "tag": "0003_editor_write_controls",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791781623168,
+      "tag": "0004_editor_write_control_audit",
+      "breakpoints": true
     }
   ]
 }
