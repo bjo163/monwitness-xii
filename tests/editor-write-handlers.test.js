@@ -26,7 +26,7 @@ function post(path, value) {
   });
 }
 
-test("actual editor handlers atomically create drafts, append revisions, and avoid orphan actor writes", async (t) => {
+test("actual editor handlers preserve atomic writes, authorization, rate limits, and revision concurrency", async (t) => {
   const db = new PGlite();
   t.after(() => db.close());
   for (const migration of migrations) await db.exec(migration);
@@ -135,4 +135,38 @@ test("actual editor handlers atomically create drafts, append revisions, and avo
       (SELECT count(*)::int FROM system.audit_events WHERE entity_id=(SELECT id FROM archive.stories WHERE slug='fixture-story')) AS events
   `);
   assert.deepEqual(finalCounts.rows[0], { stories: 1, revisions: 2, events: 2 });
+
+  const concurrentDependencies = {
+    ...dependencies,
+    reserveEditorWrite: (options) => reserveEditorWrite({ ...options, limit: 10 }),
+  };
+  const concurrentDraftHandler = createEditorDraftHandler(concurrentDependencies);
+  const concurrentRevisionHandler = createEditorRevisionHandler(concurrentDependencies);
+  authorization = { ok: true, user: { id: "owner-concurrent", name: "Owner" } };
+  const concurrentDraftResponse = await concurrentDraftHandler(post("/api/editor/drafts", {
+    slug: "concurrent-story", title: "Concurrent story", body: "First revision",
+  }));
+  assert.equal(concurrentDraftResponse.status, 201);
+
+  const concurrentResponses = await Promise.all([
+    concurrentRevisionHandler(post("/api/editor/revisions", { slug: "concurrent-story", body: "Parallel edit A" })),
+    concurrentRevisionHandler(post("/api/editor/revisions", { slug: "concurrent-story", body: "Parallel edit B" })),
+  ]);
+  const concurrentStatuses = concurrentResponses.map((response) => response.status).sort((a, b) => a - b);
+  assert.ok(
+    JSON.stringify(concurrentStatuses) === JSON.stringify([201, 201]) ||
+    JSON.stringify(concurrentStatuses) === JSON.stringify([201, 409]),
+    `concurrent revision results must be success/success or success/retry-conflict, got ${concurrentStatuses}`,
+  );
+  const concurrentState = await db.query(`
+    SELECT revisions.revision, count(events.id)::int AS audit_events
+    FROM archive.story_revisions revisions
+    JOIN archive.stories stories ON stories.id=revisions.story_id
+    LEFT JOIN system.audit_events events ON events.entity_id=stories.id
+    WHERE stories.slug='concurrent-story'
+    GROUP BY revisions.revision ORDER BY revisions.revision
+  `);
+  assert.deepEqual(concurrentState.rows.map((row) => row.revision),
+    concurrentStatuses[1] === 201 ? [1, 2, 3] : [1, 2]);
+  assert.ok(concurrentState.rows.every((row) => row.audit_events === concurrentState.rows.length));
 });
