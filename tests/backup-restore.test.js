@@ -118,6 +118,6 @@ test("backup runbook states the current synthetic restore coverage and its limit
   assert.match(backupRunbook, /does not prove Neon snapshot recovery, provider Auth recovery, production data restoration, scheduled retention, or cutover\/rollback/);
   assert.match(backupRunbook, /This repository does not currently provide a verified write-stop mechanism for any persistent database/);
   assert.match(backupRunbook, /If writes cannot be proven stopped, do not claim a freeze or proceed with destructive recovery\/cutover/);
-  assert.match(backupRunbook, /have not been applied to any database, so this CLI is not presently an incident control for Neon/);
+  assert.match(backupRunbook, /have not been applied to any persistent Neon database, so this CLI is not presently an incident control for Neon/);
   assert.match(backupRunbook, /DB-03 remains open/);
 });

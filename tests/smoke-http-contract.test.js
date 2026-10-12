@@ -192,7 +192,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
   assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
   assert.match(implementationChecklist, /^\| DB-02 \| Database \|.*\| \[ \] IN PROGRESS \|.*`0003`\/`0004`/m);
-  assert.match(releaseGatesDoc, /isolated Neon rehearsal proves migrations `0000`–`0002` only.*not been applied to any database or Neon-rehearsed/);
+  assert.match(releaseGatesDoc, /isolated Neon rehearsal proves migrations `0000`–`0002` only.*not been applied to a persistent Neon database or Neon-rehearsed/);
   assert.match(releaseGatesDoc, /separate populated-fixture PGlite test automatically executes the reviewed reverse-DDL sequence.*not published downgrade scripts/);
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
   assert.match(handoverDoc, /^## Current review checkpoint — 2026-10-13/m);
@@ -251,6 +251,7 @@ test("populated development migration runbook accounts for the entire current jo
   assert.match(migrationReconciliationDoc, /do not stop after applying only `0001`\/`0002`/);
   assert.match(migrationReconciliationDoc, /complete ordered plan for all four migrations/);
   assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
+  assert.match(migrationReconciliationDoc, /PGlite fixture coverage but have not been applied to a persistent Neon database/);
   assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);
   assert.match(migrationReconciliationDoc, /Local reverse-DDL rehearsal across migrations 0001–0004/);
   assert.match(migrationReconciliationDoc, /15 synthetic published, `source_needed` story indexes and zero revisions/);
