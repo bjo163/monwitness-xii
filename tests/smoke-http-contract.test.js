@@ -103,6 +103,7 @@ test("local and Preview smoke enforce per-route Neon Auth methods", () => {
 
 test("local and Preview smoke verify that the Auth token route rejects signed-out requests", () => {
   assert.equal((smokeScript.match(/api\/auth\/token",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===401\)\|\|\(r\.status===503&&b\?\.error==="Authentication is not configured"\)\)\)/g) ?? []).length, 2);
+  assert.equal(smokeScript.split('await check("/editor",').length - 1, 2, "both local and Preview profiles must verify anonymous editor denial");
 });
 
 test("local and Preview smoke enforce route-specific OPTIONS and HEAD behavior", () => {
@@ -118,10 +119,10 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
   assert.match(handoverPage, /121 \/ 121/);
-  assert.match(handoverPage, /33 \/ 33/);
+  assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /current checkout passes 121\/121 tests, including sign-out behavior, a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
+  assert.match(handoverPage, /current checkout passes 121\/121 tests, including sign-out behavior, anonymous editor-page redirect coverage, a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);

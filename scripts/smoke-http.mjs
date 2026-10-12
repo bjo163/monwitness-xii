@@ -61,6 +61,7 @@ if(profile==="preview"){
  await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
+ await check("/editor",(r)=>[307,308].includes(r.status)&&r.headers.get("location")==="/editor/login"&&r.headers.get("cache-control")==="no-store");
  await checkFreshPageNonce("/");
  await check("/api/auth/get-session",(r,b)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&b===null);
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
@@ -89,8 +90,9 @@ if(profile==="preview"){
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&t.includes("THE CREW KEEPS WATCH.")&&t.includes("These are universe portraits, not claims that a specific character appears in an indexed story.")&&["four-lah","whalterwhite","isrockfeel","rock-soul"].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
  await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
- await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("121 / 121")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("33 / 33")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
+ await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("121 / 121")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("34 / 34")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
+ await check("/editor",(r)=>[307,308].includes(r.status)&&r.headers.get("location")==="/editor/login"&&r.headers.get("cache-control")==="no-store");
  await checkFreshPageNonce("/");
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
  await check("/api/auth/token",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401)||(r.status===503&&b?.error==="Authentication is not configured")));
