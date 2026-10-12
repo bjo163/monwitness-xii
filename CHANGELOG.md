@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Remove unverified database environment claim
+
+- A successful DB readiness probe now reports connectivity only. It no longer emits `migration: development`, which was not backed by a verified target branch and could mislead operators when `DATABASE_URL` points elsewhere.
+- Local and Preview smoke contracts reject the unverified field; handler coverage confirms the success response contains only `{ status, database }`.
+- Verified source commit `4ab981c`: 103/103 tests on Node 26.5.0 and Node 24.19.0, `db:check`, production build, diff check, and CSP-required loopback smoke 32/32 at `127.0.0.1:3037`. Release target mapping remains unverified; production stays NO-GO.
+- Local-only source and handover work. No push, deployment, or Neon operation occurred.
+
 ## 2026-10-12 — Keep local database readiness logs actionable
 
 - The database readiness endpoint now returns its existing safe 503 without logging an expected missing-`DATABASE_URL` configuration state. Actual configured probe failures continue to log only the error class and return no details.
