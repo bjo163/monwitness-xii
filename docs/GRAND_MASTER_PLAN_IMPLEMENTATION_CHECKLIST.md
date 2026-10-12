@@ -51,7 +51,7 @@ This table traces the ten areas named in Phase 1 of the attached master prompt t
 
 **Traceability result:** all ten names from the attached prompt now have an evidence-linked status in this checkout. This closes only the inventory/mapping work that can be done from the prompt. `SCOPE-01` remains blocked until the authoritative V11/V11.2 source is supplied and its actual requirements can be reconciled.
 
-Implementation-task IDs in this tracker are separate from the gate IDs in `RELEASE_GATES_V11.md`. Codes such as `ARC-01` and `DB-02` can therefore refer to different evidence scopes; a tracker status never closes a release gate by itself.
+Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs in `RELEASE_GATES_V11.md`. For example, tracker `DB-02` is a completed disposable migration rehearsal, while release gate `G-DB-02` is the still-open persistent development migration. A tracker status never closes a release gate by itself.
 
 ## Additional prompt-scope work awaiting source criteria
 

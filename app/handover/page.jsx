@@ -22,14 +22,14 @@ const verified = [
 ];
 
 const gates = [
-  { id: "SEC-01", title: "Verify CSP on the exact release preview", text: "Local smoke requires nonce-only script and style policies and checks every rendered script/style block. This worktree has no remote CI or Preview result; repeat on the exact reviewed release head." },
-  { id: "AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in, admin onboarding, authenticated draft/revision writes, audit attribution, and session/role-revocation checks." },
-  { id: "AUTH-02", title: "Identity policy", text: "Direct provider sign-up remains enabled and Managed Auth has no MFA here. Choose and verify an identity path suitable for production." },
-  { id: "DB-02", title: "Persistent development migration", text: "Confirm the exact application database target, reconcile its existing schema and missing ledger, then apply only through an approved migration plan." },
-  { id: "DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
-  { id: "ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
-  { id: "REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
-  { id: "PLAN-01", title: "Full V11 traceability", text: "All ten prompt modules are mapped to local evidence; full requirements coverage awaits the missing authoritative V11/V11.2 plan." },
+  { id: "G-SEC-01", title: "Verify CSP on the exact release preview", text: "Local smoke requires nonce-only script and style policies and checks every rendered script/style block. This worktree has no remote CI or Preview result; repeat on the exact reviewed release head." },
+  { id: "G-AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in, admin onboarding, authenticated draft/revision writes, audit attribution, and session/role-revocation checks." },
+  { id: "G-AUTH-02", title: "Identity policy", text: "Direct provider sign-up remains enabled and Managed Auth has no MFA here. Choose and verify an identity path suitable for production." },
+  { id: "G-DB-02", title: "Persistent development migration", text: "Confirm the exact application database target, reconcile its existing schema and missing ledger, then apply only through an approved migration plan." },
+  { id: "G-DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
+  { id: "G-ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
+  { id: "G-REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
+  { id: "G-PLAN-01", title: "Full V11 traceability", text: "All ten prompt modules are mapped to local evidence; full requirements coverage awaits the missing authoritative V11/V11.2 plan." },
 ];
 
 export default function HandoverPage() {

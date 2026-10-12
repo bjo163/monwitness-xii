@@ -128,12 +128,14 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /Schema verification detects untracked RLS, CHECK, policy, and trigger drift/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
   assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
-  const uiGateIds = [...handoverPage.matchAll(/\{ id: "([A-Z]{2,4}-\d{2})", title:/g)].map((match) => match[1]);
-  const docGateRows = [...releaseGatesDoc.matchAll(/^\| ([A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
-  assert.deepEqual(uiGateIds, ["SEC-01", "AUTH-01", "AUTH-02", "DB-02", "DB-03", "ARC-01", "REL-01", "PLAN-01"]);
+  const uiGateIds = [...handoverPage.matchAll(/\{ id: "(G-[A-Z]{2,4}-\d{2})", title:/g)].map((match) => match[1]);
+  const docGateRows = [...releaseGatesDoc.matchAll(/^\| (G-[A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
+  assert.deepEqual(uiGateIds, ["G-SEC-01", "G-AUTH-01", "G-AUTH-02", "G-DB-02", "G-DB-03", "G-ARC-01", "G-REL-01", "G-PLAN-01"]);
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
   const implementationTasks = implementationChecklist.split(/\r?\n/).filter((line) => /^\| [A-Z][A-Z0-9-]*-\d{2} \|/.exec(line));
   const implementationTaskIds = implementationTasks.map((line) => line.split("|")[1].trim());
+  assert.ok(uiGateIds.every((id) => id.startsWith("G-")), "release gates must use their own ID namespace");
+  assert.equal(uiGateIds.some((id) => implementationTaskIds.includes(id)), false, "release gate IDs must not collide with implementation task IDs");
   assert.ok(implementationTasks.length >= 24, "prompt and release gaps must remain in the implementation tracker");
   assert.equal(new Set(implementationTaskIds).size, implementationTaskIds.length, "implementation task IDs must be unique");
   for (const line of implementationTasks) {
@@ -141,7 +143,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
     assert.equal(columns.length, 10, `implementation task must include all ten required fields: ${line}`);
     assert.ok(/^\[x\] DONE$|^\[ \] (IN PROGRESS|BLOCKED|TODO)$/.exec(columns[4]), `invalid task status: ${columns[4]}`);
   }
-  assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the gate IDs/);
+  assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs/);
   assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
   assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
   assert.match(handoverDoc, /^### Current local review update/m);
