@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Add an editor sign-out action
+
+- Added a provider-backed sign-out button on the editor desk and signed-in access-denied screen. It returns the browser to `/editor/login` only after successful provider sign-out; failures use generic accessible feedback.
+- Unit and source-contract regressions cover success, returned errors, thrown errors, and the rendered action. Local verification passes 121/121 tests, the production build, and HTTP smoke 33/33; no owner-authenticated provider session was available for an end-to-end sign-out run.
+
 ## 2026-10-12 — Reject control characters in editor-freeze audit metadata
 
 - The database write-freeze helper now rejects C0/DEL control characters in operator references and change reasons so stored audit metadata cannot contain forged line breaks or tabs.
