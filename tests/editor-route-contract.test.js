@@ -6,6 +6,8 @@ import { relative, sep } from "node:path";
 const draftRoute = await readFile(new URL("../app/api/editor/drafts/route.js", import.meta.url), "utf8");
 const revisionRoute = await readFile(new URL("../app/api/editor/revisions/route.js", import.meta.url), "utf8");
 const writeHandlers = await readFile(new URL("../lib/editor-write-handlers.js", import.meta.url), "utf8");
+const editorAuth = await readFile(new URL("../lib/editor-auth.js", import.meta.url), "utf8");
+const editorAuthorizer = await readFile(new URL("../lib/editor-authorizer.js", import.meta.url), "utf8");
 const schema = await readFile(new URL("../db/schema.js", import.meta.url), "utf8");
 const retentionMigration = await readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8");
 const apiRoot = new URL("../app/api/", import.meta.url);
@@ -19,6 +21,13 @@ async function listRouteFiles(directory = apiRoot) {
   }));
   return nested.flat();
 }
+
+test("production editor authorizer uses uncached sessions and current owner allowlist", () => {
+  assert.match(editorAuth, /authorizeEditor\s*=\s*createEditorAuthorizer\(\{/);
+  assert.match(editorAuth, /getAdminUserIds:\(\)=>parseEditorAdminUserIds\(process\.env\.EDITOR_ADMIN_USER_IDS\)/);
+  assert.match(editorAuthorizer, /getSession:\(\)=>getFreshEditorAuthSession\(getAuth\(\)\)/);
+  assert.match(editorAuthorizer, /resolveEditorAuthorization\(\{[\s\S]*origin,expectedOrigin,[\s\S]*fetchSite:[^\n]*adminUserIds/);
+});
 
 test("draft, first revision, and audit are inserted atomically after validation and rate limiting", () => {
   assert.match(draftRoute, /createEditorDraftHandler\(\{[\s\S]*authorizeEditor,/);

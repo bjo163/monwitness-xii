@@ -4,7 +4,7 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "109 / 109", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
+  { value: "111 / 111", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
   { value: "32 / 32", label: "local HTTP checks", detail: "Current checkout · Node 26.5.0", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
@@ -85,7 +85,7 @@ export default function HandoverPage() {
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
-          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout exercises the actual editor draft/revision handlers against PGlite and passes 109/109 tests, build, and loopback smoke 32/32 on Node 26.5.0. Editor authorization bypasses the signed session-data cookie cache so the provider role is checked on each decision; a regression simulates provider role revocation between requests. Local Auth returns a signed-out session and editor denial; database routes fail closed unless the independently configured endpoint host and database name match. Browser-console error review remains open.</p>
+          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout exercises the actual editor draft/revision handlers against PGlite and passes 111/111 tests, build, and loopback smoke 32/32 on Node 26.5.0. Editor authorization bypasses the signed session-data cookie cache so the provider role is checked on each decision; PGlite verifies a successful draft before simulated provider role revocation and a denied revision after it, with no extra revision or audit row. Local Auth returns a signed-out session and editor denial; database routes fail closed unless the independently configured endpoint host and database name match. Browser-console error review remains open.</p>
         </div>
       </section>
 
