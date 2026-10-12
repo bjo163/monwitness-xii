@@ -4,7 +4,7 @@
 
 - Added same-origin `Origin` and Fetch Metadata checks to the allowlisted Neon Auth sign-in/sign-out proxy requests, with tests proving rejected requests never reach the provider.
 - Updated the handover dashboard and smoke contract to the current 127-test count, and reconciled the current local evidence across the release handover documents.
-- Rebuilt and served the current checkout at `http://localhost:3000`; all 34 local HTTP smoke checks pass. The preview is open in the browser. No deploy, push, migration, or persistent write occurred; production remains NO-GO.
+- Rebuilt and served the current checkout at `http://localhost:3000`; all 37 local HTTP smoke checks pass, including real proxy rejection of missing/cross-origin/cross-site sign-in and sign-out requests. No deploy, push, migration, or persistent write occurred; production remains NO-GO.
 
 ## 2026-10-12 — Reconcile local release evidence and provenance
 

@@ -5,7 +5,7 @@ export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
   { value: "127 / 127", label: "automated tests", detail: "Latest run · Node 26.5.0", tone: "pink" },
-  { value: "34 / 34", label: "local HTTP checks", detail: "Latest run · Node 26.5.0", tone: "cyan" },
+  { value: "37 / 37", label: "local HTTP checks", detail: "Latest run · Node 26.5.0", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];

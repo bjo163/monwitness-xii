@@ -120,13 +120,17 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local smoke checks editor write responses are not cacheable", () => {
   assert.match(smokeScript, /api\/editor\/drafts",\(r\)=>\[401,503\]\.includes\(r\.status\)&&r\.headers\.get\("cache-control"\)==="no-store","POST"/);
+  assert.match(smokeScript, /await check\("\/api\/auth\/sign-in\/email",\(r,b\)=>r\.status===403&&b\?\.error==="Cross-origin authentication request rejected","POST"\)/);
+  assert.match(smokeScript, /origin:"https:\/\/attacker\.example"/);
+  assert.match(smokeScript, /origin:parsedBase\.origin,"sec-fetch-site":"cross-site"/);
+  assert.match(smokeScript, /headers:\{\.\.\.headers,\.\.\.extraHeaders\}/);
 });
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
   assert.match(handoverPage, /127 \/ 127/);
   assert.match(smokeScript, /t\.includes\("127 \/ 127"\)/);
-  assert.match(handoverPage, /34 \/ 34/);
+  assert.match(handoverPage, /37 \/ 37/);
   assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
   assert.match(handoverPage, /Earlier clean Node 22\.23\.3 snapshots at commits 6a88a4b and 9d054ff passed their recorded workflow checks/);
@@ -138,6 +142,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /npm ls reports invalid peer versions inside the Neon Auth SDK transitive UI bundle/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(releaseGatesDoc, /current app proxy has no sign-in attempt limiter; the PostgreSQL quota protects editor draft\/revision writes only/);
+  assert.match(releaseGatesDoc, /installed `@neondatabase\/auth@0\.5\.0-beta` `NeonAuthConfig` exposes `baseUrl`, cookie settings, and logging; it has no `rateLimit` or `customRules` option/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /The Neon rehearsal covers migrations 0000–0002 only\. Review and rehearse 0003\/0004 on an isolated clone/);
   assert.match(handoverPage, /The freeze runbook requires an independently verified provider\/application write stop before destructive recovery/);
@@ -194,7 +199,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Prior local checkpoint — superseded by the verification above/);
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
-  assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3000\/handover` reports 127\/127, 34\/34, and all eight gates open/);
+  assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3000\/handover` reports 127\/127, 37\/37, and all eight gates open/);
   assert.match(releaseGatesDoc, /Read-only GitHub review recorded PR #4 draft\/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`/);
   assert.match(releaseGatesDoc, /local merge-tree simulation reported add\/add conflicts/);
   assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));

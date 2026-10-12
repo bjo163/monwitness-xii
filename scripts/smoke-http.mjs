@@ -14,11 +14,11 @@ if(profile==="local"&&!['localhost','127.0.0.1','[::1]'].includes(parsedBase.hos
 const headers=profile==="preview"&&process.env.SMOKE_BYPASS_TOKEN?{"x-vercel-protection-bypass":process.env.SMOKE_BYPASS_TOKEN}:{};
 let smokeChecksTotal=0;
 let smokeChecksPassed=0;
-async function check(path,accept,method="GET"){
+async function check(path,accept,method="GET",extraHeaders={}){
  smokeChecksTotal++;
  const label=`${method==="GET"?"":`[${method}] `}${path}`;
  try {
-  const r=await fetch(new URL(path,parsedBase),{method,headers,redirect:"manual",signal:AbortSignal.timeout(12000)});
+  const r=await fetch(new URL(path,parsedBase),{method,headers:{...headers,...extraHeaders},redirect:"manual",signal:AbortSignal.timeout(12000)});
   const text=await r.text();
   let body;
   try { body=JSON.parse(text); } catch { body=null; }
@@ -90,7 +90,7 @@ if(profile==="preview"){
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&t.includes("THE CREW KEEPS WATCH.")&&t.includes("These are universe portraits, not claims that a specific character appears in an indexed story.")&&["four-lah","whalterwhite","isrockfeel","rock-soul"].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
  await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
- await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("127 / 127")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("34 / 34")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
+ await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("127 / 127")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("37 / 37")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
  await check("/editor",(r)=>[307,308].includes(r.status)&&r.headers.get("location")==="/editor/login"&&r.headers.get("cache-control")==="no-store");
  await checkFreshPageNonce("/");
@@ -102,6 +102,9 @@ if(profile==="preview"){
  await check("/api/auth/sign-in/email",(r)=>r.status===405&&r.headers.get("allow")==="POST");
  await check("/api/auth/sign-in/email",(r)=>r.status===204&&r.headers.get("allow")==="POST","OPTIONS");
  await check("/api/auth/get-session",(r)=>r.status===405&&r.headers.get("allow")==="GET","HEAD");
+ await check("/api/auth/sign-in/email",(r,b)=>r.status===403&&b?.error==="Cross-origin authentication request rejected","POST");
+ await check("/api/auth/sign-in/email",(r,b)=>r.status===403&&b?.error==="Cross-origin authentication request rejected","POST",{origin:"https://attacker.example"});
+ await check("/api/auth/sign-out",(r,b)=>r.status===403&&b?.error==="Cross-origin authentication request rejected","POST",{origin:parsedBase.origin,"sec-fetch-site":"cross-site"});
  await check("/api/editor/session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401&&b?.authenticated===false)||(r.status===503&&b?.error==="Editor authentication is not configured")));
  await check("/api/editor/drafts",(r)=>[401,503].includes(r.status)&&r.headers.get("cache-control")==="no-store","POST");
 }
