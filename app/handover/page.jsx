@@ -4,10 +4,10 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "95 / 95", label: "automated tests", detail: "Node 22.23.3 · clean tracked snapshot", tone: "pink" },
-  { value: "32 / 32", label: "local HTTP checks", detail: "Node 22.23.3 · clean tracked snapshot", tone: "cyan" },
-  { value: "0", label: "audit findings", detail: "Node 22.23.3 · production dependencies", tone: "lime" },
-  { value: "PASS", label: "migration replay", detail: "Node 22.23.3 · clean tracked snapshot", tone: "gold" },
+  { value: "96 / 96", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
+  { value: "32 / 32", label: "local HTTP checks", detail: "Current checkout · Node 26.5.0", tone: "cyan" },
+  { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
+  { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];
 
 const verified = [
@@ -82,7 +82,7 @@ export default function HandoverPage() {
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
-          <p className={styles.evidenceNote}>Node 22.23.3 clean-snapshot verification covered install, tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current local browser smoke also passes 32/32; local Auth returns a signed-out session and editor denial, while database routes remain safely unavailable without a local database URL. Browser-console error review was not part of these checks.</p>
+          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout adds a README contract test and passes 96/96 tests, build, and loopback smoke 32/32 on Node 26.5.0. Local Auth returns a signed-out session and editor denial; database routes return safe-unavailable responses without a local database URL. Browser-console error review remains open.</p>
         </div>
       </section>
 

@@ -113,11 +113,11 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /95 \/ 95/);
-  assert.match(handoverPage, /Node 22\.23\.3 · clean tracked snapshot/);
-  assert.match(handoverPage, /production build, and CSP-required loopback smoke 32\/32/);
-  assert.match(handoverPage, /current local browser smoke also passes 32\/32/);
-  assert.match(handoverPage, /local Auth returns a signed-out session and editor denial/);
+  assert.match(handoverPage, /96 \/ 96/);
+  assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
+  assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
+  assert.match(handoverPage, /current checkout adds a README contract test and passes 96\/96 tests, build, and loopback smoke 32\/32/);
+  assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);

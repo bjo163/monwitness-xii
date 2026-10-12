@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Keep current handover metrics exact
+
+- Updated `/handover` and its smoke contract from 95/95 to the current checkout's 96/96 after adding the README instruction regression. The page distinguishes this Node 26.5.0 result from the earlier Node 22.23.3 clean snapshot at 95/95.
+- Current local verification: 96/96 tests, `db:check`, full audit (0 vulnerabilities), production build, `actionlint`, diff check, and loopback smoke 32/32. All eight release gates remain open and production remains NO-GO.
+- No push, deployment, provider access, or database operation occurred.
+
 ## 2026-10-12 — Local release gate register and README refresh (`6ac583e` + follow-up)
 
 - Added one release-gate register with all eight IDs, open states, and evidence needed to close them. The contract suite asserts that the handover dashboard has exactly the same ordered IDs and open statuses.
