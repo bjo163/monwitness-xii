@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Keep local database readiness logs actionable
+
+- The database readiness endpoint now returns its existing safe 503 without logging an expected missing-`DATABASE_URL` configuration state. Actual configured probe failures continue to log only the error class and return no details.
+- Added three isolated handler tests for unconfigured, successful, and failed probes. Updated `/handover` and local smoke contracts to the current 102-test suite.
+- Verified the exact local source commit `85fc220`: 102/102 tests on Node 26.5.0 and Node 24.19.0, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint`, production build, diff check, and CSP-required loopback smoke 32/32 on `127.0.0.1:3037`. The live server emitted no DB probe error during that smoke run; browser-console inspection and all eight release gates remain open.
+- Local-only change. No Neon operation, remote CI, push, or deployment occurred.
+
 ## 2026-10-12 — Detect untracked database security objects
 
 - Extended the read-only schema verifier to compare PostgreSQL row-security flags with the Drizzle snapshot and report unexpected CHECK constraints, row policies, and application triggers. If future snapshots introduce CHECK constraints or policies, verification now fails closed until their definitions are compared semantically.
