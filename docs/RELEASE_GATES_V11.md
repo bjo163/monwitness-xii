@@ -9,6 +9,8 @@ The current checkout passes 125/125 tests on Node 24.19.0 and 26.5.0. Both runti
 
 ### Current handover gate register
 
+The committed tree at `b68e11a` was exported without environment files and reproduced from a fresh `npm ci` (239 packages) on Node 26.5.0 / npm 11.17.0. It passed 125/125 tests, migration replay, full dependency audit (0 vulnerabilities), production build, `actionlint`, and loopback HTTP smoke 34/34. Auth and DB routes correctly showed their unconfigured states. npm emitted peer/deprecation warnings and withheld the `core-js`/`esbuild` install scripts. This clean local build does not close exact-head remote CI, Preview, database-target, or authenticated-provider gates.
+
 These `G-`-prefixed IDs and open states are the source register rendered by `/handover`. The prefix separates release gates from similarly numbered implementation tasks in the Grand Master checklist. A gate stays open until its stated evidence exists for the exact release candidate and the owner accepts it. Local-only verification does not satisfy remote, provider, content-rights, or owner-approval requirements.
 
 | ID | Gate | Current state | Evidence required to close |
