@@ -5,7 +5,7 @@ This file records user-visible and operational changes for MoonWitness XII.
 ## 2026-10-12 — Migration ledger verification
 
 - Added a local PGlite data-directory backup/restore regression with synthetic public/private Archive records, revisions, media/evidence, ledger checks, public projection, and the retained-revision FK invariant. It is synthetic engine evidence only and does not close Neon recovery/retention gates.
-- Re-ran the full local validation chain at source HEAD `7964c94`: 78/78 tests, migration check, full audit (0 vulnerabilities), workflow lint, production build, and local HTTP smoke 30/30. Persistent Neon and production were not queried or changed.
+- Re-ran the full local validation chain for source commit `d626a84`: 79/79 tests, migration check, full audit (0 vulnerabilities), workflow lint, production build, and local HTTP smoke 30/30. Smoke runs at `127.0.0.1:3015`; DB/archive routes return safe unavailable responses without a local database URL. Persistent Neon and production were not queried or changed.
 - `db:verify` now checks every Drizzle ledger row against the journal's migration hash and timestamp, in order, including row count; baseline preflight rejects an existing ledger and reports zero expected ledger entries.
 - Added contract tests against Drizzle's migration reader and updated migration runbook and README. Persistent development and production databases were not queried or changed; the change is verified locally only.
 - Reduced Neon Auth signed session-data cookie caching from the SDK default 300 seconds to an explicit 60 seconds to narrow stale role/session data exposure; live sign-in and revocation remain unverified.
