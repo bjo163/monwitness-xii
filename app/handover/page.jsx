@@ -3,9 +3,10 @@ import Link from "next/link";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const verified = [
-  "72 automated tests pass, including isolated Archive and editor-policy checks",
+  "73 automated tests pass, including isolated Archive and editor-policy checks",
   "Migration generation and PostgreSQL replay check pass",
   "Full dependency audit reports zero vulnerabilities",
+  "CI actions are SHA-pinned and Dependabot tracks updates weekly",
   "Production build and local HTTP smoke pass (30 checks)",
   "Public Archive response is limited to five editorial fields and excludes drafts",
   "Editor writes require an Auth admin role, exact owner allowlist, and same-origin request",
@@ -45,7 +46,7 @@ export default function HandoverPage() {
             This checkout is for local review only. No push or deployment was made. Local tests, migration checks, audit, build, and HTTP smoke pass; live owner authentication, persistent development migration, backup recovery, and Archive source review remain open. Production promotion requires a separate owner approval after those gates pass.
           </p>
           <p style={{ marginBottom: 0 }}>
-            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>72/72</code> · Local smoke <code>30/30</code>
+            Review branch <code>codex/v11-release-readiness</code> · Unit tests <code>73/73</code> · Local smoke <code>30/30</code>
           </p>
         </div>
 
