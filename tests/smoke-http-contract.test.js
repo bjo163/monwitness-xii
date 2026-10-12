@@ -159,6 +159,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs/);
   assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
   assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
+  assert.match(implementationChecklist, /^\| DB-02 \| Database \|.*\| \[ \] IN PROGRESS \|.*`0003`\/`0004`/m);
+  assert.match(releaseGatesDoc, /isolated Neon rehearsal proves migrations `0000`–`0002` only.*not been applied to any database or Neon-rehearsed/);
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
   assert.doesNotMatch(handoverDoc, /^### Current local review update/m);
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
