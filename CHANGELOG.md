@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Guard the Archive provenance intake register
+
+- Added a regression test requiring exactly 15 numbered intake rows, each unmapped, pending, and `source_needed`, and requiring the release gate to link the register.
+- Updated the local handover to 113/113 tests. Verification: `npm test`, production build, and CSP-required loopback smoke 32/32; no database, push, or deployment action.
+- This contract keeps the rights gate visibly open until evidence is supplied and reviewed; production remains NO-GO.
+
 ## 2026-10-12 — Add Story Archive provenance intake register
 
 - Added a 15-slot intake template for mapping verified development slugs to private evidence references, source provenance, checksums, rights, credits, privacy review, and reviewer decisions.
