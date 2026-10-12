@@ -148,8 +148,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
-  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3036\/handover`/);
-  assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35)\/handover/);
+  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3037\/handover`/);
+  assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 
 test("handover automated-test metric matches the declared Node test suite size", async () => {
