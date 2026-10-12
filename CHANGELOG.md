@@ -1,10 +1,16 @@
 # Changelog
 
+## 2026-10-12 — Bring the faceless cast into the Story Archive
+
+- Added non-story-specific Batteries portraits to the Archive and linked each portrait to the team character files. The text makes clear that the cast art does not assert that a named character appears in any particular indexed story.
+- Created four non-destructive versioned WebP variants with featureless opaque visors. RockSoul now matches the existing character brief: backwards green cap, hoodie, skateboard, and dog. The original character assets remain intact.
+- The team page now uses these same approved variants. At local source commit `d6901bd`, the production build, 107/107 tests, migration replay check, full dependency audit (0 findings), `actionlint`, and CSP-required HTTP smoke (32/32) pass. Browser accessibility inspection confirms the spotlight, crew names, safe story-association note, and Archive retry state.
+
 ## 2026-10-12 — Verify database targets before runtime access
 
 - Runtime Archive reads and editor writes now require `EXPECTED_DATABASE_HOST` and `EXPECTED_DATABASE_NAME` to independently match `DATABASE_URL` before creating a Neon client. Missing or mismatched values fail closed; health readiness returns a safe 503 without attempting a connection.
 - All schema-verifier modes now require the same independent target mapping. New tests cover missing and mismatched mappings and confirm rejection before database access without exposing connection details.
-- Verified source commit `e4336e7`: 107/107 tests, `db:check`, production build, `actionlint`, diff check, and CSP-required local HTTP smoke 32/32 at `127.0.0.1:3039`. The full dependency audit remains clean at 0 findings; no dependency files changed.
+- Implementation commit `e4336e7`; verified source HEAD `c5d4398` adds malformed URL, encoded database-name, hostname-case, and redaction assertions. `npm test` passes 107/107; `db:check`, full audit (0 findings), build, `actionlint`, diff check, and CSP-required local HTTP smoke pass 32/32 at `127.0.0.1:3039`.
 - No Neon connection, push, or deployment occurred. The local shell has no database URL or verified target values, so DB-backed routes remain safely unavailable. Production remains NO-GO.
 
 ## 2026-10-12 — Reject editor-controlled publication and provenance fields
