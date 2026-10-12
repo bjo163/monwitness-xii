@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Verify role revocation at the editor write boundary
+
+- Extracted the production editor authorizer composition so it can be exercised with an isolated provider and database fixture.
+- Added a PGlite integration that creates a draft with an admin session, changes the simulated provider role to `user`, then confirms a revision POST returns 403 and leaves revision/audit counts unchanged. A contract test ensures the production authorizer uses fresh uncached sessions and the configured owner allowlist.
+- Local verification at code commit `e7a61e5`: 111/111 tests, `db:check`, full dependency audit (0 vulnerabilities), production build, `actionlint`, and CSP-required loopback smoke 32/32.
+- This is a simulated provider role change, not live Neon Auth evidence. No push or deployment; production remains NO-GO.
+
 ## 2026-10-12 — Cover editor role revocation between requests
 
 - Added a regression that simulates the provider changing an allowlisted editor from `admin` to `user`; the next editor session lookup denies edit access and carries the SDK cache-bypass option.
