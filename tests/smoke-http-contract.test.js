@@ -124,8 +124,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(smokeScript, /t\.includes\("125 \/ 125"\)/);
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Current checkout · Node 24\.19\.0/);
-  assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /The current checkout passes 125\/125 tests on Node 24\.19\.0 and 26\.5\.0; both runtimes pass migration replay, full dependency audit, production build, and CSP-required loopback smoke 34\/34\. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup\/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed, regression coverage for all 100 AETHERION levels across ten realms and the first 33 open levels/);
+  assert.match(handoverPage, /earlier clean Node 22\.23\.3 snapshot at commit 6a88a4b passed install, 95\/95 tests/);
+  assert.match(handoverPage, /The current checkout passes 125\/125 tests and CSP-required smoke 34\/34 on Node 24\.19\.0 and 26\.5\.0; Node 26\.5\.0 production build, migration replay, dependency audit, and actionlint pass\. A clean Node 22\.23\.3 reproduction of commit 0a82eaa passes fresh install and the complete CI sequence including build, actionlint, and smoke 34\/34\. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup\/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed, regression coverage for all 100 AETHERION levels across ten realms and the first 33 open levels/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
   assert.match(handoverPage, /npm ls reports invalid peer versions inside the Neon Auth SDK transitive UI bundle/);
@@ -166,8 +166,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
   assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3040\/handover`/);
   assert.match(releaseGatesDoc, /Latest local checkpoint — 2026-10-12/);
-  assert.match(releaseGatesDoc, /125\/125 tests on Node 24\.19\.0/);
-  assert.match(releaseGatesDoc, /125\/125 automated tests and 34\/34 local HTTP checks on both Node 24\.19\.0 and Node 26\.5\.0/);
+  assert.match(releaseGatesDoc, /current checkout passes 125\/125 tests and CSP-required local HTTP smoke \(34\/34\) on Node 24\.19\.0 and 26\.5\.0/);
+  assert.match(releaseGatesDoc, /committed tree at `0a82eaa`.*fresh `npm ci` \(239 packages\).*Node 22\.23\.3 \/ npm 11\.17\.0.*passed 125\/125 tests.*smoke 34\/34/);
   assert.match(releaseGatesDoc, /All eight gates below remain OPEN/);
   assert.match(releaseGatesDoc, /PR #4 is still draft\/open with no reviews and remote head `06e2a119377e46a735714608becf96e095846553`/);
   assert.match(releaseGatesDoc, /PR #2 remains open\/unmergeable; a local merge-tree simulation/);
