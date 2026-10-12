@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Cover editor role revocation between requests
+
+- Added a regression that simulates the provider changing an allowlisted editor from `admin` to `user`; the next editor session lookup denies edit access and carries the SDK cache-bypass option.
+- Updated the local handover count to 109/109 and recorded that this is simulated provider-state evidence, not a live Neon Auth revocation test.
+- Local verification at code commit `e4018f4`: 109/109 tests, production build, CSP-required loopback smoke 32/32, `db:check`, full dependency audit (0 vulnerabilities), and `actionlint`.
+- Local-only change; no push or deployment. The live owner auth gate stays open, and production remains NO-GO.
+
 ## 2026-10-12 — Revalidate editor sessions with Neon Auth
 
 - Editor authorization now calls the installed Neon Auth SDK with `disableCookieCache=true`, so every session/role decision goes to the provider instead of trusting a still-valid signed session-data cookie. The general UI session-data cache remains bounded at 60 seconds.
