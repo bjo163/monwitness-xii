@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13 — Close PostgreSQL driver fallback gaps and refresh the handover
+
+- The shared database target guard now requires explicit URL credentials and effective port 5432, rejects PostgreSQL startup/environment fallbacks that can alter the connection, and allows only the reviewed TLS and Neon channel-binding options. Regressions exercise the installed driver parser, guarded migration wrapper, and direct Drizzle flags.
+- Root package and lockfile both declare Node.js `>=22.0.0`, aligned with the CI runtime.
+- Refreshed the handover, release register, finalization note, and implementation crosswalk with the current 133/133 test result and the observed 39/40 smoke against the existing stale local process. Correctly dated older results as historical; no extra port, restart, or deployment was performed.
+- Current working tree passes the 133-test suite, `db:check`, full dependency audit (0 findings), `actionlint`, and an isolated fresh-install production build. The local process on port 3199 still serves the old dashboard bundle; provider, owner-auth, persistent migration, backup, rights, remote review, and plan-traceability gates remain open.
+
 ## 2026-10-12 — Validate database URL identity and TLS policy
 
 - The database target guard rejects query parameters that can override host, host address, port, database, user, password, or TLS certificate settings, and requires exactly one `sslmode` of `require`, `verify-ca`, or `verify-full`.

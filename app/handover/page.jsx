@@ -4,8 +4,8 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "129 / 129", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
-  { value: "40 / 40", label: "local HTTP checks", detail: "Production build · loopback only", tone: "cyan" },
+  { value: "133 / 133", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
+  { value: "39 / 40", label: "local HTTP checks", detail: "Existing server · one stale handover metric", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];
@@ -53,7 +53,7 @@ export default function HandoverPage() {
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>ENGINEERING HANDOVER <span>V11 / 12 OCT 2026</span></p>
+          <p className={styles.eyebrow}>ENGINEERING HANDOVER <span>V11 / 13 OCT 2026</span></p>
           <h1>MISSION<br /><em>CONTROL</em></h1>
           <p className={styles.intro}>A live snapshot of the work, evidence, and open gates for the MoonWitness XII release.</p>
           <div className={styles.heroLinks}>
@@ -86,7 +86,7 @@ export default function HandoverPage() {
 
       <section className={styles.evidenceSection}>
         <div className={styles.sectionHeading}>
-          <p className={styles.eyebrow}>WHAT THE LOCAL EVIDENCE SAYS <span>CHECKPOINT · 12 OCT</span></p>
+          <p className={styles.eyebrow}>WHAT THE LOCAL EVIDENCE SAYS <span>CHECKPOINT · 13 OCT</span></p>
           <h2>Built, checked,<br /><em>still in review.</em></h2>
         </div>
         <div className={styles.evidenceList}>
@@ -94,7 +94,7 @@ export default function HandoverPage() {
           <div className={styles.limitsGrid} aria-label="Evidence boundaries">
             {evidenceLimits.map((item) => <article className={`${styles.limitCard} ${styles[item.tone]}`} key={item.label}><span>{item.label} · EVIDENCE BOUNDARY</span><strong>{item.value}</strong><p>{item.detail}</p></article>)}
           </div>
-          <div className={styles.evidenceNote}><strong>Latest local run · 12 Oct 2026</strong><p>Node 26.5.0: 129/129 tests; `db:check`; full dependency audit with 0 findings; production build; `actionlint`; and CSP-required loopback HTTP smoke 40/40. Mission Control was opened and visually inspected from the local production server. These checks verify this local checkout only.</p><p>Database target/TLS guards reject connection-identity overrides and insecure TLS settings before connection. PGlite verifies migration and editor-write behavior, including actor quotas, revocation, no-store errors, write freeze, and recovery fixtures. Neon rehearsal remains limited to `0000`–`0002`; `0003`/`0004` are not Neon-rehearsed. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open. Neon Auth transitive UI peer-version mismatch requires review; this app does not import that UI bundle.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. Historical plan snapshots do not substitute for its acceptance criteria. No live owner-auth test, connected local Neon target, exact-head remote CI/Preview, or current branch review is claimed.</p></div>
+          <div className={styles.evidenceNote}><strong>Latest local run · 13 Oct 2026</strong><p>Node 26.5.0: 133/133 tests; `db:check`; full dependency audit with 0 findings; production build; and `actionlint` pass. A fresh isolated install also builds successfully. Loopback smoke against the already-running app passed 39/40: every route, asset, CSP, Auth and Archive check passed; the only miss is the app still serving this dashboard's older 129/129 text. This source now records the current count. No new port or deployment was used.</p><p>Database target validation covers the installed driver's URL settings and `PGPORT`, `PGOPTIONS`, `PGREPLICATION`, `PGUSER`, and `PGPASSWORD` fallbacks. Tests exercise the real driver parser offline; no Neon URL is configured locally. The Neon rehearsal remains limited to `0000`–`0002`; `0003`/`0004` are not Neon-rehearsed. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, connected local Neon target, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
         </div>
       </section>
 

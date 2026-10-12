@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { parseIntoClientConfig } from "@neondatabase/serverless";
+import { Client, parseIntoClientConfig } from "@neondatabase/serverless";
 import {
   getApplicationDatabaseTargetError,
   getApplicationDatabaseUrl,
@@ -33,6 +33,38 @@ test("application database access requires matching independently supplied targe
     ...verified,
     DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech:5432/neondb?sslmode=require",
   }), null);
+  assert.equal(getApplicationDatabaseTargetError({
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require&channel_binding=require",
+  }), null, "the allowlist retains Neon's documented channel-binding connection string");
+  assert.match(getApplicationDatabaseTargetError({
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require&channel_binding=disable",
+  }), /must not disable PostgreSQL channel binding/);
+  assert.match(getApplicationDatabaseTargetError({
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require&channel_binding=require&channel_binding=require",
+  }), /must not disable PostgreSQL channel binding/);
+
+  const previousPgUser = process.env.PGUSER;
+  const previousPgPassword = process.env.PGPASSWORD;
+  process.env.PGUSER = "fallback_user";
+  process.env.PGPASSWORD = "fallback_password";
+  try {
+    const clientWithoutUrlCredentials = new Client({ connectionString: "postgresql://ep-dev.example.neon.tech/neondb?sslmode=require" });
+    assert.equal(clientWithoutUrlCredentials.user, "fallback_user", "the installed driver falls back to PGUSER when URL credentials are absent");
+    assert.equal(clientWithoutUrlCredentials.connectionParameters.password, "fallback_password", "the installed driver falls back to PGPASSWORD when URL credentials are absent");
+    clientWithoutUrlCredentials.end();
+    assert.match(getApplicationDatabaseTargetError({
+      ...verified,
+      DATABASE_URL: "postgresql://ep-dev.example.neon.tech/neondb?sslmode=require",
+    }), /must include explicit database credentials/);
+  } finally {
+    if (previousPgUser === undefined) delete process.env.PGUSER;
+    else process.env.PGUSER = previousPgUser;
+    if (previousPgPassword === undefined) delete process.env.PGPASSWORD;
+    else process.env.PGPASSWORD = previousPgPassword;
+  }
   assert.match(getApplicationDatabaseTargetError({
     ...verified,
     DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech:5433/neondb?sslmode=require",
@@ -43,6 +75,55 @@ test("application database access requires matching independently supplied targe
   const hostOverrideError = getApplicationDatabaseTargetError({ ...verified, DATABASE_URL: hostOverride });
   assert.match(hostOverrideError, /must not override connection identity through query parameters/);
   assert.doesNotMatch(hostOverrideError, /ep-prod/);
+
+  const optionsOverride = "postgresql://role:secret@ep-dev.example.neon.tech/neondb?options=-c%20search_path%3Dpublic&sslmode=require";
+  assert.equal(parseIntoClientConfig(optionsOverride).options, "-c search_path=public", "the installed PostgreSQL driver honors startup options in the URL");
+  for (const parameter of ["options", "replication", "application_name"]) {
+    const value = getApplicationDatabaseTargetError({
+      ...verified,
+      DATABASE_URL: `postgresql://role:secret@ep-dev.example.neon.tech/neondb?${parameter}=untrusted-value&sslmode=require`,
+    });
+    assert.match(value, /unsupported query parameters/);
+    assert.doesNotMatch(value, /untrusted-value/);
+  }
+
+  const urlWithoutPort = "postgresql://role:secret@ep-dev.example.neon.tech/neondb?sslmode=require";
+  const previousPgPort = process.env.PGPORT;
+  process.env.PGPORT = "5433";
+  try {
+    const pgPortClient = new Client({ connectionString: urlWithoutPort });
+    assert.equal(pgPortClient.port, 5433, "the installed PostgreSQL driver falls back to PGPORT when the URL omits a port");
+    pgPortClient.end();
+    assert.match(getApplicationDatabaseTargetError({ ...verified, PGPORT: "5433" }), /standard PostgreSQL port 5432/);
+  } finally {
+    if (previousPgPort === undefined) delete process.env.PGPORT;
+    else process.env.PGPORT = previousPgPort;
+  }
+
+  const previousPgOptions = process.env.PGOPTIONS;
+  process.env.PGOPTIONS = "-c search_path=untrusted";
+  try {
+    const pgOptionsClient = new Client({ connectionString: urlWithoutPort });
+    assert.equal(pgOptionsClient.connectionParameters.options, "-c search_path=untrusted", "the installed PostgreSQL driver honors PGOPTIONS");
+    pgOptionsClient.end();
+    assert.match(getApplicationDatabaseTargetError({ ...verified, PGOPTIONS: "-c search_path=untrusted" }), /PGOPTIONS must be unset/);
+  } finally {
+    if (previousPgOptions === undefined) delete process.env.PGOPTIONS;
+    else process.env.PGOPTIONS = previousPgOptions;
+  }
+
+  const previousPgReplication = process.env.PGREPLICATION;
+  process.env.PGREPLICATION = "replication-target-marker";
+  try {
+    const pgReplicationClient = new Client({ connectionString: urlWithoutPort });
+    assert.equal(pgReplicationClient.connectionParameters.replication, "replication-target-marker", "the installed driver honors PGREPLICATION");
+    pgReplicationClient.end();
+    assert.match(getApplicationDatabaseTargetError({ ...verified, PGREPLICATION: "replication-target-marker" }), /PGREPLICATION must be unset/);
+  } finally {
+    if (previousPgReplication === undefined) delete process.env.PGREPLICATION;
+    else process.env.PGREPLICATION = previousPgReplication;
+  }
+
   for (const parameter of ["hostaddr", "dbname", "ssl", "sslcert", "sslkey", "sslrootcert", "sslpassword", "sslcrl", "sslcrldir"]) {
     const value = getApplicationDatabaseTargetError({
       ...verified,

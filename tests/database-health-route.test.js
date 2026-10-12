@@ -44,7 +44,7 @@ test("database readiness fails closed without a matching independent target mapp
     { EXPECTED_DATABASE_HOST: "", EXPECTED_DATABASE_NAME: "" },
     { EXPECTED_DATABASE_HOST: "another-host.invalid", EXPECTED_DATABASE_NAME: "moonwitness" },
   ]) {
-    process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness?sslmode=require";
+    process.env.DATABASE_URL = "postgresql://probe:probe@local-test.invalid/moonwitness?sslmode=require";
     process.env.EXPECTED_DATABASE_HOST = target.EXPECTED_DATABASE_HOST;
     process.env.EXPECTED_DATABASE_NAME = target.EXPECTED_DATABASE_NAME;
     const response = await GET();
@@ -59,7 +59,7 @@ test("database readiness fails closed without a matching independent target mapp
 });
 
 test("database readiness reports connectivity without asserting an unverified environment", async () => {
-  process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness?sslmode=require";
+  process.env.DATABASE_URL = "postgresql://probe:probe@local-test.invalid/moonwitness?sslmode=require";
   process.env.EXPECTED_DATABASE_HOST = "local-test.invalid";
   process.env.EXPECTED_DATABASE_NAME = "moonwitness";
   const errors = [];
@@ -78,7 +78,7 @@ test("database readiness reports connectivity without asserting an unverified en
 });
 
 test("configured database failures log only their error class and return a safe response", async () => {
-  process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness?sslmode=require";
+  process.env.DATABASE_URL = "postgresql://probe:probe@local-test.invalid/moonwitness?sslmode=require";
   process.env.EXPECTED_DATABASE_HOST = "local-test.invalid";
   process.env.EXPECTED_DATABASE_NAME = "moonwitness";
   const errors = [];

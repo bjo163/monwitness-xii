@@ -1,11 +1,20 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { getDatabaseOperationError } from "../lib/database-target.js";
+import { getDatabaseOperationError, getDrizzleCliGuardError } from "../lib/database-target.js";
 
 const operation = process.argv[2];
-if (!["migrate", "studio"].includes(operation) || process.argv.length > 3) {
+if (!["migrate", "studio"].includes(operation)) {
   console.error("Usage: node scripts/drizzle-safe.mjs <migrate|studio>");
+  process.exit(2);
+}
+if (process.argv.length > 3) {
+  const cliArgumentError = getDrizzleCliGuardError({ args: [operation, ...process.argv.slice(3)], env: process.env });
+  if (cliArgumentError?.includes("overrides are disabled")) {
+    console.error(cliArgumentError);
+    process.exit(2);
+  }
+  console.error("Guarded Drizzle commands do not accept CLI arguments.");
   process.exit(2);
 }
 

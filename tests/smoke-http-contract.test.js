@@ -7,6 +7,8 @@ import { readFile, readdir } from "node:fs/promises";
 const script = fileURLToPath(new URL("../scripts/smoke-http.mjs", import.meta.url));
 const nextConfig = await readFile(new URL("../next.config.js", import.meta.url), "utf8");
 const qualityWorkflow = await readFile(new URL("../.github/workflows/quality.yml", import.meta.url), "utf8");
+const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const packageLock = JSON.parse(await readFile(new URL("../package-lock.json", import.meta.url), "utf8"));
 const dependabotConfig = await readFile(new URL("../.github/dependabot.yml", import.meta.url), "utf8");
 const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.meta.url), "utf8");
 const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", import.meta.url), "utf8");
@@ -129,13 +131,14 @@ test("local smoke checks editor write responses are not cacheable", () => {
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /129 \/ 129/);
-  assert.match(smokeScript, /t\.includes\("129 \/ 129"\)/);
-  assert.match(handoverPage, /40 \/ 40/);
+  assert.match(handoverPage, /133 \/ 133/);
+  assert.match(smokeScript, /t\.includes\("133 \/ 133"\)/);
+  assert.match(handoverPage, /39 \/ 40/);
   assert.match(handoverPage, /NOT CONNECTED/);
   assert.match(handoverPage, /This checkout is ahead of the remote PR head/);
   assert.match(handoverPage, /8 GATES OPEN/);
-  assert.match(handoverPage, /Latest local run · 12 Oct 2026/);
+  assert.match(handoverPage, /Latest local run · 13 Oct 2026/);
+  assert.match(handoverPage, /every route, asset, CSP, Auth and Archive check passed; the only miss is the app still serving this dashboard's older 129\/129 text/);
   assert.doesNotMatch(handoverPage, /Fresh exact tracked-tree reproduction at commit 2f43d14/);
   assert.match(handoverPage, /Revalidated locally · Node 26\.5\.0/);
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
@@ -198,7 +201,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Prior local checkpoint — superseded by the verification above/);
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
-  assert.match(releaseGatesDoc, /current local dashboard at `http:\/\/localhost:3199\/handover` reports 129\/129, 40\/40, and all eight gates open/);
+  assert.match(releaseGatesDoc, /existing local app at `http:\/\/127\.0\.0\.1:3199\/handover` responds 200 but still serves an older bundle showing `129 \/ 129`; the source dashboard reports 133\/133/);
+  assert.match(releaseGatesDoc, /Its sole listener is the already-running process on loopback port 3199\. No additional port or deployment was started/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
   assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
   assert.match(implementationChecklist, /Latest local-only workflow and UX evidence \(clean source snapshot `4607504`; evidence docs at `09d4147`; tracker crosswalk at `65cc398`\)/);
@@ -212,8 +216,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Editor mutation origin policy:/);
   assert.match(releaseGatesDoc, /PGlite integration calls the actual authorizer and write handler/);
   assert.match(releaseGatesDoc, /without adding a revision, audit event, actor row, or quota reservation/);
-  assert.match(releaseGatesDoc, /rejects connection-identity and TLS-configuration query overrides and requires exactly one `sslmode`/);
-  assert.match(releaseGatesDoc, /guarded npm wrapper and direct Drizzle CLI paths have offline regression tests proving they stop before connecting/);
+  assert.match(releaseGatesDoc, /rejects identity\/TLS URL overrides and other unapproved query parameters, requires one TLS-enabled `sslmode`, permits Neon's optional `channel_binding=require`, rejects `PGOPTIONS`\/`PGREPLICATION`/);
+  assert.match(releaseGatesDoc, /Direct Studio `--host`\/`--port` and wrapper `--config`\/extra-argument overrides are refused/);
   assert.match(handoverDoc, /Editor handler integration confirms rejected origin metadata adds no revision, audit event, actor row, or quota reservation/);
   assert.match(handoverDoc, /Earlier local code checkpoint `7dc1d28`.*129\/129.*40\/40/s);
   assert.match(handoverDoc, /At local checkpoint `75c7cc6`.*215 commits ahead of `origin\/codex\/v11-release-readiness` at `06e2a11`/);
@@ -272,4 +276,7 @@ test("CI actions stay pinned to full SHAs and Dependabot tracks action updates",
   }
   assert.match(dependabotConfig, /package-ecosystem:\s*github-actions/);
   assert.match(dependabotConfig, /interval:\s*weekly/);
+  assert.equal(packageJson.engines.node, ">=22.0.0");
+  assert.equal(packageLock.packages[""].engines.node, packageJson.engines.node);
+  assert.match(qualityWorkflow, /node-version:\s*'22'/);
 });
