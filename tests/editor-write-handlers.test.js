@@ -40,6 +40,13 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   const draftHandler = createEditorDraftHandler(dependencies);
   const revisionHandler = createEditorRevisionHandler(dependencies);
 
+  const forgedPublication = await draftHandler(post("/api/editor/drafts", {
+    slug: "forged-source-approval", title: "Must remain uncreated", body: "Attempted promotion",
+    status: "published", originalSourceStatus: "source_verified", rightsVerified: true,
+  }));
+  assert.equal(forgedPublication.status, 400);
+  const forgedRows = await db.query("SELECT count(*)::int AS count FROM archive.stories WHERE slug='forged-source-approval'");
+  assert.equal(forgedRows.rows[0].count, 0);
   const draftResponse = await draftHandler(post("/api/editor/drafts", {
     slug: "fixture-story", title: "Fixture story", season: "Issue 1", synopsis: "Editorial index only", body: "Original draft body",
   }));

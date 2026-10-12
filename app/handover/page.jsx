@@ -4,7 +4,7 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "103 / 103", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
+  { value: "104 / 104", label: "automated tests", detail: "Current checkout · Node 26.5.0", tone: "pink" },
   { value: "32 / 32", label: "local HTTP checks", detail: "Current checkout · Node 26.5.0", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
@@ -17,6 +17,7 @@ const verified = [
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
   "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
   "DB readiness reports connectivity without guessing the target environment; an unconfigured local check returns a safe 503, and configured failures log only the error class.",
+  "Draft and revision APIs reject unknown fields, so clients cannot set publication or source-rights status.",
   "CI workflow actions use immutable commit SHAs and Dependabot checks for action updates weekly.",
 ];
 
@@ -84,7 +85,7 @@ export default function HandoverPage() {
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
-          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout exercises the actual editor draft/revision handlers against PGlite and passes 103/103 tests, build, and loopback smoke 32/32 on Node 26.5.0. Local Auth returns a signed-out session and editor denial; database routes return safe-unavailable responses without a local database URL, and the readiness route reports connectivity without guessing its target environment or logging the expected unconfigured state. Browser-console error review remains open.</p>
+          <p className={styles.evidenceNote}>The clean Node 22.23.3 snapshot passed install, 95/95 tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current checkout exercises the actual editor draft/revision handlers against PGlite and passes 104/104 tests, build, and loopback smoke 32/32 on Node 26.5.0. Local Auth returns a signed-out session and editor denial; database routes return safe-unavailable responses without a local database URL, and the readiness route reports connectivity without guessing its target environment or logging the expected unconfigured state. Browser-console error review remains open.</p>
         </div>
       </section>
 
