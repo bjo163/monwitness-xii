@@ -15,6 +15,7 @@ const verified = [
   "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
   "Editor writes require an Auth admin role, exact owner allowlist, same-origin requests, and actor-attributed audit SQL.",
   "Public Archive responses expose five editorial fields; private drafts stay out of the public projection.",
+  "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
   "CI workflow actions use immutable commit SHAs and Dependabot checks for action updates weekly.",
 ];
 

@@ -125,6 +125,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
+  assert.match(handoverPage, /Schema verification detects untracked RLS, CHECK, policy, and trigger drift/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
   assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
   const uiGateIds = [...handoverPage.matchAll(/\{ id: "([A-Z]{2,4}-\d{2})", title:/g)].map((match) => match[1]);
