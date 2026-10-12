@@ -137,6 +137,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /effective failed-login throttling is unverified\. This SDK cannot configure a provider-wide limiter/);
   assert.match(handoverPage, /npm ls reports invalid peer versions inside the Neon Auth SDK transitive UI bundle/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
+  assert.match(releaseGatesDoc, /current app proxy has no sign-in attempt limiter; the PostgreSQL quota protects editor draft\/revision writes only/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /The Neon rehearsal covers migrations 0000–0002 only\. Review and rehearse 0003\/0004 on an isolated clone/);
   assert.match(handoverPage, /The freeze runbook requires an independently verified provider\/application write stop before destructive recovery/);
