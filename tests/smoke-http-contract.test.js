@@ -190,7 +190,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /isolated Neon rehearsal proves migrations `0000`–`0002` only.*not been applied to any database or Neon-rehearsed/);
   assert.match(releaseGatesDoc, /separate populated-fixture PGlite test automatically executes the reviewed reverse-DDL sequence.*not published downgrade scripts/);
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
-  assert.match(handoverDoc, /^### Current local review update — 2026-10-12/m);
+  assert.match(handoverDoc, /^## Current review checkpoint — 2026-10-13/m);
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
