@@ -28,6 +28,7 @@ test("schema verifier covers table, column, default, key, and index drift", () =
   assert.match(verifier, /hasSchemaDrift\(result, \{ requireLedger: !baselineReconciliation \}\)/);
   assert.match(verifier, /createHash\("sha256"\)/);
   assert.match(verifier, /SELECT hash, created_at FROM drizzle\.__drizzle_migrations ORDER BY created_at/);
+  assert.match(verifier, /expectedMigrationEntries: baselineReconciliation \? 0 : expectedMigrationEntries\.length/);
   assert.match(verifier, /migrationLedgerDrift \|\| hasSchemaDrift/);
 });
 

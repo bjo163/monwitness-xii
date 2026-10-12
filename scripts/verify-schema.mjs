@@ -268,7 +268,7 @@ const result = {
   missingUniqueConstraints,
   unexpectedUniqueConstraints,
   migrationLedgerPresent,
-  expectedMigrationEntries: expectedMigrationEntries.length,
+  expectedMigrationEntries: baselineReconciliation ? 0 : expectedMigrationEntries.length,
   actualMigrationEntries: actualMigrationEntries.length,
   migrationLedgerDrift,
   stories: storyCounts.total,
