@@ -37,6 +37,13 @@ npm run dev
 
 Add your *development-only* `DATABASE_URL`, independently verified `EXPECTED_DATABASE_HOST` and `EXPECTED_DATABASE_NAME`, `NEON_AUTH_BASE_URL`, a newly generated `NEON_AUTH_COOKIE_SECRET`, and owner-approved `EDITOR_ADMIN_USER_IDS` to `.env.local` (never commit secrets). Database routes, editor writes, and `db:verify` fail closed unless the expected host and database name match the URL; obtain expected values separately from the verified Neon endpoint details. The editor allowlist is a comma-separated set of Neon Auth user IDs and must be configured server-side for each deployment. The homepage works without a database; `/episodes` and `/api/health/db` require a verified target. `/editor/login` requires Auth configuration and an owner-provisioned admin account whose ID is allowlisted. The app auth proxy blocks public sign-up routes (404). Neon currently reports provider-level `allow_sign_up=true` and its documented Managed Auth controls do not offer a restricted-signup switch; do not treat the app proxy as provider-wide signup disablement. Editor writes require both the session's `admin` role and an exact ID match in `EDITOR_ADMIN_USER_IDS`; empty or missing allowlists deny all editor writes. Local migrations `0003`/`0004` add a database-backed freeze control; its target-guarded `scripts/editor-write-freeze.mjs` operator commands are documented in [the backup/restore runbook](docs/BACKUP_RESTORE_RUNBOOK_V11.md). These migrations have not been applied to persistent dev, Preview, or production. Direct provider sign-up behavior, identity onboarding policy, and authenticated admin E2E remain open release gates.
 
+On a shared Windows machine, restrict `.env.local` to its owner, SYSTEM, and local Administrators. Run this from the repository as the account that owns the file:
+
+```powershell
+$owner = "$env:USERDOMAIN\$env:USERNAME"
+icacls .env.local /inheritance:r /grant:r "$($owner):(F)" "NT AUTHORITY\SYSTEM:(F)" "BUILTIN\Administrators:(F)"
+```
+
 ```bash
 npm test
 npm run db:check # regenerates migration SQL and validates the committed migration history

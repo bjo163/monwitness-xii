@@ -240,6 +240,7 @@ test("populated development migration runbook accounts for the entire current jo
 
 test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
   assert.match(readme, /Local visual routes after starting the app/);
+  assert.match(readme, /icacls \.env\.local \/inheritance:r \/grant:r/);
   assert.match(readme, /If port 3000 is occupied, choose an available port/);
   assert.match(readme, /Local pages do not imply a Preview or production deployment/);
   assert.match(readme, /Do not pass a custom `--config` to a direct Drizzle command/);
