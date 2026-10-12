@@ -207,11 +207,13 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /rejects connection-identity and TLS-configuration query overrides and requires exactly one `sslmode`/);
   assert.match(releaseGatesDoc, /guarded npm wrapper and direct Drizzle CLI paths have offline regression tests proving they stop before connecting/);
   assert.match(handoverDoc, /Editor handler integration confirms rejected origin metadata adds no revision, audit event, actor row, or quota reservation/);
-  assert.match(handoverDoc, /local HEAD `7dc1d28`.*129\/129.*40\/40/s);
-  assert.match(handoverDoc, /211 commits ahead of `origin\/codex\/v11-release-readiness` at `06e2a11`/);
+  assert.match(handoverDoc, /Earlier local code checkpoint `7dc1d28`.*129\/129.*40\/40/s);
+  assert.match(handoverDoc, /At local checkpoint `75c7cc6`.*215 commits ahead of `origin\/codex\/v11-release-readiness` at `06e2a11`/);
+  assert.match(handoverDoc, /only commit after that snapshot was documentation-only/);
   assert.match(handoverDoc, /promised authoritative Grand Master Plan V11\/V11\.2 is still not present/);
-  assert.match(releaseGatesDoc, /Revalidation of current local HEAD `7dc1d28`.*129\/129.*40\/40/);
-  assert.match(releaseGatesDoc, /local commits\. The authoritative V11\/V11\.2 plan is still absent/);
+  assert.match(releaseGatesDoc, /Earlier local code revalidation \(HEAD `7dc1d28`.*129\/129.*40\/40/);
+  assert.match(releaseGatesDoc, /Local checkpoint before this documentation correction \(`75c7cc6`\).*215 commits ahead.*contained documentation only/);
+  assert.match(releaseGatesDoc, /authoritative V11\/V11\.2 plan remain unavailable/);
   assert.match(releaseGatesDoc, /Read-only GitHub review recorded PR #4 draft\/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`/);
   assert.match(releaseGatesDoc, /local merge-tree simulation reported add\/add conflicts/);
   assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));
