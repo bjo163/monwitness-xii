@@ -113,6 +113,8 @@ test("PGlite data-directory backup restores representative Archive state and inv
 
 test("backup runbook states the current synthetic restore coverage and its limits", () => {
   assert.match(backupRunbook, /synthetic dataset included one published index, one private draft, two revisions, media, evidence, all five migration ledger rows.*a frozen editor-write control.*an editor quota counter.*an audit event/);
+  assert.match(backupRunbook, /snapshot announcement.*plan-eligibility wording is mixed:[\s\S]*project's own API response is unambiguous for this account/);
+  assert.match(backupRunbook, /Free-plan update.*increases per-project storage to 1 GB but does not announce a change to snapshot scheduling or 30-day retention/);
   assert.match(backupRunbook, /does not prove Neon snapshot recovery, provider Auth recovery, production data restoration, scheduled retention, or cutover\/rollback/);
   assert.match(backupRunbook, /This repository does not currently provide a verified write-stop mechanism for any persistent database/);
   assert.match(backupRunbook, /If writes cannot be proven stopped, do not claim a freeze or proceed with destructive recovery\/cutover/);
