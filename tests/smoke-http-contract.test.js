@@ -117,10 +117,10 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /102 \/ 102/);
+  assert.match(handoverPage, /103 \/ 103/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 102\/102 tests, build, and loopback smoke 32\/32/);
+  assert.match(handoverPage, /current checkout exercises the actual editor draft\/revision handlers against PGlite and passes 103\/103 tests, build, and loopback smoke 32\/32/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
@@ -170,6 +170,9 @@ test("README local visual and smoke instructions do not claim a session-specific
   assert.doesNotMatch(readme, /\]\(https?:\/\/(?:127\.0\.0\.1|localhost):\d+|are running/);
 });
 
+test("database readiness smoke never treats an app label as proof of the target environment", () => {
+  assert.match(smokeScript, /api\/health\/db",\(r,b\)=>r\.status===200&&b\?\.status==="ok"&&b\?\.database==="connected"&&!Object\.hasOwn\(b,"migration"\)/);
+});
 test("CI actions stay pinned to full SHAs and Dependabot tracks action updates", () => {
   const actionReferences = [...qualityWorkflow.matchAll(/^\s*- uses:\s*(\S+)/gm)].map((match) => match[1]);
   assert.ok(actionReferences.length > 0);

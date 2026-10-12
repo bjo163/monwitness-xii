@@ -28,7 +28,7 @@ test("unconfigured database readiness stays unavailable without logging a connec
   assert.deepEqual(errors, []);
 });
 
-test("database readiness reports a successful connection without logging an error", async () => {
+test("database readiness reports connectivity without asserting an unverified environment", async () => {
   process.env.DATABASE_URL = "postgresql://local-test.invalid/moonwitness";
   const errors = [];
   const GET = createDatabaseHealthHandler({
@@ -41,7 +41,7 @@ test("database readiness reports a successful connection without logging an erro
 
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.deepEqual(await response.json(), { status: "ok", database: "connected", migration: "development" });
+  assert.deepEqual(await response.json(), { status: "ok", database: "connected" });
   assert.deepEqual(errors, []);
 });
 
