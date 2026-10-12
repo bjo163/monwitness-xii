@@ -213,4 +213,17 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   }));
   assert.equal(conflictResponse.status, 409);
   assert.deepEqual(await conflictResponse.json(), { error: "Concurrent revision; retry" });
+
+  const unavailableHandler = createEditorRevisionHandler({
+    authorizeEditor: async () => ({ ok: true, user: { id: "owner-revision-unavailable", name: "Owner" } }),
+    reserveEditorWrite: async () => ({ allowed: true }),
+    getSql: () => async () => { throw new Error("private database diagnostic"); },
+  });
+  const unavailableResponse = await unavailableHandler(post("/api/editor/revisions", {
+    slug: "concurrent-story", body: "Database failure must not expose diagnostics",
+  }));
+  assert.equal(unavailableResponse.status, 503);
+  assert.deepEqual(await unavailableResponse.json(), { error: "Write unavailable" });
+  const failedRevisionActor = await db.query("SELECT count(*)::int AS count FROM identity.users WHERE external_auth_id='owner-revision-unavailable'");
+  assert.equal(failedRevisionActor.rows[0].count, 0);
 });
