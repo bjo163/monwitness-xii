@@ -210,6 +210,8 @@ test("populated development migration runbook accounts for the entire current jo
   assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
   assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);
   assert.match(migrationReconciliationDoc, /Local reverse-DDL rehearsal across migrations 0001–0004/);
+  assert.match(migrationReconciliationDoc, /15 synthetic published, `source_needed` story indexes and zero revisions/);
+  assert.match(migrationReconciliationDoc, /all 19 story rows[\s\S]*15 baseline stories' published[\s\S]*source_needed[\s\S]*statuses remain intact/);
   assert.match(migrationReconciliationDoc, /PGlite reverse-DDL simulation, not a published downgrade command, Drizzle-ledger rollback workflow, or Neon rehearsal/);
   assert.match(migrationReconciliationDoc, /No step in this document grants approval to write/);
 });

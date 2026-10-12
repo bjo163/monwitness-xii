@@ -9,7 +9,7 @@ const writeLimits = await readFile(new URL("../drizzle/0002_editor_write_limits.
 const writeControls = await readFile(new URL("../drizzle/0003_editor_write_controls.sql", import.meta.url), "utf8");
 const writeControlAudit = await readFile(new URL("../drizzle/0004_editor_write_control_audit.sql", import.meta.url), "utf8");
 
-test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL", async (t) => {
+test("15-story populated baseline, full migration apply, and reverse DDL execute in PostgreSQL", async (t) => {
   const db = new PGlite();
   t.after(() => db.close());
 
@@ -21,6 +21,27 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
       ('identity','archive','scripture','research','intelligence','characters','aetherion','cab','system')
   `);
   assert.equal(baseline.rows[0].tables, 16);
+
+  await db.query(`
+    INSERT INTO archive.stories(slug,title,season,synopsis,status,experience_type,original_source_status)
+    SELECT
+      'dev-baseline-' || lpad(n::text,2,'0'),
+      'Synthetic Development Story ' || n,
+      'V11 rehearsal',
+      'Synthetic editorial index only.',
+      'published',
+      'comic',
+      'source_needed'
+    FROM generate_series(1,15) AS n
+  `);
+  const populatedBaseline = await db.query(`
+    SELECT count(*)::int AS stories,
+      count(*) FILTER (WHERE status='published')::int AS published,
+      count(*) FILTER (WHERE original_source_status='source_needed')::int AS source_needed,
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions
+    FROM archive.stories
+  `);
+  assert.deepEqual(populatedBaseline.rows[0], { stories: 15, published: 15, source_needed: 15, revisions: 0 });
 
   const fkBefore = await db.query(`
     SELECT conname, confdeltype FROM pg_constraint
@@ -45,6 +66,14 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
   `);
   assert.equal(fkAfter.rows.length, 1);
   assert.equal(fkAfter.rows[0].confdeltype, "r");
+  const populatedAfterApply = await db.query(`
+    SELECT count(*)::int AS stories,
+      count(*) FILTER (WHERE status='published')::int AS published,
+      count(*) FILTER (WHERE original_source_status='source_needed')::int AS source_needed,
+      (SELECT count(*)::int FROM archive.story_revisions) AS revisions
+    FROM archive.stories
+  `);
+  assert.deepEqual(populatedAfterApply.rows[0], { stories: 15, published: 15, source_needed: 15, revisions: 0 });
 
   const authored = await db.query(`
     WITH actor AS (
@@ -114,7 +143,8 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
     SELECT slug,title,season,synopsis,experience_type FROM archive.stories
     WHERE status='published' ORDER BY created_at DESC LIMIT 100
   `);
-  assert.deepEqual(publicList.rows.map((row) => row.slug), [publicStory.rows[0].slug]);
+  assert.equal(publicList.rows.length, 16);
+  assert.ok(publicList.rows.some((row) => row.slug === publicStory.rows[0].slug));
   assert.deepEqual(Object.keys(publicList.rows[0]).sort(), ["experience_type","season","slug","synopsis","title"]);
   assert.doesNotMatch(JSON.stringify(publicList.rows), /Private Draft Secret|Confidential original|Private author notes/);
   const privatePublicDetail = await db.query(
@@ -142,7 +172,7 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
       (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
       (SELECT count(*)::int FROM system.audit_events) AS audit_events
   `);
-  assert.deepEqual(retainedAppRows.rows[0], { stories: 4, revisions: 3, audit_events: 1 });
+  assert.deepEqual(retainedAppRows.rows[0], { stories: 19, revisions: 3, audit_events: 1 });
 
   // Exercise the reverse DDL order for local rehearsal only. The project has no
   // production downgrade scripts; this guards the reviewed destructive steps.
@@ -177,9 +207,10 @@ test("fresh baseline, retention migration, and FK rollback execute in PostgreSQL
     SELECT
       (SELECT count(*)::int FROM archive.stories) AS stories,
       (SELECT count(*)::int FROM archive.story_revisions) AS revisions,
-      (SELECT count(*)::int FROM system.audit_events) AS audit_events
+      (SELECT count(*)::int FROM system.audit_events) AS audit_events,
+      (SELECT count(*)::int FROM archive.stories WHERE slug LIKE 'dev-baseline-%' AND status='published' AND original_source_status='source_needed') AS baseline_stories
   `);
-  assert.deepEqual(afterFeatureRollback.rows[0], { stories: 4, revisions: 3, audit_events: 1 });
+  assert.deepEqual(afterFeatureRollback.rows[0], { stories: 19, revisions: 3, audit_events: 1, baseline_stories: 15 });
   await db.query("DELETE FROM archive.stories WHERE id=$1", [restrictedStory.rows[0].id]);
   const revisions = await db.query(
     "SELECT count(*)::int AS total FROM archive.story_revisions WHERE story_id=$1",
