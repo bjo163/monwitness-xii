@@ -124,7 +124,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Current checkout · Node 24\.19\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
-  assert.match(handoverPage, /The current checkout passes 124\/124 tests on Node 24\.19\.0\. Node 26\.5\.0 passed 123\/123 before the latest backup\/restore runbook contract test\. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup\/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
+  assert.match(handoverPage, /The current checkout passes 124\/124 tests on Node 24\.19\.0 and 26\.5\.0; both runtimes pass migration replay, full dependency audit, production build, and CSP-required loopback smoke 34\/34\. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup\/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
@@ -161,7 +161,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3040\/handover`/);
   assert.match(releaseGatesDoc, /Latest local checkpoint — 2026-10-12/);
   assert.match(releaseGatesDoc, /124\/124 tests on Node 24\.19\.0/);
-  assert.match(releaseGatesDoc, /Node 26\.5\.0 passed the 123-test suite\/build\/smoke before the latest added backup-runbook contract test/);
+  assert.match(releaseGatesDoc, /124\/124 automated tests and 34\/34 local HTTP checks on both Node 24\.19\.0 and Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /All eight gates below remain OPEN/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
