@@ -184,6 +184,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     slug: "fixture-story", title: "Fixture story", season: "Issue 1", synopsis: "Editorial index only", body: "Original draft body",
   }));
   assert.equal(draftResponse.status, 201);
+  assert.equal(draftResponse.headers.get("cache-control"), "no-store");
   assert.deepEqual(await draftResponse.json(), {
     id: (await db.query("SELECT id FROM archive.stories WHERE slug='fixture-story'")).rows[0].id,
     slug: "fixture-story",
@@ -213,6 +214,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     slug: "fixture-story", body: "Second editorial revision", notes: "Copy edit",
   }));
   assert.equal(revisionResponse.status, 201);
+  assert.equal(revisionResponse.headers.get("cache-control"), "no-store");
   assert.deepEqual(await revisionResponse.json(), { slug: "fixture-story", revision: 2 });
 
   const revisionState = await db.query(`
@@ -229,6 +231,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
   authorization = { ok: true, user: { id: "owner-missing-target", name: "Owner" } };
   const missingResponse = await revisionHandler(post("/api/editor/revisions", { slug: "missing-story", body: "No write" }));
   assert.equal(missingResponse.status, 404);
+  assert.equal(missingResponse.headers.get("cache-control"), "no-store");
   const orphanActor = await db.query("SELECT count(*)::int AS count FROM identity.users WHERE external_auth_id='owner-missing-target'");
   assert.equal(orphanActor.rows[0].count, 0);
 
@@ -237,6 +240,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     slug: "fixture-story", title: "Duplicate", body: "Must not replace the original",
   }));
   assert.equal(duplicateResponse.status, 409);
+  assert.equal(duplicateResponse.headers.get("cache-control"), "no-store");
 
   await db.exec("ALTER TABLE system.audit_events ADD CONSTRAINT reject_test_audit CHECK (false) NOT VALID");
   authorization = { ok: true, user: { id: "owner-atomic-failure", name: "Owner" } };
@@ -258,6 +262,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     method: "POST", headers: { "content-type": "application/json" }, body: "not json",
   }));
   assert.equal(deniedResponse.status, 403);
+  assert.equal(deniedResponse.headers.get("cache-control"), "no-store");
   const limiterAfterDeniedRequest = await db.query("SELECT count(*)::int AS count FROM system.editor_write_limits");
   assert.equal(limiterAfterDeniedRequest.rows[0].count, limiterBeforeDeniedRequest.rows[0].count);
 
@@ -296,6 +301,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     slug: "db-unavailable", title: "Unavailable", body: "No writes without a database",
   }));
   assert.equal(databaseUnavailableResponse.status, 503);
+  assert.equal(databaseUnavailableResponse.headers.get("cache-control"), "no-store");
   assert.deepEqual(await databaseUnavailableResponse.json(), { error: "Database unavailable" });
   assert.equal(unavailableLimiterCalls, 0);
 
@@ -308,6 +314,7 @@ test("actual editor handlers preserve atomic writes, authorization, rate limits,
     slug: "limiter-unavailable", title: "Unavailable", body: "No writes without rate protection",
   }));
   assert.equal(limiterUnavailableResponse.status, 503);
+  assert.equal(limiterUnavailableResponse.headers.get("cache-control"), "no-store");
   assert.deepEqual(await limiterUnavailableResponse.json(), { error: "Write protection unavailable" });
   const unavailableActors = await db.query(`
     SELECT count(*)::int AS count FROM identity.users

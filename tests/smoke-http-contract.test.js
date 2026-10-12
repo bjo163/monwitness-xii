@@ -118,16 +118,20 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
   assert.match(smokeScript, /api\/episodes\/INVALID%21",\(r,b\)=>r\.status===400&&r\.headers\.get\("cache-control"\)==="no-store"&&b\?\.error==="Invalid slug"/);
 });
 
+test("local smoke checks editor write responses are not cacheable", () => {
+  assert.match(smokeScript, /api\/editor\/drafts",\(r\)=>\[401,503\]\.includes\(r\.status\)&&r\.headers\.get\("cache-control"\)==="no-store","POST"/);
+});
+
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
-  assert.match(handoverPage, /125 \/ 125/);
-  assert.match(smokeScript, /t\.includes\("125 \/ 125"\)/);
+  assert.match(handoverPage, /126 \/ 126/);
+  assert.match(smokeScript, /t\.includes\("126 \/ 126"\)/);
   assert.match(handoverPage, /34 \/ 34/);
   assert.match(handoverPage, /Latest run · Node 26\.5\.0/);
-  assert.match(handoverPage, /draft and revision writes share a database quota and rate-limit replies are no-store/);
+  assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
   assert.match(handoverPage, /Earlier clean Node 22\.23\.3 snapshots at commits 6a88a4b and 9d054ff passed their recorded workflow checks/);
   assert.match(handoverPage, /Fresh exact tracked-tree reproduction at commit 2f43d14 passed 125\/125 tests, migration replay, full npm audit \(0 vulnerabilities\), actionlint, production build, and CSP-required loopback smoke 34\/34 on Node 26\.5\.0 \/ npm 11\.17\.0 after a clean 239-package install/);
-  assert.match(handoverPage, /draft and revision writes share one actor quota and the rate-limit 429 response is no-store/);
+  assert.match(handoverPage, /draft and revision writes share one actor quota and editor write responses use `Cache-Control: no-store`/);
   assert.match(handoverPage, /Local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
   assert.match(handoverPage, /effective failed-login throttling is unverified\. This SDK cannot configure a provider-wide limiter/);

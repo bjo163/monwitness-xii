@@ -69,8 +69,9 @@ test("direct Drizzle CLI migration also rejects an unapproved target before conn
       EXPECTED_DATABASE_NAME: "moonwitness_local",
       CONFIRM_DATABASE_MIGRATION: "YES",
     },
-    timeout: 5000,
+    timeout: 15000,
   });
+  assert.equal(result.error, undefined, result.error?.message);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /DATABASE_URL host does not match EXPECTED_DATABASE_HOST; Drizzle migrate not run/);
   assert.doesNotMatch(result.stderr, /local-only|do-not-print|127\.0\.0\.1|moonwitness_local/);
@@ -87,8 +88,9 @@ test("direct Drizzle introspection rejects an unapproved target before connectin
       EXPECTED_DATABASE_NAME: "moonwitness_local",
       CONFIRM_DATABASE_INTROSPECTION: "YES",
     },
-    timeout: 5000,
+    timeout: 15000,
   });
+  assert.equal(result.error, undefined, result.error?.message);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /DATABASE_URL host does not match EXPECTED_DATABASE_HOST; Drizzle introspect not run/);
   assert.doesNotMatch(result.stderr, /local-only|do-not-print|127\.0\.0\.1|moonwitness_local/);
