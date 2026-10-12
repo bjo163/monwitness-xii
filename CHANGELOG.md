@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — Verify a clean tracked-tree checkout
+
+- Exported the committed tree at `f6151d0` to a fresh temporary directory, confirmed it contained no `.env` or `.env.local`, and installed the locked 239 packages using Node `v26.5.0` / npm `11.17.0`.
+- The clean snapshot passed 103/103 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint`, production build, and CSP-required local smoke 32/32 at `127.0.0.1:3038`. Database/Auth routes correctly used safe unconfigured responses.
+- npm reported peer/deprecation warnings and withheld `core-js`/`esbuild` install scripts under the local approval policy. This is clean local Node 26 evidence; exact-head GitHub Actions on Node 22 remains unverified.
+
 ## 2026-10-12 — Remove unverified database environment claim
 
 - A successful DB readiness probe now reports connectivity only. It no longer emits `migration: development`, which was not backed by a verified target branch and could mislead operators when `DATABASE_URL` points elsewhere.
