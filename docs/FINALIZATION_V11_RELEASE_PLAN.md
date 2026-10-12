@@ -2,6 +2,8 @@
 
 Updated: 2026-10-12. Review branch: `codex/v11-release-readiness`. Goal: release Story Archive without exposing originals or breaking production.
 
+> **Status and evidence note:** this is a dated planning snapshot. Its `[x]` entries mean that an implementation or checkpoint evidence was recorded here; they do not mean the current release gates are closed. For current operational state and required evidence, use the [engineering handover](./HANDOVER_V11.md), [release gate register](./RELEASE_GATES_V11.md), and [implementation checklist](./GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md). Production remains **NO-GO** until those current gates are verified and the owner approves promotion.
+
 ## Decision: retain Neon + Vercel for release; Local AI is optional
 Replacing a functioning deployed stack with a local inference engine now is **not** a release shortcut.
 A local model (e.g. Ollama or llama.cpp) can be integrated later for optional AI-assisted tagging/search. Keep all scripture/religious analyses human-reviewed, no autonomous publishing, no private content sent to external models without consent.

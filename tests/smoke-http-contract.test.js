@@ -16,6 +16,7 @@ const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.m
 const handoverDoc = await readFile(new URL("../docs/HANDOVER_V11.md", import.meta.url), "utf8");
 const implementationChecklist = await readFile(new URL("../docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md", import.meta.url), "utf8");
 const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
+const finalizationPlan = await readFile(new URL("../docs/FINALIZATION_V11_RELEASE_PLAN.md", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
 const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
@@ -132,6 +133,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
   assert.match(handoverDoc, /Current local review update.*checkout `f63d643`/);
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
+  assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
+  assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
   assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3036\/handover`/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35)\/handover/);
 });

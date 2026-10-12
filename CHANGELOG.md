@@ -4,6 +4,7 @@
 
 - Marked the older 95-test checkpoint as historical, aligned the current local URL to port 3036, and recorded the verified 98-test checkout in the handover and release tracker.
 - Extended the existing handover contract to reject stale local-port references and ensure superseded test checkpoints remain labeled historical.
+- Marked the finalization checklist as a dated evidence snapshot, clarified that historical checkmarks do not close current release gates, and added a regression contract for the NO-GO notice.
 - Validation on the current checkout: 98/98 tests on Node 26.5.0 and bundled Node 24.19.0, `db:check`, and CSP-required loopback HTTP smoke 32/32. The production server returned HTTP 200 for health and handover.
 - Documentation only; no application source, database, remote branch, or deployment was changed.
 
