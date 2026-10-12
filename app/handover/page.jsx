@@ -4,10 +4,10 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "95 / 95", label: "automated tests", detail: "Auth · Archive · migrations · recovery", tone: "pink" },
-  { value: "32 / 32", label: "local HTTP checks", detail: "Routes · artwork · CSP · signed-out auth", tone: "cyan" },
-  { value: "0", label: "audit findings", detail: "Full dependency tree · local audit", tone: "lime" },
-  { value: "PASS", label: "migration replay", detail: "Generated schema matches journal", tone: "gold" },
+  { value: "95 / 95", label: "automated tests", detail: "Node 22.23.3 · clean tracked snapshot", tone: "pink" },
+  { value: "32 / 32", label: "local HTTP checks", detail: "Node 22.23.3 · clean tracked snapshot", tone: "cyan" },
+  { value: "0", label: "audit findings", detail: "Node 22.23.3 · production dependencies", tone: "lime" },
+  { value: "PASS", label: "migration replay", detail: "Node 22.23.3 · clean tracked snapshot", tone: "gold" },
 ];
 
 const verified = [
@@ -82,7 +82,7 @@ export default function HandoverPage() {
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
-          <p className={styles.evidenceNote}>The browser HTTP smoke passed locally. Browser-console error review was not part of that check. Database endpoints return their expected safe-unavailable response without a local database URL.</p>
+          <p className={styles.evidenceNote}>Node 22.23.3 clean-snapshot verification covered install, tests, migration replay, audit, production build, and CSP-required loopback smoke 32/32. The current local browser smoke also passes 32/32; local Auth returns a signed-out session and editor denial, while database routes remain safely unavailable without a local database URL. Browser-console error review was not part of these checks.</p>
         </div>
       </section>
 

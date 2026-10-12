@@ -13,6 +13,7 @@ const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", i
 const editorLoginView = await readFile(new URL("../app/editor/login/view.jsx", import.meta.url), "utf8");
 const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
 const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
+const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
 const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
 
@@ -112,11 +113,19 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
   assert.match(handoverPage, /95 \/ 95/);
+  assert.match(handoverPage, /Node 22\.23\.3 · clean tracked snapshot/);
+  assert.match(handoverPage, /production build, and CSP-required loopback smoke 32\/32/);
+  assert.match(handoverPage, /current local browser smoke also passes 32\/32/);
+  assert.match(handoverPage, /local Auth returns a signed-out session and editor denial/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(handoverPage, /Daily snapshots with 30-day retention are unavailable/);
   assert.match(handoverPage, /All 15 entries remain source-needed/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
   assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
+  const uiGateIds = [...handoverPage.matchAll(/\{ id: "([A-Z]{2,4}-\d{2})", title:/g)].map((match) => match[1]);
+  const docGateRows = [...releaseGatesDoc.matchAll(/^\| ([A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
+  assert.deepEqual(uiGateIds, ["SEC-01", "AUTH-01", "AUTH-02", "DB-02", "DB-03", "ARC-01", "REL-01", "PLAN-01"]);
+  assert.deepEqual(docGateRows, uiGateIds, "release gate register must match the dashboard and keep each gate open");
 });
 
 test("CI actions stay pinned to full SHAs and Dependabot tracks action updates", () => {

@@ -3,6 +3,23 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
+### Current handover gate register
+
+These IDs and open states are the source register rendered by `/handover`. A gate stays open until its stated evidence exists for the exact release candidate and the owner accepts it. Local-only verification does not satisfy remote, provider, content-rights, or owner-approval requirements.
+
+| ID | Gate | Current state | Evidence required to close |
+| --- | --- | --- | --- |
+| SEC-01 | Exact release CSP | OPEN | Exact reviewed release Preview plus nonce/CSP and browser-console verification. |
+| AUTH-01 | Owner identity and editor access | OPEN | Owner-provisioned admin sign-in, authenticated draft/revision/audit writes, logout/session restoration, and role-revocation checks. |
+| AUTH-02 | Identity policy | OPEN | Owner-approved registration and credential-attempt policy, plus MFA-capable production identity evidence. |
+| DB-02 | Persistent development migration | OPEN | Independently verified app database target, baseline/ledger reconciliation, reviewed migration apply, schema and rollback checks. |
+| DB-03 | Recoverable backups | OPEN | Approved retention/RPO/RTO plan and representative-data restore with verified cutover/rollback. Daily snapshots with 30-day retention remain unavailable on the selected Free plan. |
+| ARC-01 | Archive sources and rights | OPEN | Originals, credits, and rights evidence reviewed for all 15 entries; retain `source_needed` until then. |
+| REL-01 | Independent release review | OPEN | Independent review and integration of PR #4, conflict recheck of PR #2, and exact-head CI evidence. |
+| PLAN-01 | Full V11 traceability | OPEN | Authoritative V11/V11.2 plan supplied and each actual requirement mapped to implementation and verification evidence. |
+
+- Current handover page at `http://127.0.0.1:3033/handover` shows all eight gates as open. Production remains NO-GO. No push, deployment, or persistent Neon operation is part of this local review.
+
 - **Current local review UI and CSP source of truth:** `/handover` is a responsive mission-control dashboard at `http://127.0.0.1:3020/handover`. Removed the obsolete `next.config.js` CSP containing `script-src 'unsafe-inline'`; the Next.js proxy now owns the nonce policy for page responses. Script/style directives and rendered elements share their per-request nonce; smoke rejects inline style attributes and requires no page CSP on APIs/static assets. The npm migration/Studio wrappers and repository-default Drizzle config require an independently checked host/database and operation-specific confirmation for database access; credential overrides are rejected and direct schema `push` is disabled. The editor sign-in explains owner provisioning, the Auth admin role and exact ID allowlist, and distinguishes service failure from authorization denial. A repository-wide API contract confirms only guarded editor POSTs can write; session responses are no-store and contain only the minimal decision fields. Current tree validation at `7ec6752`: 95/95 tests, migration replay, full audit (0 findings), `actionlint`, production build, CSP-required loopback smoke 32/32, and diff check pass. Browser-console inspection and all external release gates remain open; no push, deployment, or Neon access occurred.
 
 - **Previous local security checkpoint (commit `1d703d5`, extended by the current worktree above):** all HTML pages have a fresh per-request CSP nonce; loopback smoke verifies nonce uniqueness, nonce matching on every script tag and route, and absence of `unsafe-inline` in `script-src`. Production build confirms all routes use dynamic rendering. At that checkpoint, 79 tests, migration replay, full audit, `actionlint`, production build, and local HTTP smoke 31/31 passed. `style-src` remains permissive for inline styles. Home and handover now invoke server rendering; monitor the Hobby plan's 1M invocation / 4 CPU-hour allowance. This is local evidence only; no remote CI/Preview, push, deployment, or persistent Neon query/write occurred. Auth onboarding, persistent-dev migration, representative Neon recovery, source-rights, and independent review gates remain open.
