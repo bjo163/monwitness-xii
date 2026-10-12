@@ -4,8 +4,8 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
-  { value: "129 / 129", label: "automated tests", detail: "Latest run · Node 26.5.0", tone: "pink" },
-  { value: "40 / 40", label: "local HTTP checks", detail: "Latest run · Node 26.5.0", tone: "cyan" },
+  { value: "129 / 129", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
+  { value: "40 / 40", label: "local HTTP checks", detail: "Production build · loopback only", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];
@@ -30,6 +30,12 @@ const gates = [
   { id: "G-ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
   { id: "G-REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
   { id: "G-PLAN-01", title: "Full V11 traceability", text: "All ten prompt modules are mapped to local evidence; full requirements coverage awaits the missing authoritative V11/V11.2 plan." },
+];
+
+const evidenceLimits = [
+  { label: "DATABASE", value: "NOT CONNECTED", detail: "No local DATABASE_URL or verified target is configured. Database routes fail closed; Neon behavior is not tested here.", tone: "pink" },
+  { label: "REVIEW BRANCH", value: "LOCAL ONLY", detail: "This checkout is ahead of the remote PR head. Current remote CI does not cover these local commits.", tone: "gold" },
+  { label: "RELEASE", value: "8 GATES OPEN", detail: "Owner identity, provider policy, isolated migration, recovery, Archive rights, independent review, and full-plan traceability remain unresolved.", tone: "aqua" },
 ];
 
 export default function HandoverPage() {
@@ -85,7 +91,10 @@ export default function HandoverPage() {
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
-          <p className={styles.evidenceNote}>Fresh exact tracked-tree reproduction at commit 2f43d14 passed 125/125 tests, migration replay, full npm audit (0 vulnerabilities), actionlint, production build, and CSP-required loopback smoke 34/34 on Node 26.5.0 / npm 11.17.0 after a clean 239-package install without environment files. DB/Auth routes returned their designed unconfigured 503 responses; remote CI and Preview remain unverified. PGlite verifies that draft and revision writes share one actor quota and editor write responses use `Cache-Control: no-store`. Earlier clean Node 22.23.3 snapshots at commits 6a88a4b and 9d054ff passed their recorded workflow checks. Current local evidence includes sign-out behavior requiring an explicit provider success response, anonymous editor-page redirect coverage, backup/restore runbook alignment with all five journal entries, a contract that keeps the 15-slot Archive provenance intake pending and source-needed, regression coverage for all 100 AETHERION levels across ten realms and the first 33 open levels, plus the actual editor draft/revision handler checks against PGlite. AETHERION progress remains browser-local; database seeding and persistent saves are still open. The clean install has zero npm audit advisories, but npm ls reports invalid peer versions inside the Neon Auth SDK transitive UI bundle; the app does not import that UI, and the mismatch remains for upstream version-alignment review. The isolated Neon rehearsal covers migrations 0000–0002 only; 0003/0004 have PGlite coverage but have not been applied to any database or Neon-rehearsed. The freeze runbook requires an independently verified provider/application write stop before destructive recovery, and the guarded local freeze CLI is not an incident control for persistent environments. Editor authorization bypasses the signed session-data cookie cache so the provider role is checked on each decision; PGlite verifies role revocation blocks a revision without extra revision, audit, quota, or actor rows. The Archive pages use shared published-only queries whose exact page projection is regression-tested separately from the five-field public API projection. Local Auth returns a signed-out session and editor denial; database routes fail closed unless the independently configured expected host and database name match. Browser-console error review remains open.</p>
+          <div className={styles.limitsGrid} aria-label="Evidence boundaries">
+            {evidenceLimits.map((item) => <article className={`${styles.limitCard} ${styles[item.tone]}`} key={item.label}><span>{item.label} · EVIDENCE BOUNDARY</span><strong>{item.value}</strong><p>{item.detail}</p></article>)}
+          </div>
+          <div className={styles.evidenceNote}><strong>Latest local run · 12 Oct 2026</strong><p>Node 26.5.0: 129/129 tests; `db:check`; full dependency audit with 0 findings; production build; `actionlint`; and CSP-required loopback HTTP smoke 40/40. Mission Control was opened and visually inspected from the local production server. These checks verify this local checkout only.</p><p>Database target/TLS guards reject connection-identity overrides and insecure TLS settings before connection. PGlite verifies migration and editor-write behavior, including actor quotas, revocation, no-store errors, write freeze, and recovery fixtures. Neon rehearsal remains limited to `0000`–`0002`; `0003`/`0004` are not Neon-rehearsed. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open. Neon Auth transitive UI peer-version mismatch requires review; this app does not import that UI bundle.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. Historical plan snapshots do not substitute for its acceptance criteria. No live owner-auth test, connected local Neon target, exact-head remote CI/Preview, or current branch review is claimed.</p></div>
         </div>
       </section>
 
@@ -95,7 +104,7 @@ export default function HandoverPage() {
           <p>Each gate needs current, reviewable evidence before production status can change.</p>
         </div>
         <div className={styles.gateList}>
-          {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Open">○</span></article>)}
+          {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Open"><i />OPEN</span></article>)}
         </div>
         <div className={styles.docsRow}>
           <div>RELEASE GATES <code>docs/RELEASE_GATES_V11.md</code></div>
