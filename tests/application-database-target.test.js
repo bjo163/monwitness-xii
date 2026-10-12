@@ -18,6 +18,30 @@ test("application database access requires matching independently supplied targe
   assert.equal(getApplicationDatabaseTargetError(verified), null);
   assert.equal(getApplicationDatabaseUrl(verified), verified.DATABASE_URL);
 
+  // PostgreSQL URLs are case-insensitive for host names, while database names
+  // remain exact after URL decoding.
+  const hostCase = {
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@EP-DEV.EXAMPLE.NEON.TECH/moon%2Ddev?sslmode=require",
+    EXPECTED_DATABASE_HOST: "ep-dev.example.neon.tech",
+    EXPECTED_DATABASE_NAME: "moon-dev",
+  };
+  assert.equal(getApplicationDatabaseTargetError(hostCase), null);
+
+  const malformedDatabaseEncoding = {
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech/moon%2Gdev?sslmode=require",
+  };
+  assert.match(getApplicationDatabaseTargetError(malformedDatabaseEncoding), /invalid database name/);
+  assert.match(getApplicationDatabaseTargetError({
+    ...verified,
+    DATABASE_URL: "https://ep-dev.example.neon.tech/neondb",
+  }), /must identify a PostgreSQL host and database/);
+  assert.match(getApplicationDatabaseTargetError({
+    ...verified,
+    EXPECTED_DATABASE_HOST: "   ",
+  }), /host does not match/);
+
   const missingHost = { ...verified, EXPECTED_DATABASE_HOST: "" };
   assert.equal(isApplicationDatabaseConfigured(missingHost), false);
   assert.match(getApplicationDatabaseTargetError(missingHost), /Expected database host and name are required/);
