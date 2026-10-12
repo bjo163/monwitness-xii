@@ -1,10 +1,16 @@
 # Changelog
 
+## 2026-10-12 — Reject nonstandard local database ports
+
+- Reject explicitly nonstandard PostgreSQL ports and cover standard/nonstandard ports in the database-target regression test.
+- A loopback-only direct Drizzle probe confirmed that an alternate `--config` file is loaded without executing this repository's guard. Direct custom-config CLI invocations can bypass repository safeguards; connected database work must use guarded npm wrappers, which do not accept custom config paths.
+- Verification: 117/117 tests, `db:check`, production build, and local CSP-required smoke 33/33 passed. The smoke now prints its total and passed case counts. `db:check` replayed migration SQL locally and did not connect to a remote database. The custom-config probe used only `127.0.0.1:1`; no external database, push, or deployment was used.
+
 ## 2026-10-12 — Add a local editor write freeze
 
 - Added singleton database write control with operator/reason audit metadata. Editor draft and revision mutations take a shared row lock, so freeze activation waits for in-flight writes and blocks later mutations atomically; missing control state fails closed.
 - Added target-guarded `status`, `freeze`, and `unfreeze` commands, action-specific confirmation, PGlite race/failure tests, and operator steps to the backup/restore runbook. Migrations `0003`/`0004` remain local and have not been applied to persistent dev, Preview, or production.
-- Verification: 117/117 tests, `db:check`, full dependency audit (0 vulnerabilities), production build, `actionlint`, and local CSP-required smoke 32/32 passed on Node 26.5.0 / npm 11.17.0. Production remains NO-GO; no push or deployment.
+- Verification: 117/117 tests, `db:check`, full dependency audit (0 vulnerabilities), production build, `actionlint`, and local CSP-required smoke 33/33 passed on Node 26.5.0 / npm 11.17.0. Production remains NO-GO; no push or deployment.
 
 ## 2026-10-12 — Reproduce the exact review head from a clean snapshot
 

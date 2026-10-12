@@ -28,6 +28,15 @@ test("application database access requires matching independently supplied targe
   };
   assert.equal(getApplicationDatabaseTargetError(hostCase), null);
 
+  assert.equal(getApplicationDatabaseTargetError({
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech:5432/neondb?sslmode=require",
+  }), null);
+  assert.match(getApplicationDatabaseTargetError({
+    ...verified,
+    DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech:5433/neondb?sslmode=require",
+  }), /standard PostgreSQL port 5432/);
+
   const malformedDatabaseEncoding = {
     ...verified,
     DATABASE_URL: "postgresql://role:secret@ep-dev.example.neon.tech/moon%2Gdev?sslmode=require",

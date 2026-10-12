@@ -12,7 +12,10 @@ if (!['http:', 'https:'].includes(parsedBase.protocol)) { console.error("SMOKE_B
 if(parsedBase.username||parsedBase.password){console.error("SMOKE_BASE_URL must not contain credentials");process.exit(2)}
 if(profile==="local"&&!['localhost','127.0.0.1','[::1]'].includes(parsedBase.hostname)){console.error("Local smoke profile only permits loopback hosts");process.exit(2)}
 const headers=profile==="preview"&&process.env.SMOKE_BYPASS_TOKEN?{"x-vercel-protection-bypass":process.env.SMOKE_BYPASS_TOKEN}:{};
+let smokeChecksTotal=0;
+let smokeChecksPassed=0;
 async function check(path,accept,method="GET"){
+ smokeChecksTotal++;
  const label=`${method==="GET"?"":`[${method}] `}${path}`;
  try {
   const r=await fetch(new URL(path,parsedBase),{method,headers,redirect:"manual",signal:AbortSignal.timeout(12000)});
@@ -20,7 +23,7 @@ async function check(path,accept,method="GET"){
   let body;
   try { body=JSON.parse(text); } catch { body=null; }
   if(!accept(r,body,text)){console.error(label+" FAILED: unexpected "+r.status);process.exitCode=1}
-  else console.log(label+" PASSED: "+r.status);
+  else {smokeChecksPassed++;console.log(label+" PASSED: "+r.status)}
  } catch (error) {
   console.error(label+" FAILED: "+(error instanceof Error?error.name:"request failed"));
   process.exitCode=1;
@@ -39,6 +42,7 @@ function hasStrictPageCsp(response,_body,html){
  return scripts.length>0&&scripts.every(([,attributes])=>nonceMatches(attributes))&&styleBlocks.every(([,attributes])=>nonceMatches(attributes))&&!/<[a-z][^>]*\sstyle\s*=/i.test(html);
 }
 async function checkFreshPageNonce(path){
+ smokeChecksTotal++;
  const label=`${path} fresh per-request CSP nonce`;
  try{
   const responses=await Promise.all([0,1].map(()=>fetch(new URL(path,parsedBase),{headers,redirect:"manual",signal:AbortSignal.timeout(12000)})));
@@ -46,7 +50,7 @@ async function checkFreshPageNonce(path){
   const nonces=pages.map(({response})=>response.headers.get("content-security-policy")?.match(/'nonce-([^']+)'/)?.[1]);
   const valid=pages.every(({response,html})=>response.status===200&&hasStrictPageCsp(response,null,html));
   if(!valid||!nonces[0]||!nonces[1]||nonces[0]===nonces[1]){console.error(label+" FAILED: nonce was missing, reused, or not applied");process.exitCode=1}
-  else console.log(label+" PASSED");
+  else {smokeChecksPassed++;console.log(label+" PASSED")}
  }catch(error){console.error(label+" FAILED: "+(error instanceof Error?error.name:"request failed"));process.exitCode=1}
 }
 if(profile==="preview"){
@@ -85,7 +89,7 @@ if(profile==="preview"){
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&t.includes("THE CREW KEEPS WATCH.")&&t.includes("These are universe portraits, not claims that a specific character appears in an indexed story.")&&["four-lah","whalterwhite","isrockfeel","rock-soul"].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
  await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
- await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("117 / 117")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("32 / 32")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
+ await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("117 / 117")&&t.includes("All ten prompt modules are mapped to local evidence")&&t.includes("33 / 33")&&t.includes("Release gates remaining")&&!t.includes("Preview is live")&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
  await checkFreshPageNonce("/");
  await check("/api/auth/get-session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b===null)||(r.status===503&&b?.error==="Authentication is not configured")));
@@ -99,3 +103,4 @@ if(profile==="preview"){
  await check("/api/editor/session",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===401&&b?.authenticated===false)||(r.status===503&&b?.error==="Editor authentication is not configured")));
  await check("/api/editor/drafts",(r)=>r.status===405);
 }
+console.log(`HTTP smoke checks: ${smokeChecksPassed}/${smokeChecksTotal} passed`);

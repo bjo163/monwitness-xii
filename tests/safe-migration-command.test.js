@@ -59,7 +59,7 @@ test("migration command requires explicit operator confirmation after target val
 });
 
 test("direct Drizzle CLI migration also rejects an unapproved target before connecting", () => {
-  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:1/moonwitness_local";
+  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:5432/moonwitness_local";
   const result = spawnSync(process.execPath, [drizzleCli, "migrate"], {
     encoding: "utf8",
     env: {
@@ -77,7 +77,7 @@ test("direct Drizzle CLI migration also rejects an unapproved target before conn
 });
 
 test("direct Drizzle introspection rejects an unapproved target before connecting", () => {
-  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:1/moonwitness_local";
+  const localOnlyUrl = "postgresql://local-only:do-not-print@127.0.0.1:5432/moonwitness_local";
   const result = spawnSync(process.execPath, [drizzleCli, "introspect"], {
     encoding: "utf8",
     env: {

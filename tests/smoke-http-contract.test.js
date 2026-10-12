@@ -118,6 +118,7 @@ test("local smoke checks public Archive detail projection and invalid-slug handl
 test("local handover reports current local evidence and keeps production NO-GO", () => {
   assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
   assert.match(handoverPage, /117 \/ 117/);
+  assert.match(handoverPage, /33 \/ 33/);
   assert.match(handoverPage, /Current checkout · Node 26\.5\.0/);
   assert.match(handoverPage, /clean Node 22\.23\.3 snapshot passed install, 95\/95 tests/);
   assert.match(handoverPage, /current checkout passes 117\/117 tests, including a contract that keeps the 15-slot Archive provenance intake pending and source-needed/);
@@ -128,6 +129,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /Schema verification detects untracked RLS, CHECK, policy, and trigger drift/);
   assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
   assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
+  assert.match(smokeScript, /let smokeChecksTotal=0/);
+  assert.match(smokeScript, /let smokeChecksPassed=0/);
+  assert.match(smokeScript, /HTTP smoke checks: \$\{smokeChecksPassed\}\/\$\{smokeChecksTotal\} passed/);
   const uiGateIds = [...handoverPage.matchAll(/\{ id: "(G-[A-Z]{2,4}-\d{2})", title:/g)].map((match) => match[1]);
   const docGateRows = [...releaseGatesDoc.matchAll(/^\| (G-[A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
   assert.deepEqual(uiGateIds, ["G-SEC-01", "G-AUTH-01", "G-AUTH-02", "G-DB-02", "G-DB-03", "G-ARC-01", "G-REL-01", "G-PLAN-01"]);
@@ -146,11 +150,12 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs/);
   assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
   assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
-  assert.match(handoverDoc, /^### Current local review update/m);
+  assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
+  assert.doesNotMatch(handoverDoc, /^### Current local review update/m);
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
-  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3039\/handover`/);
+  assert.match(releaseGatesDoc, /Current handover page at `http:\/\/127\.0\.0\.1:3040\/handover`/);
   assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
 });
 
