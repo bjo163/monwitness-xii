@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Separate release gate IDs from implementation task IDs
+
+- Prefixed the eight dashboard/register release gates with `G-` so labels such as the persistent development migration `G-DB-02` cannot be confused with the completed disposable migration task `DB-02`.
+- Added a regression contract that compares the dashboard IDs to the source register, keeps all eight gates open, and proves no gate ID collides with an implementation-task ID.
+- Verified source HEAD `789296b`: 107/107 tests, `db:check`, full dependency audit (0 vulnerabilities), production build, `actionlint`, CSP-required HTTP smoke 32/32, and browser accessibility review of the rendered gates.
+- Local-only change. No CI, PR, database, or deployment operation occurred; production remains NO-GO.
+
 ## 2026-10-12 — Bring the faceless cast into the Story Archive
 
 - Added non-story-specific Batteries portraits to the Archive and linked each portrait to the team character files. The text makes clear that the cast art does not assert that a named character appears in any particular indexed story.
