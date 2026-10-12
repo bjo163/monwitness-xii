@@ -2,28 +2,30 @@ import { neon } from "@neondatabase/serverless";
 import { getApplicationDatabaseUrl } from "../lib/database-target.js";
 import { isEditorWriteFrozen, setEditorWriteFreezeState } from "../lib/editor-write-freeze.js";
 
+class SafeCommandError extends Error {}
+
 function usage() {
   return "Usage: node scripts/editor-write-freeze.mjs status | freeze --actor=<operator-ref> --reason=<incident-ref> | unfreeze --actor=<operator-ref> --reason=<change-ref>";
 }
 
 async function main(args) {
   const [action, ...options] = args;
-  if (!["status", "freeze", "unfreeze"].includes(action)) throw new Error(usage());
+  if (!["status", "freeze", "unfreeze"].includes(action)) throw new SafeCommandError(usage());
   const parsed = new Map();
   for (const option of options) {
     const match = /^--(actor|reason)=(.{1,240})$/.exec(option);
-    if (!match || parsed.has(match[1])) throw new Error(usage());
-    if ((match[1] === "actor" && match[2].length > 120) || !match[2].trim()) throw new Error(usage());
+    if (!match || parsed.has(match[1])) throw new SafeCommandError(usage());
+    if ((match[1] === "actor" && match[2].length > 120) || !match[2].trim()) throw new SafeCommandError(usage());
     parsed.set(match[1], match[2]);
   }
 
   if (action !== "status") {
     if (process.env.CONFIRM_EDITOR_WRITE_FREEZE !== action) {
-      throw new Error(`Set CONFIRM_EDITOR_WRITE_FREEZE=${action} after verifying the exact development database target`);
+      throw new SafeCommandError(`Set CONFIRM_EDITOR_WRITE_FREEZE=${action} after verifying the exact development database target`);
     }
-    if (!parsed.has("actor") || !parsed.has("reason")) throw new Error(usage());
+    if (!parsed.has("actor") || !parsed.has("reason")) throw new SafeCommandError(usage());
   } else if (parsed.size > 0) {
-    throw new Error(usage());
+    throw new SafeCommandError(usage());
   }
 
   const sql = neon(getApplicationDatabaseUrl());
@@ -43,6 +45,6 @@ async function main(args) {
 }
 
 main(process.argv.slice(2)).catch((error) => {
-  process.stderr.write(`${error?.message === "Invalid editor write freeze state" ? error.message : "Editor write freeze command failed; check the verified target and control table."}\n`);
+  process.stderr.write(`${error instanceof SafeCommandError || error?.message === "Invalid editor write freeze state" ? error.message : "Editor write freeze command failed; check the verified target and control table."}\n`);
   process.exitCode = 1;
 });

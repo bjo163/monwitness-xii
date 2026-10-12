@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12 — Make editor-freeze CLI validation actionable
+
+- Preserve sanitized usage and confirmation guidance for invalid operator input while continuing to mask target/configuration and database errors.
+- Added subprocess regressions for missing action confirmation, mismatched database target, malformed status arguments, and secret/endpoint redaction. Test cases use only a dummy loopback URL and the target guard rejects it before a connection; no database was contacted.
+
 ## 2026-10-12 — Reproduce local review from a clean tracked tree
 
 - Exported local commit `6a88a4b` without `.env` or `.env.local`. A fresh `npm ci --no-audit --no-fund` installed 239 packages on Node 26.5.0 / npm 11.17.0; the clean export passed 117/117 tests, `db:check`, full audit (0 vulnerabilities), production build, `actionlint`, and CSP-required loopback smoke 33/33.

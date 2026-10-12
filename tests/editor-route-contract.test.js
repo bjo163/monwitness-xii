@@ -1,13 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import { relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const draftRoute = await readFile(new URL("../app/api/editor/drafts/route.js", import.meta.url), "utf8");
 const revisionRoute = await readFile(new URL("../app/api/editor/revisions/route.js", import.meta.url), "utf8");
 const writeHandlers = await readFile(new URL("../lib/editor-write-handlers.js", import.meta.url), "utf8");
 const writeFreeze = await readFile(new URL("../lib/editor-write-freeze.js", import.meta.url), "utf8");
 const writeFreezeScript = await readFile(new URL("../scripts/editor-write-freeze.mjs", import.meta.url), "utf8");
+const writeFreezeCli = fileURLToPath(new URL("../scripts/editor-write-freeze.mjs", import.meta.url));
 const editorAuth = await readFile(new URL("../lib/editor-auth.js", import.meta.url), "utf8");
 const editorAuthorizer = await readFile(new URL("../lib/editor-authorizer.js", import.meta.url), "utf8");
 const schema = await readFile(new URL("../db/schema.js", import.meta.url), "utf8");
@@ -59,6 +62,35 @@ test("production editor routes require the database write-freeze gate and lock i
   assert.match(writeFreezeScript, /operator: parsed\.get\("actor"\)/);
   assert.match(writeFreezeScript, /reason: parsed\.get\("reason"\)/);
   assert.doesNotMatch(writeFreezeScript, /console\.log\(process\.env|DATABASE_URL/);
+
+  const runCli = (args, overrides = {}) => spawnSync(process.execPath, [writeFreezeCli, ...args], {
+    encoding: "utf8",
+    timeout: 5000,
+    env: {
+      ...process.env,
+      DATABASE_URL: "postgresql://local-only:dummy-secret@127.0.0.1:5432/moonwitness_test",
+      EXPECTED_DATABASE_HOST: "verified.example.neon.tech",
+      EXPECTED_DATABASE_NAME: "moonwitness_test",
+      CONFIRM_EDITOR_WRITE_FREEZE: "",
+      ...overrides,
+    },
+  });
+  const missingConfirmation = runCli(["freeze", "--actor=on-call", "--reason=INC-CLI"]);
+  assert.equal(missingConfirmation.status, 1);
+  assert.match(missingConfirmation.stderr, /Set CONFIRM_EDITOR_WRITE_FREEZE=freeze/);
+  assert.doesNotMatch(missingConfirmation.stderr, /dummy-secret|local-only/);
+
+  const mismatchedTarget = runCli(["freeze", "--actor=on-call", "--reason=INC-CLI"], {
+    CONFIRM_EDITOR_WRITE_FREEZE: "freeze",
+    EXPECTED_DATABASE_HOST: "different.example.neon.tech",
+  });
+  assert.equal(mismatchedTarget.status, 1);
+  assert.match(mismatchedTarget.stderr, /Editor write freeze command failed/);
+  assert.doesNotMatch(mismatchedTarget.stderr, /dummy-secret|local-only|127\.0\.0\.1/);
+
+  const malformedStatus = runCli(["status", "--actor=unexpected"]);
+  assert.equal(malformedStatus.status, 1);
+  assert.match(malformedStatus.stderr, /Usage: node scripts\/editor-write-freeze\.mjs/);
 });
 
 test("revision allocation locks the draft and audits only an inserted revision", () => {
