@@ -26,7 +26,7 @@ const gates = [
   { id: "DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
   { id: "ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
   { id: "REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
-  { id: "PLAN-01", title: "Full V11 traceability", text: "The authoritative Grand Master Plan V11/V11.2 source is missing from this checkout. Full module coverage cannot yet be claimed." },
+  { id: "PLAN-01", title: "Full V11 traceability", text: "All ten prompt modules are mapped to local evidence; full requirements coverage awaits the missing authoritative V11/V11.2 plan." },
 ];
 
 export default function HandoverPage() {
