@@ -3,7 +3,11 @@ _Track on GitHub issue #3. [x] denotes verified evidence, not intent._
 
 ## Local-only follow-up — 2026-10-12
 
-### Latest local checkpoint — 2026-10-12
+### Current local verification — code commit `ccf11d6`
+
+The current local checkout passes 125/125 tests, `db:check`, full `npm audit` (0 vulnerabilities), production build, `actionlint`, and CSP-required HTTP smoke 34/34 on Node 26.5.0. The updated dashboard is running locally at `http://127.0.0.1:3051/handover`; all eight gates remain open. A separate fresh tracked-tree snapshot at `162693b` passed the full workflow on Node 26.5.0 / npm 11.17.0 but predates the latest auth-policy wording. Node 22 is unavailable on this host. No deployment, push, or persistent Neon operation occurred.
+
+### Prior local checkpoint — superseded by the verification above
 
 Latest local verification at commit `81f8fe8` passes 125/125 tests and CSP-required HTTP smoke 34/34 on Node 26.5.0; the same checkout passes the production build, `db:check`, full `npm audit` (0 vulnerabilities), and `actionlint`. A separate fresh tracked-tree snapshot at `162693b` (no `.env` files, fresh install of 239 locked packages) passed the full local workflow on Node 26.5.0 / npm 11.17.0; it predates the latest auth-policy wording change. Node 22 is unavailable on this host, so neither this snapshot nor the current checkout proves workflow Node 22 or current remote CI. The current local dashboard is open at `http://127.0.0.1:3050/handover`; it shows 125/125, 34/34, and all eight gates open. Earlier Chrome DevTools Protocol emulation verified 390px document width at 390×844, inspected a 1440×1000 view, and recorded no local console errors. Exact-release Preview verification remains open under G-SEC-01. Read-only GitHub review recorded PR #4 draft/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`; this local branch includes later unpushed commits beyond that remote head, so Actions run `38180083381` is not exact-head evidence for current source. PR #2 remains open/unmergeable; a local merge-tree simulation reported add/add conflicts in `app/page.jsx`, `app/style.css`, and `package.json`. No remote ref was changed. No deploy, push, or persistent Neon operation occurred.
 
