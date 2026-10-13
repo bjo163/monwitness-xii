@@ -230,7 +230,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
   assert.match(releaseGatesDoc, /Current Neon Auth documentation review \(2026-10-13, read-only\).*production checklist.*email verification is off by default.*restricted sign-up is still forthcoming.*MFA roadmap/);
   assert.match(readme, /current provider-policy evidence.*RELEASE_GATES_V11\.md#security-and-editor/);
-  assert.match(releaseGatesDoc, /Read-only dev database refresh \(2026-10-13\).*15 stories, all 15 `source_needed`; `drizzle\.__drizzle_migrations` and `system\.editor_write_controls` are absent.*G-DB-02 remains open/);
+  assert.match(releaseGatesDoc, /Read-only dev database refresh \(2026-10-13\).*ready, non-default branch.*15 stories, all 15 `source_needed`.*no `drizzle\.__drizzle_migrations`.*revision FK `ON DELETE CASCADE`.*G-DB-02 remains open/);
+  assert.match(migrationReconciliationDoc, /Latest development preflight \(read-only, 2026-10-13\).*ready, non-default.*16 application tables.*15 rows, all 15 `source_needed`.*no `drizzle\.__drizzle_migrations`.*`ON DELETE CASCADE`.*No SQL writes/);
   assert.match(releaseGatesDoc, /Supplemental clean local Node 24 reproduction \(`352467f`; Node 24\.19\.0\/npm 11\.17\.0\).*fresh install of 239 locked packages.*134\/134.*`db:check`.*full `npm audit` \(0 findings\).*`actionlint`.*production build/);
   assert.match(releaseGatesDoc, /Previous runtime snapshot \(superseded by commit `5bae423`\)/);
   assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);

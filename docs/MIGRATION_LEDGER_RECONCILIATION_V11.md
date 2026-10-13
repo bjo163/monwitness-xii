@@ -4,6 +4,8 @@
 
 The persistent development branch `br-green-butterfly-b51kp4b1` contains the original 16 application tables and 15 published editorial indexes, but has no `drizzle.__drizzle_migrations` table. Its revision foreign key is still `ON DELETE CASCADE`, which matches migration `0000` and differs from migration `0001` (`RESTRICT`). Migration `0002` adds a per-editor write-limit table. Local-only migrations `0003` and `0004` add the editor write-freeze singleton and its operator/reason audit fields. These two files have PGlite fixture coverage but have not been applied to a persistent Neon database. The development branch has not been stamped or migrated.
 
+**Latest development preflight (read-only, 2026-10-13):** Neon reports `mw-v11-development` (`br-green-butterfly-b51kp4b1`) as ready, non-default, and parented by production root `br-dark-sea-b5iws5uf`. The `neondb` inventory still has the 16 application tables. An aggregate-only story query returned 15 rows, all 15 `source_needed`; no content fields were selected. Catalog checks confirmed no `drizzle.__drizzle_migrations`, `system.editor_write_limits`, or `system.editor_write_controls` table; the revision FK remains `ON DELETE CASCADE`. No SQL writes or branch changes occurred. This confirms the present migration preflight state; it does not establish authorization to stamp or migrate.
+
 The migration journal records these exact files and timestamps:
 
 | Order | File | SHA-256 | `created_at` |
