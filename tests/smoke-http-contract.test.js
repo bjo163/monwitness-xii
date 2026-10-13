@@ -226,6 +226,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
   assert.match(handoverDoc, /^## Current review checkpoint — 2026-10-13/m);
   assert.match(handoverDoc, /Latest local-only CI-chain checkpoint \(`e77fce3`; 2026-10-13\).*Node\.js 22\.23\.3.*SHA-256.*241 locked packages.*134\/134.*production build.*smoke runner passed 40\/40.*127\.0\.0\.1:3199/);
+  assert.match(handoverDoc, /Handover freshness follow-up \(commits `831f9de`, `55db969`, `c2ca014`, `8ab6753`\).*expanded smoke returns 39\/40.*previous bundle/);
+  assert.match(handoverDoc, /Local evidence-contract follow-up \(commits `277a4ff`, `779f97d`\).*single-server build → health check → HTTP-smoke lifecycle.*all 15 pending Archive rows/);
   assert.ok(handoverDoc.includes("verified application source baseline is `ca975bb` on `codex/v11-release-readiness`; it contains"));
   assert.ok(handoverDoc.includes("One local server listens at `127.0.0.1:3199`; no listener is open on 3000."));
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
