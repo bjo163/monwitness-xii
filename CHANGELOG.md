@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-13 — Revalidate the local review checkout
+
+- Revalidated source HEAD `1d778b1`: 134/134 tests, migration check, 0 npm audit findings, actionlint, and production build passed. Existing-server smoke returned 39/40 on port 3199; the only miss is the old `/handover` bundle. Visual/art, CSP, Auth, and other route checks passed. DB/Archive 503 is expected without local database credentials.
+- No server was started or restarted, and no push or deployment occurred. This remains local-only evidence; remote CI, provider behavior, and production gates are not inferred from it.
+
 ## 2026-10-13 — Recheck Neon release blockers
 
 - Read-only discovery resolved MoonWitness to Neon project `moonwitness-ii` and distinguished a separate project with a similar owner. Production and development snapshot schedules remain empty; only the existing manual restore-rehearsal snapshot is present. Development Auth still permits direct signup without required email verification, and production has no Auth integration.
