@@ -117,9 +117,9 @@ test("PGlite data-directory backup restores representative Archive state and inv
 
 test("backup runbook states the current synthetic restore coverage and its limits", () => {
   assert.match(backupRunbook, /synthetic dataset included one explicitly approved public index, one private draft, two revisions, media, evidence, all six migration ledger rows.*a frozen editor-write control.*an editor quota counter.*an audit event/);
-  assert.match(backupRunbook, /snapshot announcement.*conflicting eligibility wording:[\s\S]*branch-scoped `get_snapshot_schedule` API was rechecked and returned `schedule: \[\]` for both production.*and development/);
-  assert.match(backupRunbook, /These account-specific results establish that the requested schedule is not configured here, regardless of the blog's mixed wording/);
-  assert.match(backupRunbook, /Current-plan note \(checked 2026-10-12\).*six-hour Instant Restore window.*latest branch schedule API result is recorded above.*does not establish 30-day retention/);
+  assert.match(backupRunbook, /Latest official plan and snapshot evidence \(read-only refresh 2026-10-13\).*1 GB\/project.*six-hour Instant Restore window/);
+  assert.match(backupRunbook, /snapshot guidance.*eligibility wording is mixed[\s\S]*`get_snapshot_schedule` API returned `schedule: \[\]` for production.*and development/);
+  assert.match(backupRunbook, /account-specific schedule and rejection are decisive for this account: requested daily\/30-day retention is not configured or available on the selected plan/);
   assert.match(backupRunbook, /does not prove Neon snapshot recovery, provider Auth recovery, production data restoration, scheduled retention, or cutover\/rollback/);
   assert.match(backupRunbook, /This repository does not currently provide a verified write-stop mechanism for any persistent database/);
   assert.match(backupRunbook, /If writes cannot be proven stopped, do not claim a freeze or proceed with destructive recovery\/cutover/);

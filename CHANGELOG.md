@@ -5,6 +5,7 @@
 - Relabeled the dashboard's 40/40 HTTP figure as the earlier baseline result. The follow-up smoke now requires the Node 22 evidence copy and reports 39/40 against the already-running server because `/handover` still serves its previous bundle.
 - Updated the engineering handover, README, and release-gate register to distinguish the historical green run from the latest stale-bundle check. No extra server, port, deployment, push, or database change was made.
 - Added regression coverage for CI's single-server smoke lifecycle and for keeping evidence/rights/reviewer fields empty on all 15 pending Archive intake rows. The implementation tracker now reflects the latest 39/40 freshness check.
+- Rechecked Neon's Oct 2026 Free-plan and snapshot guidance; clarified the 1 GB/project storage and six-hour restore window against the account's empty schedule and rejected daily-schedule request. Daily/30-day retention remains unmet.
 - Current source passes 134/134 tests, `db:check`, full dependency audit (0 findings), `actionlint`, and production build on Node 22.23.3. Production remains NO-GO.
 
 ## 2026-10-13 — Verify the current checkout on the CI Node release
