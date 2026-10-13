@@ -5,7 +5,7 @@ export const metadata = { title: "MoonWitness XII — Release & Handover" };
 
 const checks = [
   { value: "134 / 134", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
-  { value: "39 / 40", label: "local HTTP checks", detail: "Existing process · stale 129-test bundle", tone: "cyan" },
+  { value: "40 / 40", label: "local HTTP checks", detail: "Current-source build · loopback :3199", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
 ];
@@ -25,7 +25,7 @@ const gates = [
   { id: "G-SEC-01", title: "Verify CSP on the exact release preview", text: "Local smoke requires nonce-only script and style policies and checks every rendered script/style block. This worktree has no remote CI or Preview result; repeat on the exact reviewed release head." },
   { id: "G-AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in with verified email, admin onboarding, authenticated draft/revision writes, audit attribution, session/role-revocation checks, and review Neon Auth SDK peer compatibility." },
   { id: "G-AUTH-02", title: "Identity policy", text: "Direct provider sign-up remains enabled, MFA is unavailable here, and effective failed-login throttling is unverified. This SDK cannot configure a provider-wide limiter; verify Neon enforcement or choose an approved identity path." },
-  { id: "G-DB-02", title: "Persistent development migration", text: "The Neon rehearsal covers migrations 0000–0002 only. Review and rehearse 0003/0004 on an isolated clone, confirm the exact application target, reconcile its schema and ledger, then apply only through an approved plan. The local freeze CLI is not a persistent incident control yet." },
+  { id: "G-DB-02", title: "Persistent development migration", text: "An isolated Neon clone has rehearsal evidence for migrations 0000–0002; persistent development is still unmigrated. Rehearse 0003/0004 on an isolated clone, confirm the exact application target, reconcile its schema and ledger, then apply only through an approved plan. The local freeze CLI is not a persistent incident control yet." },
   { id: "G-DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
   { id: "G-ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
   { id: "G-REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
@@ -35,7 +35,7 @@ const gates = [
 const evidenceLimits = [
   { label: "DATABASE", value: "NOT CONNECTED", detail: "No local DATABASE_URL or verified target is configured. Database routes fail closed; Neon behavior is not tested here.", tone: "pink" },
   { label: "REVIEW BRANCH", value: "LOCAL ONLY", detail: "This checkout is ahead of the remote PR head. Current remote CI does not cover these local commits.", tone: "gold" },
-  { label: "RELEASE", value: "8 GATES OPEN", detail: "Owner identity, provider policy, isolated migration, recovery, Archive rights, independent review, and full-plan traceability remain unresolved.", tone: "aqua" },
+  { label: "RELEASE", value: "8 GATES OPEN", detail: "Owner identity, provider policy, persistent DB rollout, recovery, Archive rights, independent review, and full-plan traceability remain unresolved.", tone: "aqua" },
 ];
 
 export default function HandoverPage() {
@@ -94,7 +94,7 @@ export default function HandoverPage() {
           <div className={styles.limitsGrid} aria-label="Evidence boundaries">
             {evidenceLimits.map((item) => <article className={`${styles.limitCard} ${styles[item.tone]}`} key={item.label}><span>{item.label} · EVIDENCE BOUNDARY</span><strong>{item.value}</strong><p>{item.detail}</p></article>)}
           </div>
-          <div className={styles.evidenceNote}><strong>Latest local run · 13 Oct 2026</strong><p>Node 26.5.0: 134/134 tests; `db:check`; full dependency audit with 0 findings; production build; and `actionlint` pass. A fresh isolated install also builds successfully. The editor session now requires an explicitly verified email in addition to the Neon administrator role and exact server-side user allowlist. The hosted dev provider still allows public signup and does not require email verification, so this local application check does not close provider identity policy. Local HTTP smoke must be rerun against the updated bundle. No deployment was performed.</p><p>Database target validation covers the installed driver's URL settings and `PGPORT`, `PGOPTIONS`, `PGREPLICATION`, `PGUSER`, and `PGPASSWORD` fallbacks. Tests exercise the real driver parser offline; no Neon URL is configured locally. The Neon rehearsal remains limited to `0000`–`0002`; `0003`/`0004` are not Neon-rehearsed. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, connected local Neon target, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
+          <div className={styles.evidenceNote}><strong>Latest local run · 13 Oct 2026</strong><p>Node 26.5.0: 134/134 tests; `db:check`; full dependency audit with 0 findings; production build; `actionlint`; and current-source HTTP smoke 40/40 pass. The build is serving locally at `127.0.0.1:3199`; no deployment was performed. The editor session requires a verified email, Neon admin role, and exact server-side user allowlist. Hosted dev Auth still allows public signup and does not require email verification, so provider identity policy remains open.</p><p>The isolated Neon rehearsal covers `0000`–`0002`; migration `0001` was applied and rolled back with the baseline FK and ledger restored. Migrations `0003`/`0004` and persistent development rollout remain open. No Neon URL is configured locally; database and Archive APIs fail closed with `503`. All 15 Archive entries remain `source_needed`. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
         </div>
       </section>
 
