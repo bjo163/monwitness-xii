@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-13 — Recheck Neon release blockers
+
+- Read-only discovery resolved MoonWitness to Neon project `moonwitness-ii` and distinguished a separate project with a similar owner. Production and development snapshot schedules remain empty; only the existing manual restore-rehearsal snapshot is present. Development Auth still permits direct signup without required email verification, and production has no Auth integration.
+- Recorded this evidence in the handover and release gate register. No snapshot, Auth, branch, database setting, or data was changed; production remains NO-GO.
+
 ## 2026-10-13 — Make local handover actions clearer
 
 - Rewrote the three owner-input cards to identify the missing V11/V11.2 source documents, admin identity and backup requirements, and evidence needed for the 15 Archive stories. The dashboard now states that these inputs are not the full set of release gates.
