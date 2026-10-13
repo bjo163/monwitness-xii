@@ -16,7 +16,7 @@ test("Drizzle migrator applies the journal in order and validates its ledger", a
   await migrate(db, config);
 
   const firstPass = await client.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at");
-  assert.equal(firstPass.rows.length, 5);
+  assert.equal(firstPass.rows.length, 6);
   const expectedEntries = readMigrationFiles(config).map(({ hash, folderMillis }) => ({ hash, created_at: folderMillis }));
   assert.equal(hasMigrationLedgerDrift({ present: true, actualEntries: firstPass.rows, expectedEntries }), false);
   assert.equal(hasMigrationLedgerDrift({

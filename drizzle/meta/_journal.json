@@ -36,6 +36,13 @@
       "when": 1791781623168,
       "tag": "0004_editor_write_control_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791855252864,
+      "tag": "0005_public_index_approval",
+      "breakpoints": true
     }
   ]
 }

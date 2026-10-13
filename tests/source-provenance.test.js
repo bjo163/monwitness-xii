@@ -3,7 +3,7 @@ import test from "node:test";
 import { getSourceProvenanceNotice, PUBLIC_ARCHIVE_NOTICE } from "../lib/source-provenance.js";
 
 test("public API notice separates listing from source and rights verification", () => {
-  assert.equal(PUBLIC_ARCHIVE_NOTICE, "Published means this metadata index is public. It does not verify original sources, credits, or reuse rights.");
+  assert.equal(PUBLIC_ARCHIVE_NOTICE, "Only entries explicitly approved for public index use are shown. Approval covers the listed editorial fields only, not original scripts or artwork.");
 });
 
 test("source-needed entries clearly disclose the missing source, credit, and rights review", () => {

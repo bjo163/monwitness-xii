@@ -7,9 +7,9 @@ const detailRoute = await readFile(new URL("../app/api/episodes/[slug]/route.js"
 const detailHandler = await readFile(new URL("../lib/public-archive-route.js", import.meta.url), "utf8");
 const queryModule = await readFile(new URL("../lib/public-archive-query.js", import.meta.url), "utf8");
 
-test("public archive list selects a bounded published-only metadata projection", () => {
+test("public archive list selects a bounded published-and-approved metadata projection", () => {
   assert.match(queryModule, /slug: stories\.slug,[\s\S]*title: stories\.title,[\s\S]*season: stories\.season,[\s\S]*synopsis: stories\.synopsis,[\s\S]*experienceType: stories\.experienceType/);
-  assert.match(queryModule, /\.where\(eq\(stories\.status, "published"\)\)/);
+  assert.match(queryModule, /\.where\(and\(eq\(stories\.status, "published"\), eq\(stories\.publicIndexApproved, true\)\)\)/);
   assert.match(queryModule, /\.limit\(100\)/);
   assert.match(listRoute, /listPublicEpisodes\(db, stories\)/);
   assert.match(listRoute, /createPublicEpisodesResponse\(rows\)/);
@@ -17,11 +17,11 @@ test("public archive list selects a bounded published-only metadata projection",
   assert.doesNotMatch(listRoute, /originalSourceStatus|storyRevisions|auditEvents|\.select\(\)/);
 });
 
-test("public story detail requires a valid slug and published status", () => {
+test("public story detail requires a valid slug, published status, and explicit approval", () => {
   assert.match(detailRoute, /createPublicEpisodeRouteHandler\(\{ getDatabase, stories \}\)/);
   assert.match(detailHandler, /!\/\^\[a-z0-9-\]\{1,120\}\$\//);
   assert.match(detailHandler, /createPublicArchiveErrorResponse\("invalid-slug"\)/);
-  assert.match(queryModule, /\.where\(and\(eq\(stories\.slug, slug\), eq\(stories\.status, "published"\)\)\)/);
+  assert.match(queryModule, /\.where\(and\(eq\(stories\.slug, slug\), eq\(stories\.status, "published"\), eq\(stories\.publicIndexApproved, true\)\)\)/);
   assert.match(detailHandler, /findPublicEpisode\(db, stories, slug\)/);
   assert.match(detailHandler, /if \(!episode\) return createPublicArchiveErrorResponse\("not-found"\)/);
   assert.match(detailHandler, /createPublicEpisodeResponse\(episode\)/);

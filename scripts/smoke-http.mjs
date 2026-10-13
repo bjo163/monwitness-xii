@@ -56,10 +56,10 @@ async function checkFreshPageNonce(path){
 if(profile==="preview"){
  await check("/api/health/db",(r,b)=>r.status===200&&b?.status==="ok"&&b?.database==="connected"&&!Object.hasOwn(b,"migration"));
  await check("/api/health",(r,b)=>r.status===200&&r.headers.get("content-security-policy")===null&&b?.status==="ok"&&b?.service==="moonwitness-xii");
- await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
+ await check("/api/episodes",(r,b)=>r.status===200&&Array.isArray(b?.episodes)&&b.episodes.every(episode=>JSON.stringify(Object.keys(episode).sort())===JSON.stringify(["experienceType","season","slug","synopsis","title"]))&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
  await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE));
- await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE);
- await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
+ await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.status===404&&r.headers.get("cache-control")==="no-store"&&b?.error==="Not found");
+ await check("/episodes/tick-tock-on-the-clock",(r)=>r.status===404);
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
  await check("/editor",(r)=>[307,308].includes(r.status)&&r.headers.get("location")==="/editor/login"&&r.headers.get("cache-control")==="no-store");
  await checkFreshPageNonce("/");
@@ -85,11 +85,11 @@ if(profile==="preview"){
  }
  await check("/api/health",(r,b)=>r.status===200&&r.headers.get("content-security-policy")===null&&b?.status==="ok"&&b?.service==="moonwitness-xii");
  await check("/api/health/db",(r,b)=>(r.status===200&&b?.status==="ok"&&b?.database==="connected"&&!Object.hasOwn(b,"migration"))||(r.status===503&&b?.status==="error"&&b?.database==="unavailable"));
- await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.length===15&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
- await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===200&&b?.episode?.slug==="tick-tock-on-the-clock"&&b?.notice===PUBLIC_ARCHIVE_NOTICE&&JSON.stringify(Object.keys(b.episode).sort())===JSON.stringify(["experienceType","season","slug","synopsis","title"]))||(r.status===503&&b?.error==="Archive unavailable")));
+ await check("/api/episodes",(r,b)=>(r.status===200&&Array.isArray(b?.episodes)&&b.episodes.every(episode=>JSON.stringify(Object.keys(episode).sort())===JSON.stringify(["experienceType","season","slug","synopsis","title"]))&&b?.notice===PUBLIC_ARCHIVE_NOTICE)||(r.status===503&&b?.error==="Archive unavailable"));
+ await check("/api/episodes/tick-tock-on-the-clock",(r,b)=>r.headers.get("cache-control")==="no-store"&&((r.status===404&&b?.error==="Not found")||(r.status===503&&b?.error==="Archive unavailable")));
  await check("/api/episodes/INVALID%21",(r,b)=>r.status===400&&r.headers.get("cache-control")==="no-store"&&b?.error==="Invalid slug");
- await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&t.includes("THE CREW KEEPS WATCH.")&&t.includes("These are universe portraits, not claims that a specific character appears in an indexed story.")&&["four-lah","whalterwhite","isrockfeel","rock-soul"].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("INDEXED EPISODES"))&&hasStrictPageCsp(r,b,t));
- await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===200&&hasStrictPageCsp(r,b,t));
+ await check("/episodes",(r,b,t)=>r.status===200&&t.includes("PUBLIC EDITORIAL INDEX")&&t.includes(PUBLIC_ARCHIVE_NOTICE)&&t.includes("THE CREW KEEPS WATCH.")&&t.includes("These are universe portraits, not claims that a specific character appears in an indexed story.")&&["four-lah","whalterwhite","isrockfeel","rock-soul"].every(name=>t.includes(`/characters/styles/faceless-visor/${name}--faceless-visor.webp`))&&(t.includes("THE VAULT IS TAKING A BREATHER")||t.includes("THE STORIES ARE IN REVIEW")||t.includes("APPROVED INDEX ENTRIES"))&&hasStrictPageCsp(r,b,t));
+ await check("/episodes/tick-tock-on-the-clock",(r,b,t)=>r.status===404||r.status===200&&t.includes("THE VAULT IS TAKING A BREATHER"));
  await check("/handover",(r,b,t)=>r.status===200&&t.includes("LOCAL REVIEW • NO-GO FOR PRODUCTION")&&t.includes("134 / 134")&&t.includes("40 / 40")&&t.includes("Current-source build · loopback :3199")&&t.includes("current-source HTTP smoke 40/40 pass")&&t.includes("Unggah rencana V11 dan V11.2")&&t.includes("Putuskan identitas dan pemulihan")&&t.includes("Lengkapi bukti sumber Archive")&&t.includes("Release gates remaining")&&t.includes("DATABASE")&&t.includes("NOT CONNECTED")&&t.includes("REVIEW BRANCH")&&t.includes("LOCAL ONLY")&&t.includes("3 ACTION GROUPS")&&t.includes("8 gate teknis tetap terbuka; produksi tetap NO-GO")&&t.includes("EVIDENCE BOUNDARY")&&t.includes("OPEN")&&!t.includes("Preview is live")&&!t.includes("Fresh exact tracked-tree reproduction at commit 2f43d14")&&hasStrictPageCsp(r,b,t));
  await check("/editor/login",(r,b,t)=>r.status===200&&r.headers.get("cache-control")==="no-store"&&hasStrictPageCsp(r,b,t));
  await check("/editor",(r)=>[307,308].includes(r.status)&&r.headers.get("location")==="/editor/login"&&r.headers.get("cache-control")==="no-store");

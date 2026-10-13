@@ -43,7 +43,7 @@ test("schema verifier covers table, column, default, key, and index drift", () =
 test("normal verification selects the latest migration snapshot and reconciliation selects the baseline", async () => {
   const { selectSchemaSnapshot } = await import("../lib/schema-snapshot-selection.js");
   const metadata = { journalVersion: migrationJournal.version, journalDialect: migrationJournal.dialect };
-  assert.equal(selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: migrationJournal.entries, ...metadata }), "0004_snapshot.json");
+  assert.equal(selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: migrationJournal.entries, ...metadata }), "0005_snapshot.json");
   assert.equal(selectSchemaSnapshot({ baselineReconciliation: true, migrationEntries: migrationJournal.entries, ...metadata }), "0000_snapshot.json");
   assert.throws(() => selectSchemaSnapshot({ baselineReconciliation: false, migrationEntries: [], ...metadata }), /no entries/);
 });
@@ -96,14 +96,31 @@ test("schema verification fails on a missing migration ledger and any inventory 
   assert.equal(hasSchemaDrift({ ...clean, mismatchedDefaults: [{}] }), true);
   assert.equal(hasSchemaDrift({ ...clean, mismatchedRowSecurity: [{}] }), true);
   assert.equal(hasSchemaDrift({ ...clean, unexpectedCheckConstraints: [{}] }), true);
+  assert.equal(hasSchemaDrift({ ...clean, missingExpectedCheckConstraints: ["archive.stories.check"] }), true);
+  assert.equal(hasSchemaDrift({ ...clean, mismatchedExpectedCheckConstraints: ["archive.stories.check"] }), true);
   assert.equal(hasSchemaDrift({ ...clean, unexpectedPolicies: [{}] }), true);
   assert.equal(hasSchemaDrift({ ...clean, unexpectedTriggers: [{}] }), true);
 
-  const snapshot = JSON.parse(await readFile(new URL("../drizzle/meta/0004_snapshot.json", import.meta.url), "utf8"));
+  const snapshot = JSON.parse(await readFile(new URL("../drizzle/meta/0005_snapshot.json", import.meta.url), "utf8"));
   const expectedTables = { "archive.stories": snapshot.tables["archive.stories"] };
   const db = new PGlite();
   try {
-    await db.exec("CREATE SCHEMA archive; CREATE TABLE archive.stories (id integer)");
+    await db.exec(`CREATE SCHEMA archive; CREATE TABLE archive.stories (
+      id integer,
+      public_index_approved boolean NOT NULL DEFAULT false,
+      original_source_status text,
+      public_index_approved_by text,
+      public_index_approved_at timestamptz,
+      public_index_approved_use text,
+      CONSTRAINT stories_public_index_approval_complete CHECK (
+        NOT public_index_approved OR (
+          original_source_status = 'source_verified'
+          AND public_index_approved_by IS NOT NULL AND length(trim(public_index_approved_by)) > 0
+          AND public_index_approved_at IS NOT NULL
+          AND public_index_approved_use IS NOT NULL AND length(trim(public_index_approved_use)) > 0
+        )
+      )
+    )`);
     const inspect = async () => {
       const actualTableSecurity = await db.query(`
         SELECT schema_row.nspname AS schema_name, table_row.relname AS table_name,
@@ -142,11 +159,26 @@ test("schema verification fails on a missing migration ledger and any inventory 
       mismatchedRowSecurity: [],
       forcedRowSecurity: [],
       unexpectedCheckConstraints: [],
-      unverifiedExpectedCheckConstraints: [],
+      missingExpectedCheckConstraints: [],
+      mismatchedExpectedCheckConstraints: [],
       unexpectedPolicies: [],
       unverifiedExpectedPolicies: [],
       unexpectedTriggers: [],
     });
+    const alteredApprovalConstraint = getSchemaSupplementalDrift({
+      expectedTables,
+      actualTableSecurity: [],
+      actualCheckConstraints: [{
+        schema_name: "archive",
+        table_name: "stories",
+        constraint_name: "stories_public_index_approval_complete",
+        definition: "CHECK (public_index_approved = false)",
+      }],
+      actualPolicies: [],
+      actualTriggers: [],
+    });
+    assert.deepEqual(alteredApprovalConstraint.mismatchedExpectedCheckConstraints, ["archive.stories.stories_public_index_approval_complete"]);
+    assert.equal(hasSchemaDrift({ ...clean, ...alteredApprovalConstraint }), true);
     const futurePolicySchema = {
       "archive.stories": {
         ...expectedTables["archive.stories"],
@@ -161,7 +193,7 @@ test("schema verification fails on a missing migration ledger and any inventory 
       actualPolicies: [],
       actualTriggers: [],
     });
-    assert.equal(unsupportedExpected.unverifiedExpectedCheckConstraints.length, 1);
+    assert.equal(unsupportedExpected.missingExpectedCheckConstraints.length, 1);
     assert.equal(unsupportedExpected.unverifiedExpectedPolicies.length, 1);
     assert.equal(hasSchemaDrift({ ...clean, ...unsupportedExpected }), true);
 

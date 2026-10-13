@@ -276,6 +276,23 @@
   letter-spacing: .15em;
 }
 
+.pendingReview {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  max-width: 720px;
+  margin: 1rem 0 4rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(237, 197, 121, .32);
+  border-radius: 14px;
+  background: linear-gradient(125deg, rgba(42, 31, 38, .94), rgba(17, 23, 36, .92));
+  color: #e9d6ab;
+}
+
+.pendingReview > span { color: #e7b95f; font-size: 1.4rem; }
+.pendingReview h2 { margin: 0 0 .45rem; font-size: .95rem; letter-spacing: .12em; }
+.pendingReview p { margin: 0; color: #beb8b0; line-height: 1.65; }
+
 .countLine strong {
   color: #17182e;
   font-family: "Barlow Condensed", Impact, sans-serif;

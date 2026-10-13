@@ -83,7 +83,7 @@ test("global Next.js headers harden pages and static assets", () => {
   assert.match(smokeScript, /content-security-policy"\)===null&&r\.headers\.get\("content-type"/);
   assert.match(smokeScript, /styleBlocks\.every/);
   assert.match(smokeScript, /style-src\[\^;\]\*'unsafe-inline'/);
-  assert.equal((smokeScript.match(/\/episodes\/tick-tock-on-the-clock",\(r,b,t\)=>r\.status===200&&hasStrictPageCsp/g) ?? []).length, 2);
+  assert.equal(smokeScript.split('await check("/episodes/tick-tock-on-the-clock"').length - 1, 2);
   assert.match(smokeScript, /checkFreshPageNonce\("\/"\)/);
   assert.match(smokeScript, /scripts\.every/);
   assert.match(handoverPage, /Every HTML page receives a fresh script CSP nonce/);
@@ -118,7 +118,7 @@ test("local and Preview smoke enforce route-specific OPTIONS and HEAD behavior",
 });
 
 test("local smoke checks public Archive detail projection and invalid-slug handling", () => {
-  assert.match(smokeScript, /api\/episodes\/tick-tock-on-the-clock",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===200&&b\?\.episode\?\.slug==="tick-tock-on-the-clock"&&b\?\.notice===PUBLIC_ARCHIVE_NOTICE&&JSON\.stringify\(Object\.keys\(b\.episode\)\.sort\(\)\)===JSON\.stringify\(\["experienceType","season","slug","synopsis","title"\]\)\)\|\|\(r\.status===503&&b\?\.error==="Archive unavailable"\)\)\)/);
+  assert.match(smokeScript, /api\/episodes\/tick-tock-on-the-clock",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===404&&b\?\.error==="Not found"\)\|\|\(r\.status===503&&b\?\.error==="Archive unavailable"\)\)\)/);
   assert.match(smokeScript, /api\/episodes\/INVALID%21",\(r,b\)=>r\.status===400&&r\.headers\.get\("cache-control"\)==="no-store"&&b\?\.error==="Invalid slug"/);
 });
 
@@ -250,7 +250,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /rejects identity\/TLS URL overrides and other unapproved query parameters, requires one TLS-enabled `sslmode`, permits Neon's optional `channel_binding=require`, rejects `PGOPTIONS`\/`PGREPLICATION`/);
   assert.match(releaseGatesDoc, /Direct Studio `--host`\/`--port` and wrapper `--config`\/extra-argument overrides are refused/);
   assert.match(handoverDoc, /Editor handler integration confirms rejected origin metadata adds no revision, audit event, actor row, or quota reservation/);
-  assert.match(handoverDoc, /Project Status label and current port.*sole active listener at `127\.0\.0\.1:3199`.*other numbered ports.*temporary test servers and are no longer active/);
+  assert.match(handoverDoc, /Project Status label and current port.*one development server is listening at `127\.0\.0\.1:3199`.*Other numbered ports below refer to old historical checkpoints and are not current services/);
   assert.match(handoverDoc, /Earlier local code checkpoint `7dc1d28`.*129\/129.*40\/40/s);
   assert.match(handoverDoc, /At local checkpoint `75c7cc6`.*215 commits ahead of `origin\/codex\/v11-release-readiness` at `06e2a11`/);
   assert.match(handoverDoc, /only commit after that snapshot was documentation-only/);
@@ -276,11 +276,13 @@ test("handover automated-test metric matches the declared Node test suite size",
 
 test("populated development migration runbook accounts for the entire current journal", () => {
   assert.match(migrationReconciliationDoc, /After the `0000` row is independently confirmed[\s\S]*run `npm run db:migrate`/);
-  assert.match(migrationReconciliationDoc, /do not stop after only `0001`\/`0002`/);
   assert.match(migrationReconciliationDoc, /review the complete ordered plan[\s\S]*applying all remaining journal entries/);
   assert.match(migrationReconciliationDoc, /npm run db:stamp-baseline/);
   assert.match(migrationReconciliationDoc, /CONFIRM_BASELINE_STAMP = "br-green-butterfly-b51kp4b1"/);
   assert.match(migrationReconciliationDoc, /one PostgreSQL `DO` statement[\s\S]*atomically creating the standard Drizzle ledger/);
+  assert.match(migrationReconciliationDoc, /branch-ID confirmation is an operator prompt only[\s\S]*does not cryptographically bind the URL to that branch/);
+  assert.match(migrationReconciliationDoc, /single-operator migration window[\s\S]*does not coordinate with another session's DDL/);
+  assert.match(migrationReconciliationDoc, /absence of `0005` approval columns/);
   assert.match(migrationReconciliationDoc, /No approval to stamp persistent development has been given/);
   assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
   assert.match(migrationReconciliationDoc, /PGlite fixture coverage but have not been applied to a persistent Neon database/);

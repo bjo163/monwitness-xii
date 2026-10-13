@@ -30,7 +30,7 @@ export default async function EpisodesPage() {
       <p className={styles.intro}>MoonWitness stories, The Batteries absurd comedy, witness journeys, and AETHERION. Each public entry is an editorial index; original scripts and comic pages are not reproduced here.</p>
       <aside className={styles.provenanceNotice} role="note" aria-label="Archive source and rights status">
         <span className={styles.noticeMark} aria-hidden="true">!</span>
-        <div><strong>PUBLIC INDEX DOES NOT MEAN SOURCE VERIFIED</strong><p>{PUBLIC_ARCHIVE_NOTICE}</p></div>
+        <div><strong>PUBLIC LISTING REQUIRES EXPLICIT USE APPROVAL</strong><p>{PUBLIC_ARCHIVE_NOTICE}</p></div>
       </aside>
     </header>
     <section className={styles.crewSpotlight} aria-labelledby="crew-spotlight-title">
@@ -52,7 +52,8 @@ export default async function EpisodesPage() {
       </div>
     </section>
     {connectionIssue?<section className={styles.retry} role="alert"><h2>THE VAULT IS TAKING A BREATHER</h2><p>Archive database is temporarily unavailable. No private drafts are displayed.</p><Link href="/episodes" className={styles.entryLink}>TRY AGAIN ↻</Link></section>:
-    <><p className={styles.countLine}><strong>{episodes.length}</strong> INDEXED EPISODES</p>
+    <><p className={styles.countLine}><strong>{episodes.length}</strong> APPROVED INDEX ENTRIES</p>
+    {episodes.length === 0 && <section className={styles.pendingReview} role="status"><span aria-hidden="true">✳</span><div><h2>THE STORIES ARE IN REVIEW</h2><p>No entry is cleared for the public index yet. Stories stay private until their sources, credits, privacy, and exact public use are reviewed.</p></div></section>}
     <div className={styles.grid}>
       {episodes.map((e,i)=>{
         const provenance=getSourceProvenanceNotice(e.originalSourceStatus);

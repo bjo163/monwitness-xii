@@ -27,7 +27,11 @@ test("PGlite data-directory backup restores representative Archive state and inv
     synopsis: "Synthetic metadata fixture for isolated recovery verification.",
     status: "published",
     experienceType: "comic",
-    originalSourceStatus: "source_needed",
+    originalSourceStatus: "source_verified",
+    publicIndexApproved: true,
+    publicIndexApprovedBy: "synthetic-recovery-reviewer",
+    publicIndexApprovedAt: new Date("2026-10-13T00:00:00.000Z"),
+    publicIndexApprovedUse: "Synthetic test metadata index",
     metadata: { privateNote: "synthetic private metadata" },
   }).returning({ id: stories.id });
   const [draft] = await sourceDb.insert(stories).values({
@@ -112,7 +116,7 @@ test("PGlite data-directory backup restores representative Archive state and inv
 });
 
 test("backup runbook states the current synthetic restore coverage and its limits", () => {
-  assert.match(backupRunbook, /synthetic dataset included one published index, one private draft, two revisions, media, evidence, all five migration ledger rows.*a frozen editor-write control.*an editor quota counter.*an audit event/);
+  assert.match(backupRunbook, /synthetic dataset included one explicitly approved public index, one private draft, two revisions, media, evidence, all six migration ledger rows.*a frozen editor-write control.*an editor quota counter.*an audit event/);
   assert.match(backupRunbook, /snapshot announcement.*conflicting eligibility wording:[\s\S]*branch-scoped `get_snapshot_schedule` API was rechecked and returned `schedule: \[\]` for both production.*and development/);
   assert.match(backupRunbook, /These account-specific results establish that the requested schedule is not configured here, regardless of the blog's mixed wording/);
   assert.match(backupRunbook, /Current-plan note \(checked 2026-10-12\).*six-hour Instant Restore window.*latest branch schedule API result is recorded above.*does not establish 30-day retention/);

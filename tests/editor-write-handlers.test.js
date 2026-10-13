@@ -12,6 +12,7 @@ const migrations = await Promise.all([
   readFile(new URL("../drizzle/0002_editor_write_limits.sql", import.meta.url), "utf8"),
   readFile(new URL("../drizzle/0003_editor_write_controls.sql", import.meta.url), "utf8"),
   readFile(new URL("../drizzle/0004_editor_write_control_audit.sql", import.meta.url), "utf8"),
+  readFile(new URL("../drizzle/0005_public_index_approval.sql", import.meta.url), "utf8"),
 ]);
 
 function taggedQuery(db) {

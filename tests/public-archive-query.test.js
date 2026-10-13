@@ -19,6 +19,7 @@ const migrationFiles = [
   "../drizzle/0002_editor_write_limits.sql",
   "../drizzle/0003_editor_write_controls.sql",
   "../drizzle/0004_editor_write_control_audit.sql",
+  "../drizzle/0005_public_index_approval.sql",
 ];
 const migrations = await Promise.all(migrationFiles.map((file) => readFile(new URL(file, import.meta.url), "utf8")));
 const archivePageSource = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
@@ -38,13 +39,17 @@ test("public archive Drizzle queries expose only published editorial fields from
   const db = drizzle(client);
 
   const [published] = await db.insert(stories).values({
-    slug: "source-needed-public-index",
+    slug: "approved-public-index",
     title: "Public Editorial Index",
     season: "Season One",
     synopsis: "A summary written for the public index.",
     status: "published",
     experienceType: "comic",
-    originalSourceStatus: "source_needed",
+    originalSourceStatus: "source_verified",
+    publicIndexApproved: true,
+    publicIndexApprovedBy: "reviewed-owner",
+    publicIndexApprovedAt: new Date("2026-10-13T00:00:00.000Z"),
+    publicIndexApprovedUse: "Public editorial index fields only",
     metadata: { sourceUrl: "https://private.example/original-manuscript", privateEditorNote: "never expose" },
   }).returning({ id: stories.id });
   await db.insert(storyRevisions).values({
@@ -68,6 +73,23 @@ test("public archive Drizzle queries expose only published editorial fields from
     claim: "Internal claim text",
   });
   await db.insert(stories).values({
+    slug: "source-needed-not-public",
+    title: "Pending Rights Review",
+    synopsis: "This source-needed synopsis must stay private.",
+    status: "published",
+    originalSourceStatus: "source_needed",
+  });
+  await assert.rejects(
+    db.insert(stories).values({
+      slug: "approval-needs-review-metadata",
+      title: "Invalid approval",
+      status: "published",
+      originalSourceStatus: "source_needed",
+      publicIndexApproved: true,
+    }),
+    (error) => error.cause?.message.includes("violates check constraint"),
+  );
+  await db.insert(stories).values({
     slug: "draft-must-stay-private",
     title: "Private Draft Secret",
     synopsis: "Private draft synopsis",
@@ -78,22 +100,23 @@ test("public archive Drizzle queries expose only published editorial fields from
   const list = await listPublicEpisodes(db, stories);
   assert.equal(list.length, 1);
   assert.deepEqual(Object.keys(list[0]).sort(), ["experienceType", "season", "slug", "synopsis", "title"]);
-  assert.equal(list[0].slug, "source-needed-public-index");
+  assert.equal(list[0].slug, "approved-public-index");
   assert.deepEqual(await createPublicEpisodesResponse(list).json(), {
     episodes: [{
-      slug: "source-needed-public-index",
+      slug: "approved-public-index",
       title: "Public Editorial Index",
       season: "Season One",
       synopsis: "A summary written for the public index.",
       experienceType: "comic",
     }],
-    notice: "Published means this metadata index is public. It does not verify original sources, credits, or reuse rights.",
+    notice: "Only entries explicitly approved for public index use are shown. Approval covers the listed editorial fields only, not original scripts or artwork.",
   });
 
-  const detail = await findPublicEpisode(db, stories, "source-needed-public-index");
+  const detail = await findPublicEpisode(db, stories, "approved-public-index");
   assert.ok(detail);
   assert.deepEqual(Object.keys(detail).sort(), ["experienceType", "season", "slug", "synopsis", "title"]);
   assert.equal(await findPublicEpisode(db, stories, "draft-must-stay-private"), null);
+  assert.equal(await findPublicEpisode(db, stories, "source-needed-not-public"), null);
   assert.equal(await findPublicEpisode(db, stories, "unknown-story"), null);
 
   const pageList = await listPublicArchivePageEntries(db, stories);
@@ -101,30 +124,31 @@ test("public archive Drizzle queries expose only published editorial fields from
   assert.deepEqual(Object.keys(pageList[0]).sort(), [
     "experienceType", "originalSourceStatus", "season", "slug", "synopsis", "title",
   ]);
-  assert.equal(pageList[0].originalSourceStatus, "source_needed");
-  const pageDetail = await findPublicArchivePageEntry(db, stories, "source-needed-public-index");
+  assert.equal(pageList[0].originalSourceStatus, "source_verified");
+  const pageDetail = await findPublicArchivePageEntry(db, stories, "approved-public-index");
   assert.deepEqual(Object.keys(pageDetail).sort(), [
     "experienceType", "originalSourceStatus", "season", "slug", "synopsis", "title",
   ]);
-  assert.equal(pageDetail.originalSourceStatus, "source_needed");
+  assert.equal(pageDetail.originalSourceStatus, "source_verified");
   assert.equal(await findPublicArchivePageEntry(db, stories, "draft-must-stay-private"), null);
+  assert.equal(await findPublicArchivePageEntry(db, stories, "source-needed-not-public"), null);
 
   const detailRoute = createPublicEpisodeRouteHandler({ getDatabase: () => db, stories });
   const routeResponse = await detailRoute(
-    new Request("http://localhost/api/episodes/source-needed-public-index"),
-    { params: Promise.resolve({ slug: "source-needed-public-index" }) },
+    new Request("http://localhost/api/episodes/approved-public-index"),
+    { params: Promise.resolve({ slug: "approved-public-index" }) },
   );
   assert.equal(routeResponse.status, 200);
   assert.equal(routeResponse.headers.get("cache-control"), "no-store");
   assert.deepEqual(await routeResponse.json(), {
     episode: {
-      slug: "source-needed-public-index",
+      slug: "approved-public-index",
       title: "Public Editorial Index",
       season: "Season One",
       synopsis: "A summary written for the public index.",
       experienceType: "comic",
     },
-    notice: "Published means this metadata index is public. It does not verify original sources, credits, or reuse rights.",
+    notice: "Only entries explicitly approved for public index use are shown. Approval covers the listed editorial fields only, not original scripts or artwork.",
   });
 
   const draftResponse = await detailRoute(
@@ -134,6 +158,14 @@ test("public archive Drizzle queries expose only published editorial fields from
   assert.equal(draftResponse.status, 404);
   assert.equal(draftResponse.headers.get("cache-control"), "no-store");
   assert.deepEqual(await draftResponse.json(), { error: "Not found" });
+
+  const pendingResponse = await detailRoute(
+    new Request("http://localhost/api/episodes/source-needed-not-public"),
+    { params: Promise.resolve({ slug: "source-needed-not-public" }) },
+  );
+  assert.equal(pendingResponse.status, 404);
+  assert.equal(pendingResponse.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await pendingResponse.json(), { error: "Not found" });
 
   let invalidSlugDatabaseCalls = 0;
   const invalidSlugRoute = createPublicEpisodeRouteHandler({
@@ -157,6 +189,7 @@ test("public archive Drizzle queries expose only published editorial fields from
     "https://private.example/evidence",
     "Internal claim text",
     "Private Draft Secret",
+    "This source-needed synopsis must stay private.",
   ]) assert.doesNotMatch(publicJson, new RegExp(privateValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
   const listResponse = createPublicEpisodesResponse(list);

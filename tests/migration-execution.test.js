@@ -13,6 +13,7 @@ const retention = await readFile(new URL("../drizzle/0001_initial_v11.sql", impo
 const writeLimits = await readFile(new URL("../drizzle/0002_editor_write_limits.sql", import.meta.url), "utf8");
 const writeControls = await readFile(new URL("../drizzle/0003_editor_write_controls.sql", import.meta.url), "utf8");
 const writeControlAudit = await readFile(new URL("../drizzle/0004_editor_write_control_audit.sql", import.meta.url), "utf8");
+const publicIndexApproval = await readFile(new URL("../drizzle/0005_public_index_approval.sql", import.meta.url), "utf8");
 
 test("15-story populated baseline, full migration apply, and reverse DDL execute in PostgreSQL", async (t) => {
   const db = new PGlite();
@@ -59,6 +60,12 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
   await db.exec(writeLimits);
   await db.exec(writeControls);
   await db.exec(writeControlAudit);
+  await db.exec(publicIndexApproval);
+  await assert.rejects(
+    db.query(`INSERT INTO archive.stories(slug,title,status,original_source_status,public_index_approved)
+      VALUES ('invalid-public-approval','Invalid approval','published','source_needed',true)`),
+    /violates check constraint/,
+  );
   const rateLimitColumns = await db.query(`
     SELECT column_name FROM information_schema.columns
     WHERE table_schema='system' AND table_name='editor_write_limits'
@@ -133,8 +140,9 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
   `);
 
   const publicStory = await db.query(`
-    INSERT INTO archive.stories(slug,title,season,synopsis,status,experience_type,original_source_status)
-    VALUES ($1,$2,$3,$4,'published','comic','source_needed') RETURNING slug
+    INSERT INTO archive.stories(slug,title,season,synopsis,status,experience_type,original_source_status,
+      public_index_approved,public_index_approved_by,public_index_approved_at,public_index_approved_use)
+    VALUES ($1,$2,$3,$4,'published','comic','source_verified',true,'synthetic-reviewer',now(),'Synthetic metadata fixture') RETURNING slug
   `, ["public-editorial-index", "Public Index", "Season 1", "A short public synopsis."]);
   const privateStory = await db.query(`
     INSERT INTO archive.stories(slug,title,synopsis,status,original_source_status)
@@ -146,14 +154,14 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
   );
   const publicList = await db.query(`
     SELECT slug,title,season,synopsis,experience_type FROM archive.stories
-    WHERE status='published' ORDER BY created_at DESC LIMIT 100
+    WHERE status='published' AND public_index_approved=true ORDER BY created_at DESC LIMIT 100
   `);
-  assert.equal(publicList.rows.length, 16);
+  assert.equal(publicList.rows.length, 1);
   assert.ok(publicList.rows.some((row) => row.slug === publicStory.rows[0].slug));
   assert.deepEqual(Object.keys(publicList.rows[0]).sort(), ["experience_type","season","slug","synopsis","title"]);
   assert.doesNotMatch(JSON.stringify(publicList.rows), /Private Draft Secret|Confidential original|Private author notes/);
   const privatePublicDetail = await db.query(
-    "SELECT slug,title,season,synopsis,experience_type FROM archive.stories WHERE slug=$1 AND status='published' LIMIT 1",
+    "SELECT slug,title,season,synopsis,experience_type FROM archive.stories WHERE slug=$1 AND status='published' AND public_index_approved=true LIMIT 1",
     [privateStory.rows[0].slug],
   );
   assert.equal(privatePublicDetail.rows.length, 0);
@@ -181,6 +189,13 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
 
   // Exercise the reverse DDL order for local rehearsal only. The project has no
   // production downgrade scripts; this guards the reviewed destructive steps.
+  await db.exec(`
+    ALTER TABLE archive.stories DROP CONSTRAINT stories_public_index_approval_complete;
+    ALTER TABLE archive.stories DROP COLUMN public_index_approved_use;
+    ALTER TABLE archive.stories DROP COLUMN public_index_approved_at;
+    ALTER TABLE archive.stories DROP COLUMN public_index_approved_by;
+    ALTER TABLE archive.stories DROP COLUMN public_index_approved;
+  `);
   await db.exec(`
     ALTER TABLE system.editor_write_controls DROP COLUMN change_reason;
     ALTER TABLE system.editor_write_controls DROP COLUMN changed_by;
@@ -231,7 +246,7 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
     hash,
     created_at: folderMillis,
   }));
-  assert.equal(expectedLedger.length, 5);
+  assert.equal(expectedLedger.length, 6);
 
   await drizzleClient.exec(initial);
   await drizzleClient.query(`
@@ -262,6 +277,21 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
     SELECT to_regclass('drizzle.__drizzle_migrations') IS NOT NULL AS ledger_exists
   `);
   assert.equal(mismatchedLedger.rows[0].ledger_exists, false, "a preflight mismatch must not leave a partial ledger");
+
+  const advancedBaselineClient = new PGlite();
+  t.after(() => advancedBaselineClient.close());
+  await advancedBaselineClient.exec(initial);
+  await advancedBaselineClient.query(`
+    INSERT INTO archive.stories(slug,title,status,original_source_status)
+    SELECT 'advanced-stamp-' || n, 'Advanced baseline fixture ' || n, 'published', 'source_needed'
+    FROM generate_series(1,15) AS n
+  `);
+  await advancedBaselineClient.exec("ALTER TABLE archive.stories ADD COLUMN public_index_approved boolean NOT NULL DEFAULT false");
+  await assert.rejects(advancedBaselineClient.exec(stampSql), /post-baseline public-index approval columns already exist/);
+  const advancedLedger = await advancedBaselineClient.query(`
+    SELECT to_regclass('drizzle.__drizzle_migrations') IS NOT NULL AS ledger_exists
+  `);
+  assert.equal(advancedLedger.rows[0].ledger_exists, false, "an advanced schema must not be stamped as baseline 0000");
 
   await drizzleClient.exec(stampSql);
   const stampedLedger = await drizzleClient.query(`
