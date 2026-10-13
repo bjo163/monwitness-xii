@@ -160,7 +160,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
   assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);
   assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
-  assert.match(implementationChecklist, /DoD-02 Tests pass.*134\/134 tests pass on Node 26\.5\.0.*352467f.*134\/134 on Node 24\.19\.0/);
+  assert.match(implementationChecklist, /DoD-02 Tests pass.*Clean archive of exact local commit `5f40c6e` passed 134\/134 tests on Node 26\.5\.0\/npm 11\.17\.0/);
+  assert.match(implementationChecklist, /Exact clean local workflow refresh \(`5f40c6e`; 2026-10-13\).*fresh `npm ci`.*239 locked packages.*passed 134\/134 tests, `db:check`, full audit.*`actionlint`, and production build/);
   const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
   assert.match(p705Task, /134\/134/);
   assert.doesNotMatch(p705Task, /133\/133/);
