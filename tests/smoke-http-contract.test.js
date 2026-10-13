@@ -147,6 +147,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /No live owner-auth test, connected local Neon target/);
   assert.match(handoverPage, /review Neon Auth SDK peer compatibility/);
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
+  assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
+  assert.match(implementationChecklist, /DoD-02 Tests pass.*134\/134 tests pass on Node 26\.5\.0.*352467f.*134\/134 on Node 24\.19\.0/);
+  assert.match(implementationChecklist, /P3-09 HTTP smoke tests.*129\/129.*133\/133.*134\/134.*current bundle has not been smoke-tested/);
   assert.match(releaseGatesDoc, /current app proxy has no sign-in attempt limiter; the PostgreSQL quota protects editor draft\/revision writes only/);
   assert.match(releaseGatesDoc, /installed `@neondatabase\/auth@0\.5\.0-beta` `NeonAuthConfig` exposes `baseUrl`, cookie settings, and logging; it has no `rateLimit` or `customRules` option/);
   assert.match(handoverStyles, /@media\(max-width:620px\)\{[\s\S]*?\.nav\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
