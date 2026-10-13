@@ -224,8 +224,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
-  assert.match(releaseGatesDoc, /Application source based on `5bae423` with handover-status refresh \(local-only\).*current working tree passes the full 134-test suite.*production build\. A clean-install production build is separately documented.*three-group owner-action summary.*eight-open-gates\/NO-GO caveat/);
-  assert.match(releaseGatesDoc, /sole loopback listener `127\.0\.0\.1:3199`; current-source CSP-required HTTP smoke passed 40\/40/);
+  assert.match(releaseGatesDoc, /Current local release status — tooling source `1aca0e7`, docs-only follow-up `8c91f46`.*clean archive.*passed 134\/134 tests.*production build.*existing local app remains on `127\.0\.0\.1:3199`.*no listener on `3000`.*baseline stamp command.*has not been run against Neon/);
+  assert.match(releaseGatesDoc, /existing local app remains on `127\.0\.0\.1:3199`; the latest port check found no listener on `3000`/);
   assert.match(releaseGatesDoc, /Approved isolated Neon rehearsal of `0001`.*exact `0001` foreign-key DDL.*rollback restored `ON DELETE CASCADE`/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
   assert.match(releaseGatesDoc, /Current Neon Auth documentation review \(2026-10-13, read-only\).*production checklist.*email verification is off by default.*restricted sign-up is still forthcoming.*MFA roadmap/);
@@ -299,7 +299,8 @@ test("README local visual and smoke instructions do not claim a session-specific
   assert.match(readme, /current local review, stay in the existing checkout on `codex\/v11-release-readiness`.*clean-clone steps below check out remote `dev`/);
   assert.match(readme, /Local visual routes after starting the app/);
   assert.match(readme, /icacls \.env\.local \/inheritance:r \/grant:r/);
-  assert.match(readme, /If port 3000 is occupied, choose an available port/);
+  assert.match(readme, /reuse the MoonWitness local server if one is already running.*opens no listener.*Only when no MoonWitness server is running/);
+  assert.match(readme, /if 3000 is occupied, choose one available port and use it for both commands/);
   assert.match(readme, /Local pages do not imply a Preview or production deployment/);
   assert.match(readme, /Do not pass a custom `--config` to a direct Drizzle command/);
   assert.match(readme, /that file is outside the repository's default-config guard/);
