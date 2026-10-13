@@ -211,7 +211,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(promptCrosswalk, /DoD-14.*Maintain NO-GO until all gates are verified and owner separately approves promotion/);
   assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
   assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
-  assert.match(implementationChecklist, /^\| DB-02 \| Database \|.*\| \[ \] IN PROGRESS \|.*`0003`\/`0004`/m);
+  assert.match(implementationChecklist, /^\| DB-02 \| Database \|.*\| \[ \] IN PROGRESS \|.*`0003`–`0005`/m);
   assert.match(releaseGatesDoc, /isolated Neon rehearsal proves migrations `0000`–`0002` only.*not been applied to a persistent Neon database or Neon-rehearsed/);
   assert.match(releaseGatesDoc, /separate populated-fixture PGlite test automatically executes the reviewed reverse-DDL sequence.*not published downgrade scripts/);
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
@@ -224,8 +224,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
-  assert.match(releaseGatesDoc, /Current local release status — verified tooling source `1aca0e7`.*clean archive.*passed 134\/134 tests.*production build.*16 smoke-contract tests.*existing local app remains on `127\.0\.0\.1:3199`.*no listener on `3000`.*baseline stamp command.*has not been run against Neon/);
-  assert.match(releaseGatesDoc, /existing local app remains on `127\.0\.0\.1:3199`; the latest port check found no listener on `3000`/);
+  assert.match(releaseGatesDoc, /Current local release status — source checkpoint `f839e9d`.*migration `0005_public_index_approval`.*npm test` 134\/134.*production build.*HTTP smoke 40\/40.*single loopback listener `127\.0\.0\.1:3199`.*port `3000` is free/);
   assert.match(releaseGatesDoc, /Approved isolated Neon rehearsal of `0001`.*exact `0001` foreign-key DDL.*rollback restored `ON DELETE CASCADE`/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
   assert.match(releaseGatesDoc, /Current Neon Auth documentation review \(2026-10-13, read-only\).*production checklist.*email verification is off by default.*restricted sign-up is still forthcoming.*MFA roadmap/);
@@ -250,7 +249,6 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /rejects identity\/TLS URL overrides and other unapproved query parameters, requires one TLS-enabled `sslmode`, permits Neon's optional `channel_binding=require`, rejects `PGOPTIONS`\/`PGREPLICATION`/);
   assert.match(releaseGatesDoc, /Direct Studio `--host`\/`--port` and wrapper `--config`\/extra-argument overrides are refused/);
   assert.match(handoverDoc, /Editor handler integration confirms rejected origin metadata adds no revision, audit event, actor row, or quota reservation/);
-  assert.match(handoverDoc, /Project Status label and current port.*one development server is listening at `127\.0\.0\.1:3199`.*Other numbered ports below refer to old historical checkpoints and are not current services/);
   assert.match(handoverDoc, /Earlier local code checkpoint `7dc1d28`.*129\/129.*40\/40/s);
   assert.match(handoverDoc, /At local checkpoint `75c7cc6`.*215 commits ahead of `origin\/codex\/v11-release-readiness` at `06e2a11`/);
   assert.match(handoverDoc, /only commit after that snapshot was documentation-only/);
@@ -287,7 +285,7 @@ test("populated development migration runbook accounts for the entire current jo
   assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
   assert.match(migrationReconciliationDoc, /PGlite fixture coverage but have not been applied to a persistent Neon database/);
   assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);
-  assert.match(migrationReconciliationDoc, /Local reverse-DDL rehearsal across migrations 0001–0004/);
+  assert.match(migrationReconciliationDoc, /Local reverse-DDL rehearsal across migrations 0001–0005/);
   assert.match(migrationReconciliationDoc, /15 synthetic published, `source_needed` story indexes and zero revisions/);
   assert.match(migrationReconciliationDoc, /all 19 story rows[\s\S]*15 baseline stories' published[\s\S]*source_needed[\s\S]*statuses remain intact/);
   assert.match(migrationReconciliationDoc, /PGlite reverse-DDL simulation, not a published downgrade command, Drizzle-ledger rollback workflow, or Neon rehearsal/);
