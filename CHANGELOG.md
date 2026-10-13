@@ -1,11 +1,11 @@
 # Changelog
 
-## 2026-10-13 — Reproduce the latest handover from a clean checkout
+## 2026-10-13 — Verify the exact current local review source
 
-- Exported exact local checkpoint `e2225a3` without `.env`/`.env.local`; fresh `npm ci` installed 239 locked packages on Node 26.5.0/npm 11.17.0.
-- Passed 134/134 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint .github/workflows/quality.yml`, and the Next.js production build. Local-profile CSP-required HTTP smoke separately passed 40/40 against the user's existing loopback server on port 3199; no temporary listener was opened.
+- Exported exact application source checkpoint `ca975bb` without environment files; fresh `npm ci` installed 239 locked packages on Node 26.5.0/npm 11.17.0.
+- Passed 134/134 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint .github/workflows/quality.yml`, and the Next.js production build. Local-profile CSP-required HTTP smoke passed 40/40 against the existing loopback server on port 3199; no temporary listener was opened.
 - npm repeated the Neon Auth UI peer/deprecation warnings and withheld install scripts for `core-js`/`esbuild`; these warnings did not fail the recorded checks.
-- A clean replay of earlier source checkpoint `f839e9d` exposed a stale handover wording assertion, not a runtime defect. The subsequent `cdc1cba` documentation/test-contract fix is included in `e2225a3`; the latest exact checkout passes cleanly. This is local evidence only; no remote CI, Preview, Neon/Auth, push, or deployment was performed.
+- This is local evidence only; no remote CI, Preview, Neon/Auth, push, or deployment was performed.
 
 ## 2026-10-13 — Require explicit approval for public Archive entries
 

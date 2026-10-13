@@ -162,10 +162,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);
   assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
   assert.match(changelog, /2026-10-13 — Require explicit approval for public Archive entries.*`0005_public_index_approval`.*`f839e9d`.*`cdc1cba`/s);
-  assert.match(changelog, /Reproduce the latest handover from a clean checkout.*`e2225a3`.*134\/134 tests.*40\/40/s);
+  assert.match(changelog, /Verify the exact current local review source.*`ca975bb`.*134\/134 tests.*40\/40/s);
   assert.match(implementationChecklist, /P7-09 Release notes and changelog.*`CHANGELOG.md` records migration `0005_public_index_approval`.*default-deny behavior.*local verification/);
-  assert.match(implementationChecklist, /DoD-02 Tests pass.*Fresh archive of current local checkpoint `e2225a3` passes 134\/134 tests/);
-  assert.match(implementationChecklist, /Exact clean local workflow refresh \(`5f40c6e`; 2026-10-13\).*fresh `npm ci`.*239 locked packages.*passed 134\/134 tests, `db:check`, full audit.*`actionlint`, and production build/);
+  assert.match(implementationChecklist, /DoD-02 Tests pass.*Fresh archive of source checkpoint `ca975bb` passes 134\/134 tests/);
+  assert.match(implementationChecklist, /Exact clean local workflow refresh \(`ca975bb`; 2026-10-13\).*fresh `npm ci`.*239 locked packages.*passed 134\/134 tests, `db:check`, full audit.*actionlint.*production build/);
   const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
   assert.match(p705Task, /134\/134/);
   assert.doesNotMatch(p705Task, /133\/133/);
