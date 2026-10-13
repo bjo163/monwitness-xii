@@ -334,4 +334,12 @@ test("CI actions stay pinned to full SHAs and Dependabot tracks action updates",
   assert.equal(packageJson.engines.node, ">=22.0.0");
   assert.equal(packageLock.packages[""].engines.node, packageJson.engines.node);
   assert.match(qualityWorkflow, /node-version:\s*'22'/);
+  const startServer = "npm run start -- --hostname 127.0.0.1 --port 3000";
+  assert.equal(qualityWorkflow.split(startServer).length - 1, 1, "CI owns exactly one loopback app server for HTTP smoke");
+  const buildIndex = qualityWorkflow.indexOf("npm run build");
+  const startIndex = qualityWorkflow.indexOf(startServer);
+  const smokeIndex = qualityWorkflow.indexOf("SMOKE_PROFILE=local SMOKE_BASE_URL=http://127.0.0.1:3000 SMOKE_EXPECT_CSP=1 npm run smoke:http");
+  assert.ok(buildIndex < startIndex && startIndex < smokeIndex, "CI builds before starting one server and smoking it");
+  assert.match(qualityWorkflow, /trap 'kill "\$server_pid" 2>\/dev\/null \|\| true' EXIT/);
+  assert.match(qualityWorkflow, /curl --fail --silent http:\/\/127\.0\.0\.1:3000\/api\/health/);
 });
