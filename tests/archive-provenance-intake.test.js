@@ -20,6 +20,9 @@ test("Archive provenance intake keeps all 15 slots pending and source-needed", (
   for (const [index, row] of rows.entries()) {
     assert.match(row, /\| Pending \| `source_needed` \|$/);
     assert.match(row, new RegExp(`^\\| (?:0[1-9]|1[0-5]) \\| \`${expectedSlugs[index]}\` \\| — \\|`));
+    const columns = row.split("|").slice(1, -1).map((column) => column.trim());
+    assert.equal(columns.length, 11, `slot ${expectedSlugs[index]} must retain all intake fields`);
+    assert.deepEqual(columns.slice(2, 9), Array(7).fill("—"), `slot ${expectedSlugs[index]} must not imply private evidence, rights, credit, privacy review, or reviewer data exists`);
   }
   for (const slug of expectedSlugs) assert.ok(register.includes(`\`${slug}\``), `missing development slug ${slug}`);
   assert.match(register, /branch `br-green-butterfly-b51kp4b1`/);
