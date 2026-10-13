@@ -4,8 +4,8 @@
 
 MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG. Its development release contains a database-backed Story Archive, four recurring fictional characters, and an AETHERION 100-level conceptual interface.
 
-> **Handover status (12 October 2026): DEVELOPMENT AUTH INTEGRATION IN PROGRESS — NOT PRODUCTION-READY.**
-> Neon Managed Auth is enabled on the isolated development branch. The sign-in flow and admin-only draft routes are implemented, but owner-admin session and authenticated-write E2E tests remain unverified. Production Auth, migrations and release have not been changed.
+> **Handover status (13 October 2026): LOCAL RELEASE REVIEW IN PROGRESS — NOT PRODUCTION-READY.**
+> Editor access requires a verified email, Neon admin role, and exact owner allowlist. Local checks pass (134/134 tests; HTTP smoke 40/40), but owner-authenticated E2E remains unverified. Neon Managed Auth still permits public sign-up; restricted sign-up, provider login throttling, and MFA remain open gates. Production remains NO-GO.
 
 ## Quick links
 - Local visual routes after starting the app: `/`, `/team`, `/episodes`, and `/handover` (see [Local development](#local-development)). No port-specific localhost URL is recorded because local ports vary by session.

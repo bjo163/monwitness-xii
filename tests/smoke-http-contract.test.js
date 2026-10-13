@@ -152,6 +152,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /All ten prompt modules are mapped to local evidence/);
   assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
   assert.match(implementationChecklist, /DoD-02 Tests pass.*134\/134 tests pass on Node 26\.5\.0.*352467f.*134\/134 on Node 24\.19\.0/);
+  const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
+  assert.match(p705Task, /134\/134/);
+  assert.doesNotMatch(p705Task, /133\/133/);
   assert.match(implementationChecklist, /P3-09 HTTP smoke tests.*Historical loopback smoke returned 39\/40.*current source reports `134\/134`.*production build serves.*current-source HTTP smoke passed 40\/40.*exact-release Preview smoke remains open/);
   assert.match(releaseGatesDoc, /current app proxy has no sign-in attempt limiter; the PostgreSQL quota protects editor draft\/revision writes only/);
   assert.match(releaseGatesDoc, /installed `@neondatabase\/auth@0\.5\.0-beta` `NeonAuthConfig` exposes `baseUrl`, cookie settings, and logging; it has no `rateLimit` or `customRules` option/);
@@ -271,6 +274,8 @@ test("populated development migration runbook accounts for the entire current jo
 });
 
 test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
+  assert.match(readme, /Handover status \(13 October 2026\): LOCAL RELEASE REVIEW IN PROGRESS — NOT PRODUCTION-READY/);
+  assert.match(readme, /134\/134 tests; HTTP smoke 40\/40/);
   assert.match(readme, /Local visual routes after starting the app/);
   assert.match(readme, /icacls \.env\.local \/inheritance:r \/grant:r/);
   assert.match(readme, /If port 3000 is occupied, choose an available port/);

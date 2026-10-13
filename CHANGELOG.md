@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13 — Reconcile the current local handover
+
+- Updated the release dashboard and smoke contract to report the verified current-source HTTP result (40/40), then reconciled the implementation tracker and README with the current 134-test suite and local-only release status.
+- Rechecked backup evidence: the focused synthetic PGlite restore contract passes 2/2; the runbook explicitly limits that result to local fixtures, not Neon production recovery.
+- Rechecked official Neon Managed Auth guidance: public signup is the default, restricted signups are not yet supported, and MFA remains on the Managed Auth roadmap. Provider signup, throttling, MFA, and owner-auth E2E stay open release gates.
+- Verification: full suite 134/134, smoke/document contract 16/16, backup/restore contract 2/2, and local `/handover` returned 200 with `40 / 40` and `NO-GO`. No push, deployment, provider configuration, or database change occurred.
+
 ## 2026-10-13 — Require verified email for editor authorization
 
 - Editor session authorization now fails closed unless the authenticated Neon user has `emailVerified === true`, in addition to the existing administrator role and exact owner allowlist.
