@@ -5,7 +5,7 @@
 MoonWitness XII is a faceless neon-comic storytelling universe and learning RPG. Its development release contains a database-backed Story Archive, four recurring fictional characters, and an AETHERION 100-level conceptual interface.
 
 > **Project status (13 October 2026): LOCAL RELEASE REVIEW IN PROGRESS — NOT PRODUCTION-READY.**
-> Editor access requires a verified email, Neon admin role, and exact owner allowlist. Local checks pass (134/134 tests; HTTP smoke 40/40), but owner-authenticated E2E remains unverified. Public sign-up, provider login throttling, and MFA remain open identity gates; see the current evidence in [release gates](docs/RELEASE_GATES_V11.md#security-and-editor). Production remains NO-GO.
+> Editor access requires a verified email, Neon admin role, and exact owner allowlist. Local tests pass (134/134). The recorded baseline HTTP smoke passed 40/40; a later freshness assertion reports 39/40 against the already-running server because `/handover` still serves its previous bundle. Rebuild and refresh the existing server on its current port before relying on the visual handover. Owner-authenticated E2E remains unverified. Public sign-up, provider login throttling, and MFA remain open identity gates; see the current evidence in [release gates](docs/RELEASE_GATES_V11.md#security-and-editor). Production remains NO-GO.
 > The local `/handover` dashboard groups owner follow-ups into three action groups for readability; the detailed release register still has eight open technical gates.
 
 ## Quick links

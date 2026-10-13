@@ -308,7 +308,7 @@ test("populated development migration runbook accounts for the entire current jo
 test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
   assert.match(readme, /Project status \(13 October 2026\): LOCAL RELEASE REVIEW IN PROGRESS — NOT PRODUCTION-READY/);
   assert.match(readme, /groups owner follow-ups into three action groups.*detailed release register still has eight open technical gates/);
-  assert.match(readme, /134\/134 tests; HTTP smoke 40\/40/);
+  assert.match(readme, /Local tests pass \(134\/134\).*baseline HTTP smoke passed 40\/40.*freshness assertion reports 39\/40.*previous bundle/);
   assert.match(readme, /current local review, stay in the existing checkout on `codex\/v11-release-readiness`.*clean-clone steps below check out remote `dev`/);
   assert.match(readme, /Local visual routes after starting the app/);
   assert.match(readme, /icacls \.env\.local \/inheritance:r \/grant:r/);
