@@ -22,6 +22,7 @@ const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", i
 const migrationReconciliationDoc = await readFile(new URL("../docs/MIGRATION_LEDGER_RECONCILIATION_V11.md", import.meta.url), "utf8");
 const finalizationPlan = await readFile(new URL("../docs/FINALIZATION_V11_RELEASE_PLAN.md", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+const changelog = await readFile(new URL("../CHANGELOG.md", import.meta.url), "utf8");
 const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
 const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
 const testsDirectory = new URL(".", import.meta.url);
@@ -160,6 +161,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
   assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);
   assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
+  assert.match(changelog, /2026-10-13 — Require explicit approval for public Archive entries.*`0005_public_index_approval`.*`f839e9d`.*`cdc1cba`/s);
+  assert.match(implementationChecklist, /P7-09 Release notes and changelog.*`CHANGELOG.md` records migration `0005_public_index_approval`.*default-deny behavior.*local verification/);
   assert.match(implementationChecklist, /DoD-02 Tests pass.*Clean archive of exact local commit `5f40c6e` passed 134\/134 tests on Node 26\.5\.0\/npm 11\.17\.0/);
   assert.match(implementationChecklist, /Exact clean local workflow refresh \(`5f40c6e`; 2026-10-13\).*fresh `npm ci`.*239 locked packages.*passed 134\/134 tests, `db:check`, full audit.*`actionlint`, and production build/);
   const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));

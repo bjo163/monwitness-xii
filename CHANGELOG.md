@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-13 — Require explicit approval for public Archive entries
+
+- Added migration `0005_public_index_approval` with default-deny `public_index_approved` and reviewer, timestamp, and defined-use fields. A story must be published, source-verified, and explicitly approved for the precise public index use before list or detail APIs return it. Existing entries remain hidden until their evidence and approval are reviewed.
+- Extended schema verification to compare the approval CHECK constraint and hardened baseline stamping so an upgraded schema cannot be mislabeled as the original `0000` baseline.
+- Updated Archive notice/empty states, migration reconciliation, release gates, handover, and the implementation checklist. The existing faceless character art remains in place.
+- Verification at source commit `f839e9d`: `npm test` 134/134, `npm run db:check`, production build, and local-profile CSP-required HTTP smoke 40/40. The app database is not configured locally, so database endpoints return their designed unavailable response. Neon migration rehearsal, all 15 source/rights reviews, remote exact-head CI, and production promotion remain open. No push or deployment.
+- Documentation follow-up at `cdc1cba` updates the handover and regression contract. Local-only work remains on `codex/v11-release-readiness`.
+
 ## 2026-10-13 — Reconcile the current local handover
 
 - Updated the release dashboard and smoke contract to report the verified current-source HTTP result (40/40), then reconciled the implementation tracker and README with the current 134-test suite and local-only release status.
