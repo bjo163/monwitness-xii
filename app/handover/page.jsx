@@ -1,7 +1,7 @@
 import Link from "next/link";
 import styles from "./handover.module.css";
 
-export const metadata = { title: "MoonWitness XII — Release & Handover" };
+export const metadata = { title: "MoonWitness XII — Project Status" };
 
 const checks = [
   { value: "134 / 134", label: "automated tests", detail: "Revalidated locally · Node 26.5.0", tone: "pink" },
@@ -22,20 +22,15 @@ const verified = [
 ];
 
 const gates = [
-  { id: "G-SEC-01", title: "Verify CSP on the exact release preview", text: "Local smoke requires nonce-only script and style policies and checks every rendered script/style block. This worktree has no remote CI or Preview result; repeat on the exact reviewed release head." },
-  { id: "G-AUTH-01", title: "Owner identity and editor access", text: "Complete owner sign-in with verified email, admin onboarding, authenticated draft/revision writes, audit attribution, session/role-revocation checks, and review Neon Auth SDK peer compatibility." },
-  { id: "G-AUTH-02", title: "Identity policy", text: "Direct provider sign-up remains enabled, MFA is unavailable here, and effective failed-login throttling is unverified. This SDK cannot configure a provider-wide limiter; verify Neon enforcement or choose an approved identity path." },
-  { id: "G-DB-02", title: "Persistent development migration", text: "An isolated Neon clone has rehearsal evidence for migrations 0000–0002; persistent development is still unmigrated. Rehearse 0003/0004 on an isolated clone, confirm the exact application target, reconcile its schema and ledger, then apply only through an approved plan. The local freeze CLI is not a persistent incident control yet." },
-  { id: "G-DB-03", title: "Recoverable backups", text: "Daily snapshots with 30-day retention are unavailable on the selected Free plan. Representative Neon data restore, accepted RPO/RTO, and cutover/rollback remain unverified." },
-  { id: "G-ARC-01", title: "Archive sources and rights", text: "All 15 entries remain source-needed until original materials, credits, and reuse-rights evidence are reviewed." },
-  { id: "G-REL-01", title: "Independent release review", text: "The latest local commits have no remote CI result. PR #4 needs independent review and integration; PR #2 still has conflicts." },
-  { id: "G-PLAN-01", title: "Full V11 traceability", text: "All ten prompt modules are mapped to local evidence; full requirements coverage awaits the missing authoritative V11/V11.2 plan." },
+  { id: "WAIT-01", title: "Unggah rencana V11 dan V11.2", text: "Yang tersedia baru prompt dan checklist lama. Tanpa dokumen rencana otoritatif, saya tidak bisa menandai semua persyaratan sebagai selesai." },
+  { id: "WAIT-02", title: "Putuskan identitas dan pemulihan", text: "Neon Free saat ini masih mengizinkan pendaftaran langsung dan belum memberi snapshot harian 30 hari. Untuk editor admin dan backup yang dapat dipulihkan, perlu kebijakan/opsi yang disetujui pemilik." },
+  { id: "WAIT-03", title: "Lengkapi bukti sumber Archive", text: "15 cerita tetap ditandai source-needed. Masing-masing perlu materi asli, kredit, dan bukti hak pakai sebelum dapat dianggap siap terbit." },
 ];
 
 const evidenceLimits = [
   { label: "DATABASE", value: "NOT CONNECTED", detail: "No local DATABASE_URL or verified target is configured. Database routes fail closed; Neon behavior is not tested here.", tone: "pink" },
   { label: "REVIEW BRANCH", value: "LOCAL ONLY", detail: "This checkout is ahead of the remote PR head. Current remote CI does not cover these local commits.", tone: "gold" },
-  { label: "RELEASE", value: "8 GATES OPEN", detail: "Owner identity, provider policy, persistent DB rollout, recovery, Archive rights, independent review, and full-plan traceability remain unresolved.", tone: "aqua" },
+  { label: "RELEASE", value: "3 ACTION GROUPS", detail: "Ringkasan ini mengelompokkan pekerjaan yang menunggu pemilik; semua 8 gate teknis tetap OPEN di release register dan produksi tetap NO-GO.", tone: "aqua" },
 ];
 
 export default function HandoverPage() {
@@ -46,18 +41,18 @@ export default function HandoverPage() {
         <nav aria-label="Main navigation" className={styles.nav}>
           <Link href="/episodes">STORY ARCHIVE</Link>
           <Link href="/team">THE BATTERIES</Link>
-          <a href="#release-gates">RELEASE GATES <span>08</span></a>
+          <a href="#release-gates">NEXT STEPS <span>03</span></a>
         </nav>
         <span className={styles.localBadge}><i /> LOCAL REVIEW</span>
       </header>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>ENGINEERING HANDOVER <span>V11 / 13 OCT 2026</span></p>
+          <p className={styles.eyebrow}>PROJECT STATUS <span>V11 / 13 OCT 2026</span></p>
           <h1>MISSION<br /><em>CONTROL</em></h1>
-          <p className={styles.intro}>A live snapshot of the work, evidence, and open gates for the MoonWitness XII release.</p>
+          <p className={styles.intro}>Yang sudah beres, yang masih menunggu keputusan, dan langkah berikutnya—ringkas, lokal, tanpa deployment.</p>
           <div className={styles.heroLinks}>
-            <a href="#release-gates" className={styles.primaryButton}>REVIEW THE GATES <span>↘</span></a>
+            <a href="#release-gates" className={styles.primaryButton}>LIHAT 3 LANGKAH <span>↘</span></a>
             <Link href="/team" className={styles.secondaryButton}>MEET THE BATTERIES <span>↗</span></Link>
           </div>
         </div>
@@ -87,7 +82,7 @@ export default function HandoverPage() {
       <section className={styles.evidenceSection}>
         <div className={styles.sectionHeading}>
           <p className={styles.eyebrow}>WHAT THE LOCAL EVIDENCE SAYS <span>CHECKPOINT · 13 OCT</span></p>
-          <h2>Built, checked,<br /><em>still in review.</em></h2>
+          <h2>Sudah dicek,<br /><em>ini batasnya.</em></h2>
         </div>
         <div className={styles.evidenceList}>
           {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
@@ -100,11 +95,11 @@ export default function HandoverPage() {
 
       <section className={styles.gatesSection} id="release-gates" aria-label="Release gates remaining">
         <div className={styles.gatesHeader}>
-          <div><p className={styles.eyebrow}>THE WORK STILL AHEAD <span>OWNER DECISIONS + VERIFIED EVIDENCE</span></p><h2>Eight open<br /><em>release gates.</em></h2></div>
-          <p>Each gate needs current, reviewable evidence before production status can change.</p>
+          <div><p className={styles.eyebrow}>LANGKAH BERIKUTNYA <span>3 HAL YANG BENAR-BENAR MENUNGGU</span></p><h2>Tiga hal,<br /><em>lalu lanjut.</em></h2></div>
+          <p>Ringkasan ini mengelompokkan pekerjaan untuk menghindari daftar berulang. Semua 8 gate teknis tetap terbuka; produksi tetap NO-GO sampai bukti lengkap dan pemilik menyetujui promosi.</p>
         </div>
         <div className={styles.gateList}>
-          {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Open"><i />OPEN</span></article>)}
+          {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Menunggu"><i />MENUNGGU</span></article>)}
         </div>
         <div className={styles.docsRow}>
           <div>RELEASE GATES <code>docs/RELEASE_GATES_V11.md</code></div>
