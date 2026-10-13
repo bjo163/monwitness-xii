@@ -162,8 +162,9 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);
   assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
   assert.match(changelog, /2026-10-13 — Require explicit approval for public Archive entries.*`0005_public_index_approval`.*`f839e9d`.*`cdc1cba`/s);
+  assert.match(changelog, /Reproduce the latest handover from a clean checkout.*`e2225a3`.*134\/134 tests.*40\/40/s);
   assert.match(implementationChecklist, /P7-09 Release notes and changelog.*`CHANGELOG.md` records migration `0005_public_index_approval`.*default-deny behavior.*local verification/);
-  assert.match(implementationChecklist, /DoD-02 Tests pass.*Clean archive of exact local commit `5f40c6e` passed 134\/134 tests on Node 26\.5\.0\/npm 11\.17\.0/);
+  assert.match(implementationChecklist, /DoD-02 Tests pass.*Fresh archive of current local checkpoint `e2225a3` passes 134\/134 tests/);
   assert.match(implementationChecklist, /Exact clean local workflow refresh \(`5f40c6e`; 2026-10-13\).*fresh `npm ci`.*239 locked packages.*passed 134\/134 tests, `db:check`, full audit.*`actionlint`, and production build/);
   const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
   assert.match(p705Task, /134\/134/);
@@ -219,6 +220,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /separate populated-fixture PGlite test automatically executes the reviewed reverse-DDL sequence.*not published downgrade scripts/);
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
   assert.match(handoverDoc, /^## Current review checkpoint — 2026-10-13/m);
+  assert.match(handoverDoc, /Fresh exact-checkout reproduction \(`e2225a3`; Node 26\.5\.0\/npm 11\.17\.0\).*134\/134 tests.*production build.*smoke.*40\/40/);
+  assert.ok(handoverDoc.includes("One local server listens at `127.0.0.1:3199`; no listener is open on 3000."));
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
   assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
   assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
@@ -228,6 +231,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
   assert.match(releaseGatesDoc, /Current local release status — source checkpoint `f839e9d`.*migration `0005_public_index_approval`.*npm test` 134\/134.*production build.*HTTP smoke 40\/40.*single loopback listener `127\.0\.0\.1:3199`.*port `3000` is free/);
+  assert.ok(releaseGatesDoc.includes("Fresh exact-checkout reproduction (`e2225a3`; Node 26.5.0/npm 11.17.0):** exported the exact committed tree without environment files, ran fresh `npm ci` (239 locked packages), then passed 134/134 tests"));
   assert.match(releaseGatesDoc, /Approved isolated Neon rehearsal of `0001`.*exact `0001` foreign-key DDL.*rollback restored `ON DELETE CASCADE`/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
   assert.match(releaseGatesDoc, /Current Neon Auth documentation review \(2026-10-13, read-only\).*production checklist.*email verification is off by default.*restricted sign-up is still forthcoming.*MFA roadmap/);
