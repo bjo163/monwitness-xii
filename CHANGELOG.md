@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-13 — Make local handover actions clearer
+
+- Rewrote the three owner-input cards to identify the missing V11/V11.2 source documents, admin identity and backup requirements, and evidence needed for the 15 Archive stories. The dashboard now states that these inputs are not the full set of release gates.
+- Labeled test evidence as a clean local run instead of implying it was GitHub CI. Added a clear note that the updated page needs the already-running app refreshed on port 3199; it explicitly says not to start another server or use another port.
+- Verification: `npm test` passes 134/134 and `npm run build` passes. HTTP contract tests cover the revised handover. The existing local server remains on port 3199; no server restart, extra port, push, or deployment was made. Production remains NO-GO.
+
 ## 2026-10-13 — Clarify handover smoke freshness
 
 - Relabeled the dashboard's 40/40 HTTP figure as the earlier baseline result. The follow-up smoke now requires the Node 22 evidence copy and reports 39/40 against the already-running server because `/handover` still serves its previous bundle.

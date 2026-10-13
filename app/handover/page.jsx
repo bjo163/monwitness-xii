@@ -4,7 +4,7 @@ import styles from "./handover.module.css";
 export const metadata = { title: "MoonWitness XII — Project Status" };
 
 const checks = [
-  { value: "134 / 134", label: "automated tests", detail: "Revalidated locally · CI Node 22.23.3", tone: "pink" },
+  { value: "134 / 134", label: "automated tests", detail: "Clean local run · Node 22.23.3", tone: "pink" },
   { value: "40 / 40", label: "baseline HTTP smoke", detail: "Earlier run · freshness follow-up below", tone: "cyan" },
   { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
   { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
@@ -22,9 +22,9 @@ const verified = [
 ];
 
 const gates = [
-  { id: "WAIT-01", title: "Unggah rencana V11 dan V11.2", text: "Yang tersedia baru prompt dan checklist lama. Tanpa dokumen rencana otoritatif, saya tidak bisa menandai semua persyaratan sebagai selesai." },
-  { id: "WAIT-02", title: "Putuskan identitas dan pemulihan", text: "Neon Free saat ini masih mengizinkan pendaftaran langsung dan belum memberi snapshot harian 30 hari. Untuk editor admin dan backup yang dapat dipulihkan, perlu kebijakan/opsi yang disetujui pemilik." },
-  { id: "WAIT-03", title: "Lengkapi bukti sumber Archive", text: "15 cerita tetap ditandai source-needed. Masing-masing perlu materi asli, kredit, dan bukti hak pakai sebelum dapat dianggap siap terbit." },
+  { id: "WAIT-01", title: "Unggah dokumen rencana V11 dan V11.2", text: "Repo berisi prompt kerja dan checklist turunan, bukan rencana otoritatif. Unggah dokumen aslinya agar setiap kriteria dapat dipetakan ke kode dan bukti tanpa menebak." },
+  { id: "WAIT-02", title: "Sediakan identitas admin dan target backup", text: "Neon Auth dev masih membolehkan signup langsung, tidak mewajibkan verifikasi email, dan tidak menyediakan MFA pada konfigurasi ini. Sebelum editor dipakai, provision identitas admin dengan MFA-capable policy dan verifikasi sign-in, role, allowlist, serta kontrol signup/throttling. Neon Free tidak menyediakan snapshot harian 30 hari; pilih tujuan backup privat tanpa biaya tambahan. Belum ada restore data aplikasi atau RPO/RTO yang teruji." },
+  { id: "WAIT-03", title: "Lengkapi bukti sumber 15 cerita Archive", text: "Untuk setiap cerita, sediakan materi asli, kredit, bukti hak penggunaan, dan keputusan privasi untuk cakupan indeks publik. Semuanya tetap source-needed sampai bukti ditinjau dan dicatat." },
 ];
 
 const evidenceLimits = [
@@ -89,14 +89,14 @@ export default function HandoverPage() {
           <div className={styles.limitsGrid} aria-label="Evidence boundaries">
             {evidenceLimits.map((item) => <article className={`${styles.limitCard} ${styles[item.tone]}`} key={item.label}><span>{item.label} · EVIDENCE BOUNDARY</span><strong>{item.value}</strong><p>{item.detail}</p></article>)}
           </div>
-          <div className={styles.evidenceNote}><strong>Local evidence · 13 Oct 2026</strong><p>Clean CI-chain replay on Node 22.23.3/npm 10.9.9: fresh `npm ci` installed 241 locked packages, then 134/134 tests, `db:check`, full dependency audit with 0 findings, production build, and `actionlint` passed. The initial HTTP smoke run was 40/40 against the existing visual app at `127.0.0.1:3199`. A stricter handover-freshness assertion was added afterward; its latest run was 39/40 because that already-running process still serves the previous handover bundle. Restart the existing server on the same port after building to load this copy; no second server or deployment was used. The editor session requires a verified email, Neon admin role, and exact server-side user allowlist. Hosted dev Auth still allows public signup and does not require email verification, so provider identity policy remains open.</p><p>The isolated Neon rehearsal covers `0000`–`0002`; migration `0001` was applied and rolled back with the baseline FK and ledger restored. Migrations `0003`–`0005` and persistent development rollout remain open. No Neon URL is configured locally; database and Archive APIs fail closed with `503`. All 15 Archive entries remain `source_needed`; local public lists/details now require a separate, default-false approval for the exact metadata use. Migration `0005` is not applied to Neon. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
+          <div className={styles.evidenceNote}><strong>Local evidence · 13 Oct 2026</strong><p>Clean local CI-chain replay on Node 22.23.3/npm 10.9.9: fresh `npm ci` installed 241 locked packages, then 134/134 tests, `db:check`, full dependency audit with 0 findings, production build, and `actionlint` passed. The initial HTTP smoke run was 40/40 against the visual app at `127.0.0.1:3199`. A stricter handover-freshness assertion was added afterward; its latest run was 39/40 because that running process still serves the previous handover bundle. The current app source and build are ready. To see the updated handover in the browser, restart that existing server on port 3199; do not start another server or use another port. No deployment was used. Editor access requires verified email, Neon admin role, and exact server-side user allowlist. Hosted dev Auth still allows direct public signup and does not require email verification; its configured provider does not supply MFA, so identity policy remains open.</p><p>The isolated Neon rehearsal covers `0000`–`0002`; migration `0001` was applied and rolled back with the baseline FK and ledger restored. Migrations `0003`–`0005` and persistent development rollout remain open. Neon Free does not meet the selected daily/30-day retention target, and no private no-cost backup destination or representative-data restore is verified; RPO/RTO remain unset. No Neon URL is configured locally; database and Archive APIs fail closed with `503`. All 15 Archive entries remain `source_needed`; local public lists/details now require a separate, default-false approval for the exact metadata use. Migration `0005` is not applied to Neon. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
         </div>
       </section>
 
       <section className={styles.gatesSection} id="release-gates" aria-label="Release gates remaining">
         <div className={styles.gatesHeader}>
-          <div><p className={styles.eyebrow}>LANGKAH BERIKUTNYA <span>3 HAL YANG BENAR-BENAR MENUNGGU</span></p><h2>Tiga hal,<br /><em>lalu lanjut.</em></h2></div>
-          <p>Ringkasan ini mengelompokkan pekerjaan untuk menghindari daftar berulang. Semua 8 gate teknis tetap terbuka; produksi tetap NO-GO sampai bukti lengkap dan pemilik menyetujui promosi.</p>
+          <div><p className={styles.eyebrow}>LANGKAH PEMILIK <span>3 HAL YANG MASIH DIBUTUHKAN</span></p><h2>Mulai<br /><em>dari sini.</em></h2></div>
+          <p>Ini tiga kelompok bahan/keputusan yang dibutuhkan dari pemilik, bukan seluruh syarat rilis. Semua 8 gate teknis tetap terbuka; produksi tetap NO-GO sampai bukti lengkap dan pemilik menyetujui promosi.</p>
         </div>
         <div className={styles.gateList}>
           {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Menunggu"><i />MENUNGGU</span></article>)}
