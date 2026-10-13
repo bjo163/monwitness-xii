@@ -224,7 +224,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
-  assert.match(releaseGatesDoc, /Current local release status — tooling source `1aca0e7`, docs-only follow-up `8c91f46`.*clean archive.*passed 134\/134 tests.*production build.*existing local app remains on `127\.0\.0\.1:3199`.*no listener on `3000`.*baseline stamp command.*has not been run against Neon/);
+  assert.match(releaseGatesDoc, /Current local release status — verified tooling source `1aca0e7`.*clean archive.*passed 134\/134 tests.*production build.*16 smoke-contract tests.*existing local app remains on `127\.0\.0\.1:3199`.*no listener on `3000`.*baseline stamp command.*has not been run against Neon/);
   assert.match(releaseGatesDoc, /existing local app remains on `127\.0\.0\.1:3199`; the latest port check found no listener on `3000`/);
   assert.match(releaseGatesDoc, /Approved isolated Neon rehearsal of `0001`.*exact `0001` foreign-key DDL.*rollback restored `ON DELETE CASCADE`/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
