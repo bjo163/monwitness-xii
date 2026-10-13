@@ -26,6 +26,8 @@ Nine logical schemas and 16 tables exist on the **isolated Neon development bran
 ## Local development
 Requirements: Node.js 22+ and npm.
 
+To view the current local review, stay in the existing checkout on `codex/v11-release-readiness`. Its review commits have not been pushed or integrated. The clean-clone steps below check out remote `dev` and do not contain this current review.
+
 ```bash
 git clone https://github.com/bjo163/monwitness-xii.git
 cd monwitness-xii
