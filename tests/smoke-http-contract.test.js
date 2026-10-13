@@ -174,7 +174,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
   assert.match(p705Task, /134\/134/);
   assert.doesNotMatch(p705Task, /133\/133/);
-  assert.match(implementationChecklist, /P3-09 HTTP smoke tests.*Historical loopback smoke returned 39\/40.*current source reports `134\/134`.*production build serves.*current-source HTTP smoke passed 40\/40.*exact-release Preview smoke remains open/);
+  assert.match(implementationChecklist, /P3-09 HTTP smoke tests.*earlier baseline returned 40\/40.*expanded current-copy assertion now returns 39\/40.*all CSP, Auth, Archive, health, route, and art checks pass.*Refresh the same local server/);
   assert.match(releaseGatesDoc, /current app proxy has no sign-in attempt limiter; the PostgreSQL quota protects editor draft\/revision writes only/);
   assert.match(releaseGatesDoc, /installed `@neondatabase\/auth@0\.5\.0-beta` `NeonAuthConfig` exposes `baseUrl`, cookie settings, and logging; it has no `rateLimit` or `customRules` option/);
   assert.match(handoverStyles, /@media\(max-width:620px\)\{[\s\S]*?\.nav\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
@@ -253,7 +253,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(implementationChecklist, /remote exact-head Preview\/CI and connected Archive count remain open/);
   const fnd04Task = implementationTasks.find((line) => line.startsWith("| FND-04 |"));
   assert.match(fnd04Task, /\| \[ \] IN PROGRESS \|/);
-  assert.match(fnd04Task, /clean tracked source snapshot `4607504`.*Node 22\.23\.3\/npm 10\.9\.4.*129\/129.*smoke passed 40\/40/is);
+  assert.match(fnd04Task, /current expanded smoke.*returns 39\/40.*previous bundle.*Refresh the existing server on the same port/i);
   assert.match(fnd04Task, /connected Archive count, owner-authenticated paths, exact reviewed Preview, and GitHub Actions on local commits remain unverified/i);
   assert.match(implementationChecklist, /production remains NO-GO/);
   assert.match(releaseGatesDoc, /Editor mutation origin policy:/);
