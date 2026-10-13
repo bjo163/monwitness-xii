@@ -162,10 +162,10 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);
   assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
   assert.match(changelog, /2026-10-13 — Require explicit approval for public Archive entries.*`0005_public_index_approval`.*`f839e9d`.*`cdc1cba`/s);
-  assert.match(changelog, /Verify the exact current local review source.*`ca975bb`.*134\/134 tests.*40\/40/s);
+  assert.match(changelog, /Verify the current checkout on the CI Node release.*`e77fce3`.*Node.js 22\.23\.3.*134\/134 tests.*40\/40/s);
   assert.match(implementationChecklist, /P7-09 Release notes and changelog.*`CHANGELOG.md` records migration `0005_public_index_approval`.*default-deny behavior.*local verification/);
-  assert.match(implementationChecklist, /DoD-02 Tests pass.*Fresh archive of source checkpoint `ca975bb` passes 134\/134 tests/);
-  assert.match(implementationChecklist, /Exact clean local workflow refresh \(`ca975bb`; 2026-10-13\).*fresh `npm ci`.*239 locked packages.*passed 134\/134 tests, `db:check`, full audit.*actionlint.*production build/);
+  assert.match(implementationChecklist, /DoD-02 Tests pass.*Fresh archive of exact checkout `e77fce3` passes 134\/134 tests/);
+  assert.match(implementationChecklist, /Exact local CI-chain refresh \(`e77fce3`; 2026-10-13\).*241 locked packages.*fresh `npm ci`.*Node 22 passed 134\/134 tests, `db:check`, full audit.*actionlint.*production build/);
   const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
   assert.match(p705Task, /134\/134/);
   assert.doesNotMatch(p705Task, /133\/133/);
@@ -220,7 +220,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /separate populated-fixture PGlite test automatically executes the reviewed reverse-DDL sequence.*not published downgrade scripts/);
   assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
   assert.match(handoverDoc, /^## Current review checkpoint — 2026-10-13/m);
-  assert.match(handoverDoc, /Latest local-only checkpoint \(`ca975bb`; 2026-10-13\).*exact source.*Node 26\.5\.0\/npm 11\.17\.0.*134\/134.*production build.*smoke passed 40\/40.*127\.0\.0\.1:3199/);
+  assert.match(handoverDoc, /Latest local-only CI-chain checkpoint \(`e77fce3`; 2026-10-13\).*Node\.js 22\.23\.3.*SHA-256.*241 locked packages.*134\/134.*production build.*smoke runner passed 40\/40.*127\.0\.0\.1:3199/);
   assert.ok(handoverDoc.includes("verified application source baseline is `ca975bb` on `codex/v11-release-readiness`; it contains"));
   assert.ok(handoverDoc.includes("One local server listens at `127.0.0.1:3199`; no listener is open on 3000."));
   assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
@@ -231,7 +231,7 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
   assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
   assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
-  assert.match(releaseGatesDoc, /Exact current-source local verification \(`ca975bb`; 2026-10-13\).*environment-free archive.*Node 26\.5\.0\/npm 11\.17\.0.*134\/134.*production build.*HTTP smoke passed 40\/40.*127\.0\.0\.1:3199/);
+  assert.match(releaseGatesDoc, /Exact local CI-chain verification \(`e77fce3`; 2026-10-13\).*environment files.*Node\.js 22\.23\.3.*241 locked packages.*134\/134.*production build.*smoke runner passed 40\/40.*127\.0\.0\.1:3199/);
   assert.ok(releaseGatesDoc.includes("Superseded clean local checkpoint (`e2225a3`):** retained in git history. Current exact-source verification is recorded once above."));
   assert.match(releaseGatesDoc, /Approved isolated Neon rehearsal of `0001`.*exact `0001` foreign-key DDL.*rollback restored `ON DELETE CASCADE`/);
   assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);

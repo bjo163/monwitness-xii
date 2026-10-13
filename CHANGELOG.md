@@ -1,11 +1,11 @@
 # Changelog
 
-## 2026-10-13 — Verify the exact current local review source
+## 2026-10-13 — Verify the current checkout on the CI Node release
 
-- Exported exact application source checkpoint `ca975bb` without environment files; fresh `npm ci` installed 239 locked packages on Node 26.5.0/npm 11.17.0.
-- Passed 134/134 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint .github/workflows/quality.yml`, and the Next.js production build. Local-profile CSP-required HTTP smoke passed 40/40 against the existing loopback server on port 3199; no temporary listener was opened.
+- Exported exact checkout `e77fce3` without environment files; verified the official Node.js 22.23.3 Windows x64 archive with SHA-256 `2b0ff57b049cda1bbcea2240eec20467018713c1efe1f7360c2681859b90ed71`. Fresh `npm ci` installed 241 locked packages with npm 10.9.9.
+- Passed 134/134 tests, `db:check`, full `npm audit` (0 vulnerabilities), `actionlint .github/workflows/quality.yml`, and the Next.js production build under Node 22. The Node 22 HTTP smoke runner passed 40/40 against the existing loopback app on port 3199; it did not start or restart a server.
 - npm repeated the Neon Auth UI peer/deprecation warnings and withheld install scripts for `core-js`/`esbuild`; these warnings did not fail the recorded checks.
-- Reconciled the handover, release gates, Grand Plan checklist, and changelog to identify `ca975bb` as the exact verified application source checkpoint; no application source or visual asset changed in this documentation follow-up.
+- Reconciled the handover, release gates, Grand Plan checklist, and changelog to identify `e77fce3` as the exact verified checkout; application source files are unchanged from code checkpoint `ca975bb`.
 - This is local evidence only; no remote CI, Preview, Neon/Auth, push, or deployment was performed.
 
 ## 2026-10-13 — Require explicit approval for public Archive entries
