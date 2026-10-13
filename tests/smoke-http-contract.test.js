@@ -140,7 +140,8 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /134 \/ 134/);
   assert.match(smokeScript, /t\.includes\("134 \/ 134"\)/);
   assert.match(handoverPage, /40 \/ 40/);
-  assert.match(handoverPage, /Current-source build · loopback :3199/);
+  assert.match(handoverPage, /baseline HTTP smoke/);
+  assert.match(handoverPage, /Earlier run · freshness follow-up below/);
   assert.match(smokeScript, /t\.includes\("40 \/ 40"\)/);
   assert.match(handoverPage, /NOT CONNECTED/);
   assert.match(handoverPage, /This checkout is ahead of the remote PR head/);
@@ -153,13 +154,14 @@ test("local handover reports current local evidence and keeps production NO-GO",
   assert.match(handoverPage, /Putuskan identitas dan pemulihan/);
   assert.match(handoverPage, /WAIT-03/);
   assert.match(handoverPage, /Lengkapi bukti sumber Archive/);
-  assert.match(handoverPage, /Latest local run · 13 Oct 2026/);
-  assert.match(handoverPage, /Node 22\.23\.3\/npm 10\.9\.9.*241 locked packages.*134\/134 tests.*Node 22 HTTP smoke runner passed 40\/40.*existing visual app.*server itself was not restarted under Node 22/);
+  assert.match(handoverPage, /Local evidence · 13 Oct 2026/);
+  assert.match(handoverPage, /Node 22\.23\.3\/npm 10\.9\.9.*241 locked packages.*134\/134 tests.*initial HTTP smoke run was 40\/40.*latest run was 39\/40.*previous handover bundle/);
   assert.doesNotMatch(handoverPage, /39 \/ 40|stale 129-test bundle|Local HTTP smoke must be rerun/);
   assert.doesNotMatch(handoverPage, /Fresh exact tracked-tree reproduction at commit 2f43d14/);
   assert.match(handoverPage, /Revalidated locally · CI Node 22\.23\.3/);
   assert.match(smokeScript, /t\.includes\("Revalidated locally · CI Node 22\.23\.3"\)/);
   assert.match(smokeScript, /t\.includes\("Node 22\.23\.3\/npm 10\.9\.9"\)/);
+  assert.match(smokeScript, /t\.includes\("latest run was 39\/40"\)/);
   assert.match(smokeScript, /!t\.includes\("Node 26\.5\.0: 134\/134 tests"\)/);
   assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
   assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);

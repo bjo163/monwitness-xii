@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-13 — Clarify handover smoke freshness
+
+- Relabeled the dashboard's 40/40 HTTP figure as the earlier baseline result. The follow-up smoke now requires the Node 22 evidence copy and reports 39/40 against the already-running server because `/handover` still serves its previous bundle.
+- Updated the engineering handover and release-gate register to distinguish the historical green run from the latest stale-bundle check. No extra server, port, deployment, push, or database change was made.
+- Current source passes 134/134 tests, `db:check`, full dependency audit (0 findings), `actionlint`, and production build on Node 22.23.3. Production remains NO-GO.
+
 ## 2026-10-13 — Verify the current checkout on the CI Node release
 
 - Exported exact checkout `e77fce3` without environment files; verified the official Node.js 22.23.3 Windows x64 archive with SHA-256 `2b0ff57b049cda1bbcea2240eec20467018713c1efe1f7360c2681859b90ed71`. Fresh `npm ci` installed 241 locked packages with npm 10.9.9.
