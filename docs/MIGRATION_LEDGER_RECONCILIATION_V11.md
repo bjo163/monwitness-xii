@@ -53,9 +53,23 @@ This mode validates the DSN's host and database against the independently suppli
 
 1. Take and verify a recoverable backup of the development branch, or make an isolated Neon clone and confirm the target identity before any write.
 2. Run the read-only baseline reconciliation command above against the exact populated development target. Stop on any mismatch.
-3. Obtain explicit owner approval to stamp this exact target. The approval must name the development branch and acknowledge that stamping records existing schema as migration `0000`; it does not execute the baseline SQL.
-4. Create the `drizzle` schema and standard `drizzle.__drizzle_migrations` table if absent, then insert exactly the `0000` hash and timestamp shown above. Stop if any ledger already exists or if the recorded baseline does not match.
-5. Before any migration command, independently confirm the endpoint host and database name in Neon, set `EXPECTED_DATABASE_HOST`, `EXPECTED_DATABASE_NAME`, and `CONFIRM_DATABASE_MIGRATION=YES`, and review the exact migration plan. `npm run db:migrate` enforces these local preconditions before starting Drizzle; this guard does not itself prove the endpoint-to-branch mapping or grant owner approval. The journal now contains migrations `0001` through `0004`; do not stop after applying only `0001`/`0002` and then expect the current verifier to pass, because it requires every journal entry. Review the complete ordered plan for all four migrations against the populated dev schema before applying the reviewed set: `0001` retention, `0002` editor-write limits, `0003` editor-write freeze control, and `0004` freeze operator/reason audit fields. Do not apply the `0000` baseline SQL to this populated database. If the owner chooses to defer `0003`/`0004`, that requires a separately reviewed, repository-consistent migration plan and verifier/journal strategy before the database is touched; do not create a partial ledger by hand.
+3. Obtain explicit owner approval to stamp this exact target. The approval must name development branch `br-green-butterfly-b51kp4b1` and acknowledge that stamping records existing schema as migration `0000`; it does not execute baseline SQL. No approval to stamp persistent development has been given.
+4. After approval, independently confirm the URL's Neon host/database maps to that exact branch. In the same PowerShell process, set the normal target variables from the verified endpoint details, then run the guarded one-time stamp command:
+
+   ```powershell
+   $env:CONFIRM_BASELINE_STAMP = "br-green-butterfly-b51kp4b1"
+   $env:CONFIRM_DATABASE_MIGRATION = "YES"
+   try {
+     npm run db:stamp-baseline
+     if ($LASTEXITCODE -ne 0) { throw "Baseline stamp did not complete." }
+   } finally {
+     Remove-Item Env:CONFIRM_BASELINE_STAMP -ErrorAction SilentlyContinue
+     Remove-Item Env:CONFIRM_DATABASE_MIGRATION -ErrorAction SilentlyContinue
+   }
+   ```
+
+   This command reruns the read-only baseline verifier, then submits one PostgreSQL `DO` statement that rechecks the ledger is absent, the 16-table/15-story baseline counts, the original `CASCADE` FK, and absence of `0002`–`0004` feature tables before atomically creating the standard Drizzle ledger and inserting the exact `0000` file hash and journal timestamp. It refuses any other branch confirmation and any pre-existing ledger. If the client reports an unknown outcome, inspect the ledger read-only before retrying. The command does not prove the URL-to-branch mapping; the owner/operator must check that independently. Its PGlite test does not authorize a persistent write.
+5. After the `0000` row is independently confirmed, review the complete ordered plan against the populated dev schema before applying all remaining journal entries. Independently reconfirm the endpoint host and database in Neon, set `EXPECTED_DATABASE_HOST`, `EXPECTED_DATABASE_NAME`, and `CONFIRM_DATABASE_MIGRATION=YES` only for the approved operation, then run `npm run db:migrate`. It applies `0001` retention, `0002` editor-write limits, `0003` editor-write freeze control, and `0004` freeze operator/reason audit fields; do not stop after only `0001`/`0002` because the current verifier requires every journal entry. Do not apply the `0000` baseline SQL to this populated database. If the owner chooses to defer `0003`/`0004`, that requires a separately reviewed repository-consistent migration plan and verifier/journal strategy before the database is touched; do not create a partial ledger by hand.
 6. Run normal `npm run db:verify`. It checks current schema shape and requires the ledger rows to match every journal migration's SHA-256 and timestamp in order, including the row count. A missing, stale, reordered, or unexpected row makes verification fail. Independently confirm the FK is `RESTRICT`, `system.editor_write_limits` exists, `system.editor_write_controls` has exactly one global row, and `writes_frozen` is `false` after migrations; confirm stories remain 15 and no draft/revision/audit data changed unexpectedly. The verifier is read-only; it has not yet been run against the persistent development branch in this checkout.
 7. Keep production separate. Its current root branch has no application tables; it needs a separately reviewed initial-schema and content rollout plan, not a populated-dev baseline stamp.
 

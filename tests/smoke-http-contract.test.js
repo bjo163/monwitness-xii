@@ -275,9 +275,13 @@ test("handover automated-test metric matches the declared Node test suite size",
 });
 
 test("populated development migration runbook accounts for the entire current journal", () => {
-  assert.match(migrationReconciliationDoc, /journal now contains migrations `0001` through `0004`/);
-  assert.match(migrationReconciliationDoc, /do not stop after applying only `0001`\/`0002`/);
-  assert.match(migrationReconciliationDoc, /complete ordered plan for all four migrations/);
+  assert.match(migrationReconciliationDoc, /After the `0000` row is independently confirmed[\s\S]*run `npm run db:migrate`/);
+  assert.match(migrationReconciliationDoc, /do not stop after only `0001`\/`0002`/);
+  assert.match(migrationReconciliationDoc, /review the complete ordered plan[\s\S]*applying all remaining journal entries/);
+  assert.match(migrationReconciliationDoc, /npm run db:stamp-baseline/);
+  assert.match(migrationReconciliationDoc, /CONFIRM_BASELINE_STAMP = "br-green-butterfly-b51kp4b1"/);
+  assert.match(migrationReconciliationDoc, /one PostgreSQL `DO` statement[\s\S]*atomically creating the standard Drizzle ledger/);
+  assert.match(migrationReconciliationDoc, /No approval to stamp persistent development has been given/);
   assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
   assert.match(migrationReconciliationDoc, /PGlite fixture coverage but have not been applied to a persistent Neon database/);
   assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);

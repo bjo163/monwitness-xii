@@ -6,6 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { readMigrationFiles } from "drizzle-orm/migrator";
+import { createBaselineStampSql } from "../lib/baseline-stamp.js";
 
 const initial = await readFile(new URL("../drizzle/0000_0000_initial_v11.sql", import.meta.url), "utf8");
 const retention = await readFile(new URL("../drizzle/0001_initial_v11.sql", import.meta.url), "utf8");
@@ -232,11 +233,59 @@ test("15-story populated baseline, full migration apply, and reverse DDL execute
   }));
   assert.equal(expectedLedger.length, 5);
 
+  await drizzleClient.exec(initial);
+  await drizzleClient.query(`
+    INSERT INTO archive.stories(slug,title,season,synopsis,status,experience_type,original_source_status)
+    SELECT
+      'stamp-fixture-' || lpad(n::text,2,'0'),
+      'Synthetic baseline stamp story ' || n,
+      'V11 rehearsal',
+      'Synthetic index only.',
+      'published',
+      'comic',
+      'source_needed'
+    FROM generate_series(1,15) AS n
+  `);
+  const baselineEntry = expectedLedger[0];
+  const stampSql = createBaselineStampSql({ hash: baselineEntry.hash, createdAt: baselineEntry.created_at });
+
+  const mismatchedClient = new PGlite();
+  t.after(() => mismatchedClient.close());
+  await mismatchedClient.exec(initial);
+  await mismatchedClient.query(`
+    INSERT INTO archive.stories(slug,title,status,original_source_status)
+    SELECT 'mismatched-stamp-' || n, 'Mismatched fixture ' || n, 'published', 'source_needed'
+    FROM generate_series(1,14) AS n
+  `);
+  await assert.rejects(mismatchedClient.exec(stampSql), /Archive baseline counts differ/);
+  const mismatchedLedger = await mismatchedClient.query(`
+    SELECT to_regclass('drizzle.__drizzle_migrations') IS NOT NULL AS ledger_exists
+  `);
+  assert.equal(mismatchedLedger.rows[0].ledger_exists, false, "a preflight mismatch must not leave a partial ledger");
+
+  await drizzleClient.exec(stampSql);
+  const stampedLedger = await drizzleClient.query(`
+    SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at
+  `);
+  assert.deepEqual(stampedLedger.rows, [baselineEntry]);
+  await assert.rejects(drizzleClient.exec(stampSql), /migration ledger already exists/);
+  const ledgerAfterDuplicateAttempt = await drizzleClient.query(`
+    SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at
+  `);
+  assert.deepEqual(ledgerAfterDuplicateAttempt.rows, [baselineEntry], "a repeated stamp must leave the single baseline ledger row unchanged");
+
   await migrate(drizzle(drizzleClient), migrationConfig);
   const appliedLedger = await drizzleClient.query(`
     SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at
   `);
   assert.deepEqual(appliedLedger.rows, expectedLedger);
+  const preservedStories = await drizzleClient.query(`
+    SELECT count(*)::int AS stories,
+      count(*) FILTER (WHERE status='published')::int AS published,
+      count(*) FILTER (WHERE original_source_status='source_needed')::int AS source_needed
+    FROM archive.stories
+  `);
+  assert.deepEqual(preservedStories.rows[0], { stories: 15, published: 15, source_needed: 15 });
 
   await migrate(drizzle(drizzleClient), migrationConfig);
   const rerunLedger = await drizzleClient.query(`

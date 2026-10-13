@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { getDrizzleCliGuardError } from "../lib/database-target.js";
 
 const script = fileURLToPath(new URL("../scripts/drizzle-safe.mjs", import.meta.url));
+const stampBaselineScript = fileURLToPath(new URL("../scripts/stamp-baseline.mjs", import.meta.url));
 const drizzleCli = fileURLToPath(new URL("../node_modules/drizzle-kit/bin.cjs", import.meta.url));
 const safeEnvironment = {
   ...process.env,
@@ -15,14 +16,44 @@ const run = (operation = "migrate", overrides = {}) => spawnSync(process.execPat
   encoding: "utf8",
   env: { ...safeEnvironment, ...overrides },
 });
+const runBaselineStamp = (overrides = {}) => spawnSync(process.execPath, [stampBaselineScript], {
+  encoding: "utf8",
+  env: { ...safeEnvironment, ...overrides },
+});
 
 test("npm migration command routes through its guard and refuses a missing URL", async () => {
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   assert.equal(packageJson.scripts["db:migrate"], "node scripts/drizzle-safe.mjs migrate");
+  assert.equal(packageJson.scripts["db:stamp-baseline"], "node scripts/stamp-baseline.mjs");
   assert.equal(packageJson.scripts["db:studio"], "node scripts/drizzle-safe.mjs studio");
   const result = run("migrate", { DATABASE_URL: "" });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /DATABASE_URL missing; Drizzle migrate not run/);
+
+  const missingBranchConfirmation = runBaselineStamp({
+    CONFIRM_BASELINE_STAMP: "",
+    CONFIRM_DATABASE_MIGRATION: "YES",
+  });
+  assert.equal(missingBranchConfirmation.status, 2);
+  assert.match(missingBranchConfirmation.stderr, /CONFIRM_BASELINE_STAMP.*exact development branch ID/);
+  assert.doesNotMatch(missingBranchConfirmation.stderr, /do-not-print|ep-dev/);
+
+  const wrongBranchConfirmation = runBaselineStamp({
+    CONFIRM_BASELINE_STAMP: "br-dark-sea-b5iws5uf",
+    CONFIRM_DATABASE_MIGRATION: "YES",
+  });
+  assert.equal(wrongBranchConfirmation.status, 2);
+  assert.match(wrongBranchConfirmation.stderr, /CONFIRM_BASELINE_STAMP.*exact development branch ID/);
+
+  const missingMigrationConfirmation = runBaselineStamp({
+    CONFIRM_BASELINE_STAMP: "br-green-butterfly-b51kp4b1",
+    CONFIRM_DATABASE_MIGRATION: "",
+    EXPECTED_DATABASE_HOST: "ep-dev.example.neon.tech",
+    EXPECTED_DATABASE_NAME: "neondb",
+  });
+  assert.equal(missingMigrationConfirmation.status, 2);
+  assert.match(missingMigrationConfirmation.stderr, /CONFIRM_DATABASE_MIGRATION=YES.*baseline stamp not run/);
+  assert.doesNotMatch(missingMigrationConfirmation.stderr, /do-not-print|ep-dev|neondb/);
 });
 
 test("migration command requires independently supplied host and database", () => {
