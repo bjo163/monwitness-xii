@@ -1,7 +1,8 @@
 # MoonWitness XII — FAST TRACK EXECUTION BOARD (V11.1)
-**Updated:** 2026-10-11 Asia/Jakarta
-**Source of truth:** [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3) and the complete downloadable Grand Master Plan V11.1 checklist.
-**Interpretation:** [x] verified evidence, [ ] not yet proven end-to-end. Deployment READY does not imply API passed runtime tests.
+**Historical snapshot:** 2026-10-11 Asia/Jakarta. Its task statuses and deployment notes are superseded by the current tracker and release gates.
+**Current sources of truth:** [Grand Plan implementation checklist](./GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md), [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3), and [release gates](./RELEASE_GATES_V11.md).
+**Source inventory:** this V11.1 execution board is present in the repository. `ENGINEERING_FAST_TRACK_V11.md` is also present, but it labels itself a superseded historical baseline. Neither file is the authoritative Grand Master Plan V11/V11.2 narrative/checklist; see GOV-01/SCOPE-01 in the current tracker. Do not use these historical snapshots as that missing source.
+**Interpretation:** checkmarks below reflect evidence known at the time; [ ] entries and all historical statuses must be reconciled against current records. Deployment READY does not imply API passed runtime tests.
 
 ## Foundation
 - [x] GitHub dev/main and Vercel project available.
@@ -19,8 +20,11 @@
 - [x] Draft creation and append-only revision scaffolds, both disabled when no token present.
 - [x] Atomic audit event statements added in editor draft/revision queries.
 - [x] 5 authorization-unit cases run locally, passed (isolated Node 22 test run); repository has tests/editor-auth.test.js.
-- [ ] Real editor authentication, roles, sessions, logout and protected writes.
-- [ ] End-to-end editor API authenticated write/revision/audit and concurrency tests.
+- [x] Neon Managed Auth is provisioned on the isolated development branch; production Auth is untouched.
+- [x] Sign-in-only admin gate, server-side role checks, same-origin checks and actor-attributed audit SQL are implemented.
+- [x] Anonymous runtime requests fail closed: Auth session 200/null, editor session 401, draft POST 401.
+- [ ] Provision owner-controlled admin account and verify sign-in, logout, session restore and authenticated write/revision/audit on dev.
+- [ ] Verify concurrent revisions, live actor mapping, rate limits and public read isolation.
 - [ ] Durable backups, privacy review, per-item evidence/original source recovery and publication gates.
 
 ## Future work (not DONE)
@@ -42,4 +46,6 @@ Dev accepted only after current build passes and endpoint and transaction tests 
 - [x] Frontend `/handover` page added; homepage links to the handover status.
 - [x] Current release decision: NO-GO for production until gates pass; no forced PR merge.
 - [ ] Verify `/handover` on deployed preview via HTTP; READY build alone is not enough.
-- [ ] Editor sessions/RBAC, migrations, CI checks and protected end-to-end tests.
+- [x] Development Auth integration and anonymous-denial checks.
+- [ ] Admin sign-in E2E, migrations, CI checks and protected write/concurrency tests.
+- [ ] MFA-capable production editor identity; current Neon Managed Auth configuration does not expose MFA.

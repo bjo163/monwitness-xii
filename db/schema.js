@@ -1,4 +1,5 @@
-import { pgSchema, uuid, text, timestamp, integer, boolean, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, text, timestamp, integer, boolean, jsonb, uniqueIndex, index, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const identity = pgSchema("identity");
 export const archive = pgSchema("archive");
@@ -23,10 +24,16 @@ export const stories = archive.table("stories", {
   experienceType: text("experience_type").notNull().default("comic"),
   originalSourceStatus: text("original_source_status").notNull().default("source_needed"),
   metadata: jsonb("metadata").notNull().default({}), createdAt: createdAt(),
-  updatedAt: timestamp("updated_at", {withTimezone:true}).notNull().defaultNow()
-});
+  updatedAt: timestamp("updated_at", {withTimezone:true}).notNull().defaultNow(),
+  publicIndexApproved: boolean("public_index_approved").notNull().default(false),
+  publicIndexApprovedBy: text("public_index_approved_by"),
+  publicIndexApprovedAt: timestamp("public_index_approved_at", { withTimezone: true }),
+  publicIndexApprovedUse: text("public_index_approved_use"),
+}, t => [
+  check("stories_public_index_approval_complete", sql`(NOT ${t.publicIndexApproved} OR (${t.originalSourceStatus} = 'source_verified' AND ${t.publicIndexApprovedBy} IS NOT NULL AND length(trim(${t.publicIndexApprovedBy})) > 0 AND ${t.publicIndexApprovedAt} IS NOT NULL AND ${t.publicIndexApprovedUse} IS NOT NULL AND length(trim(${t.publicIndexApprovedUse})) > 0))`),
+]);
 export const storyRevisions = archive.table("story_revisions", {
- id:id(), storyId:uuid("story_id").notNull().references(()=>stories.id,{onDelete:"cascade"}),
+ id:id(), storyId:uuid("story_id").notNull().references(()=>stories.id,{onDelete:"restrict"}),
  revision:integer("revision").notNull(), body:text("body").notNull(),
  sourceType:text("source_type").notNull().default("editorial"),
  notes:text("notes"), createdAt:createdAt()
@@ -97,4 +104,16 @@ export const auditEvents = system.table("audit_events", {
  event:text("event").notNull(), entity:text("entity").notNull(),
  entityId:uuid("entity_id"), payload:jsonb("payload").notNull().default({}),
  createdAt:createdAt()
+});
+export const editorWriteLimits = system.table("editor_write_limits", {
+  actorId: text("actor_id").primaryKey(),
+  windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull().defaultNow(),
+  requestCount: integer("request_count").notNull().default(0)
+});
+export const editorWriteControls = system.table("editor_write_controls", {
+  singletonId: text("singleton_id").primaryKey().default("global"),
+  writesFrozen: boolean("writes_frozen").notNull().default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  changedBy: text("changed_by").notNull().default("migration"),
+  changeReason: text("change_reason").notNull().default("initialization")
 });

@@ -1,0 +1,5 @@
+ALTER TABLE "archive"."stories" ADD COLUMN "public_index_approved" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "archive"."stories" ADD COLUMN "public_index_approved_by" text;--> statement-breakpoint
+ALTER TABLE "archive"."stories" ADD COLUMN "public_index_approved_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "archive"."stories" ADD COLUMN "public_index_approved_use" text;--> statement-breakpoint
+ALTER TABLE "archive"."stories" ADD CONSTRAINT "stories_public_index_approval_complete" CHECK ((NOT "archive"."stories"."public_index_approved" OR ("archive"."stories"."original_source_status" = 'source_verified' AND "archive"."stories"."public_index_approved_by" IS NOT NULL AND length(trim("archive"."stories"."public_index_approved_by")) > 0 AND "archive"."stories"."public_index_approved_at" IS NOT NULL AND "archive"."stories"."public_index_approved_use" IS NOT NULL AND length(trim("archive"."stories"."public_index_approved_use")) > 0)));

@@ -1,16 +1,114 @@
 import Link from "next/link";
-export const metadata={title:"MoonWitness XII — Release & Handover"};
-const done=["GitHub dev and main release branches","Neon development: 9 schemas and 16 tables","Story Archive with 15 editorial episode indices","Published-only archive API and frontend","Private editor write scaffolding with validation and audit records","Development build and deployment"];
-const pending=["End-to-end HTTP verification against protected preview","Real editor authentication, RBAC and actor attribution","Validated reversible Drizzle migration with database restore rehearsal","Green GitHub Actions run verification","PR #2 conflict resolution, approval and production release"];
-export default function HandoverPage(){return <main style={{background:"#0f1427",color:"#f8fafc",minHeight:"100vh",padding:"32px clamp(20px,5vw,80px)",fontFamily:"system-ui"}}>
-<nav style={{display:"flex",gap:22,flexWrap:"wrap"}}><Link href="/" style={{color:"#72e6ed"}}>← HOME</Link><Link href="/episodes" style={{color:"#72e6ed"}}>STORY ARCHIVE</Link><a style={{color:"#ffda73"}} href="https://github.com/bjo163/monwitness-xii/blob/dev/docs/HANDOVER_V11.md">HANDOVER DOCUMENT ↗</a></nav>
-<section style={{maxWidth:1050,margin:"72px auto 32px"}}><p style={{color:"#c9fa62",fontWeight:800,letterSpacing:3}}>RELEASE CONTROL • V11 HANDOVER EDITION</p>
-<h1 style={{fontSize:"clamp(42px,7vw,88px)",lineHeight:1.05,margin:"12px 0"}}>MISSION CONTROL <span style={{color:"#6ee6ef"}}>V11</span></h1>
-<p style={{fontSize:20,maxWidth:780}}>The comic universe is growing. The release follows evidence: what is actually ready, what still needs testing, and what must stay private.</p>
-<div style={{background:"#4a2d35",borderLeft:"5px solid #ffbb74",padding:22,margin:"26px 0",borderRadius:10}}><b>PRE-RELEASE • NO-GO FOR PRODUCTION</b><p>Development is available, but editor authentication, end-to-end tests and migration rehearsals remain required. Vercel READY means a build is deployed, not that production gates passed.</p></div>
-<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
-<section style={{background:"#192f3c",padding:25,borderRadius:18,border:"1px solid #62e2c7"}}><h2 style={{color:"#8affdd"}}>✓ Implemented in development</h2><ul style={{lineHeight:2}}>{done.map(x=><li key={x}>{x}</li>)}</ul></section>
-<section style={{background:"#322539",padding:25,borderRadius:18,border:"1px solid #e7abd1"}}><h2 style={{color:"#ffc2df"}}>◯ Release gates remaining</h2><ul style={{lineHeight:2}}>{pending.map(x=><li key={x}>{x}</li>)}</ul></section>
-</div><div style={{marginTop:40,display:"flex",flexWrap:"wrap",gap:14}}><a href="https://github.com/bjo163/monwitness-xii/issues/3" style={{background:"#d5ff69",color:"#161b27",padding:"14px 20px",fontWeight:800,borderRadius:10}}>TRACK GOAL #3 ↗</a><a href="https://github.com/bjo163/monwitness-xii/blob/dev/docs/FINALIZATION_V11_RELEASE_PLAN.md" style={{border:"2px solid #6be7e9",color:"#6be7e9",padding:"12px 20px",fontWeight:800,borderRadius:10}}>VIEW RELEASE PLAN ↗</a></div>
-<footer style={{marginTop:70,borderTop:"1px solid #536072",paddingTop:24,color:"#bdd0df"}}>FIND LIGHT IN DARKNESS · MERCY FIRST • HUMANITY FIRST • EGO LAST · COMEDY ON. SHALAWAT ON.</footer>
-</section></main>}
+import styles from "./handover.module.css";
+
+export const metadata = { title: "MoonWitness XII — Project Status" };
+
+const checks = [
+  { value: "134 / 134", label: "automated tests", detail: "Clean local run · Node 22.23.3", tone: "pink" },
+  { value: "40 / 40", label: "baseline HTTP smoke", detail: "Earlier run · freshness follow-up below", tone: "cyan" },
+  { value: "0", label: "audit findings", detail: "Current checkout · full dependency audit", tone: "lime" },
+  { value: "PASS", label: "migration replay", detail: "Current checkout · db:check", tone: "gold" },
+];
+
+const verified = [
+  "Every HTML page receives a fresh script CSP nonce; smoke checks nonce rotation and every script tag.",
+  "Script and style policies use per-request nonces; the old unsafe-inline CSP and inline style attributes have been removed.",
+  "Editor writes require a verified email, an Auth admin role, the exact owner allowlist, same-origin requests, fresh provider session checks, and actor-attributed audit SQL. Sign-in/sign-out POSTs require a same-origin Origin and accept only same-origin Fetch Metadata when present; draft and revision writes share a database quota, and every handler response is no-store.",
+  "Public Archive returns its five editorial fields only after per-entry, defined-use approval; source-needed stories stay hidden.",
+  "Schema verification detects untracked RLS, CHECK, policy, and trigger drift; the catalog regression is local PGlite evidence.",
+  "Database routes require independent host/database matches, reject connection-identity query overrides, and require TLS; readiness reports connectivity only.",
+  "Draft and revision APIs reject unknown fields; the database freeze also gates both writes atomically and records its operator and reason.",
+  "CI workflow actions use immutable commit SHAs and Dependabot checks for action updates weekly.",
+];
+
+const gates = [
+  { id: "WAIT-01", title: "Unggah dokumen rencana V11 dan V11.2", text: "Repo berisi prompt kerja dan checklist turunan, bukan rencana otoritatif. Unggah dokumen aslinya agar setiap kriteria dapat dipetakan ke kode dan bukti tanpa menebak." },
+  { id: "WAIT-02", title: "Sediakan identitas admin dan target backup", text: "Neon Auth dev masih membolehkan signup langsung, tidak mewajibkan verifikasi email, dan tidak menyediakan MFA pada konfigurasi ini. Sebelum editor dipakai, provision identitas admin dengan MFA-capable policy dan verifikasi sign-in, role, allowlist, serta kontrol signup/throttling. Neon Free tidak menyediakan snapshot harian 30 hari; pilih tujuan backup privat tanpa biaya tambahan. Belum ada restore data aplikasi atau RPO/RTO yang teruji." },
+  { id: "WAIT-03", title: "Lengkapi bukti sumber 15 cerita Archive", text: "Untuk setiap cerita, sediakan materi asli, kredit, bukti hak penggunaan, dan keputusan privasi untuk cakupan indeks publik. Semuanya tetap source-needed sampai bukti ditinjau dan dicatat." },
+];
+
+const evidenceLimits = [
+  { label: "DATABASE", value: "NOT CONNECTED", detail: "No local DATABASE_URL or verified target is configured. Database routes fail closed; Neon behavior is not tested here.", tone: "pink" },
+  { label: "REVIEW BRANCH", value: "LOCAL ONLY", detail: "This checkout is ahead of the remote PR head. Current remote CI does not cover these local commits.", tone: "gold" },
+  { label: "RELEASE", value: "3 ACTION GROUPS", detail: "Ringkasan ini mengelompokkan pekerjaan yang menunggu pemilik; semua 8 gate teknis tetap OPEN di release register dan produksi tetap NO-GO.", tone: "aqua" },
+];
+
+export default function HandoverPage() {
+  return (
+    <main className={styles.page}>
+      <header className={styles.topbar}>
+        <Link className={styles.wordmark} href="/">MOONWITNESS <span>XII</span></Link>
+        <nav aria-label="Main navigation" className={styles.nav}>
+          <Link href="/episodes">STORY ARCHIVE</Link>
+          <Link href="/team">THE BATTERIES</Link>
+          <a href="#release-gates">NEXT STEPS <span>03</span></a>
+        </nav>
+        <span className={styles.localBadge}><i /> LOCAL REVIEW</span>
+      </header>
+
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>PROJECT STATUS <span>V11 / 13 OCT 2026</span></p>
+          <h1>MISSION<br /><em>CONTROL</em></h1>
+          <p className={styles.intro}>Yang sudah beres, yang masih menunggu keputusan, dan langkah berikutnya—ringkas, lokal, tanpa deployment.</p>
+          <div className={styles.heroLinks}>
+            <a href="#release-gates" className={styles.primaryButton}>LIHAT 3 LANGKAH <span>↘</span></a>
+            <Link href="/team" className={styles.secondaryButton}>MEET THE BATTERIES <span>↗</span></Link>
+          </div>
+        </div>
+        <div className={styles.statusCard}>
+          <div className={styles.statusTop}><span>LOCAL REVIEW • NO-GO FOR PRODUCTION</span><span className={styles.statusLight}>● HOLD</span></div>
+          <div className={styles.statusStamp}>NO<span>GO</span></div>
+          <h2>Production release is on hold.</h2>
+          <p>Local code and visual review can continue. Production promotion waits for verified security, database recovery, source rights, independent review, and owner approval.</p>
+          <div className={styles.statusFoot}><span>BRANCH</span><code>codex/v11-release-readiness</code></div>
+          <div className={styles.statusFoot}><span>NETWORK</span><b>LOCAL ONLY · NO DEPLOY</b></div>
+        </div>
+        <div className={styles.sunburst} aria-hidden="true">✳</div>
+        <span className={styles.heroIndex}>MW—12</span>
+      </section>
+
+      <section className={styles.metrics} aria-label="Local verification results">
+        {checks.map((check, index) => (
+          <article className={`${styles.metric} ${styles[check.tone]}`} key={check.label}>
+            <span className={styles.metricIndex}>0{index + 1} / VERIFIED</span>
+            <strong>{check.value}</strong>
+            <h2>{check.label}</h2>
+            <p>{check.detail}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className={styles.evidenceSection}>
+        <div className={styles.sectionHeading}>
+          <p className={styles.eyebrow}>WHAT THE LOCAL EVIDENCE SAYS <span>CHECKPOINT · 13 OCT</span></p>
+          <h2>Sudah dicek,<br /><em>ini batasnya.</em></h2>
+        </div>
+        <div className={styles.evidenceList}>
+          {verified.map((item, index) => <div className={styles.evidenceItem} key={item}><span>0{index + 1}</span><p>{item}</p><b>✓</b></div>)}
+          <div className={styles.limitsGrid} aria-label="Evidence boundaries">
+            {evidenceLimits.map((item) => <article className={`${styles.limitCard} ${styles[item.tone]}`} key={item.label}><span>{item.label} · EVIDENCE BOUNDARY</span><strong>{item.value}</strong><p>{item.detail}</p></article>)}
+          </div>
+          <div className={styles.evidenceNote}><strong>Local evidence · 13 Oct 2026</strong><p>Clean local CI-chain replay on Node 22.23.3/npm 10.9.9: fresh `npm ci` installed 241 locked packages, then 134/134 tests, `db:check`, full dependency audit with 0 findings, production build, and `actionlint` passed. The initial HTTP smoke run was 40/40 against the visual app at `127.0.0.1:3199`. A stricter handover-freshness assertion was added afterward; its latest run was 39/40 because that running process still serves the previous handover bundle. The current app source and build are ready. To see the updated handover in the browser, restart that existing server on port 3199; do not start another server or use another port. No deployment was used. Editor access requires verified email, Neon admin role, and exact server-side user allowlist. Hosted dev Auth still allows direct public signup and does not require email verification; its configured provider does not supply MFA, so identity policy remains open.</p><p>The isolated Neon rehearsal covers `0000`–`0002`; migration `0001` was applied and rolled back with the baseline FK and ledger restored. Migrations `0003`–`0005` and persistent development rollout remain open. Neon Free does not meet the selected daily/30-day retention target, and no private no-cost backup destination or representative-data restore is verified; RPO/RTO remain unset. No Neon URL is configured locally; database and Archive APIs fail closed with `503`. All 15 Archive entries remain `source_needed`; local public lists/details now require a separate, default-false approval for the exact metadata use. Migration `0005` is not applied to Neon. AETHERION progress remains browser-local; persistent saves and seed authority remain open.</p><p>The authoritative Grand Master Plan V11/V11.2 has not been uploaded. No live owner-auth test, exact-head remote CI/Preview, or current remote branch review is claimed.</p></div>
+        </div>
+      </section>
+
+      <section className={styles.gatesSection} id="release-gates" aria-label="Release gates remaining">
+        <div className={styles.gatesHeader}>
+          <div><p className={styles.eyebrow}>LANGKAH PEMILIK <span>3 HAL YANG MASIH DIBUTUHKAN</span></p><h2>Mulai<br /><em>dari sini.</em></h2></div>
+          <p>Ini tiga kelompok bahan/keputusan yang dibutuhkan dari pemilik, bukan seluruh syarat rilis. Semua 8 gate teknis tetap terbuka; produksi tetap NO-GO sampai bukti lengkap dan pemilik menyetujui promosi.</p>
+        </div>
+        <div className={styles.gateList}>
+          {gates.map((gate) => <article className={styles.gate} key={gate.id}><span className={styles.gateId}>{gate.id}</span><div><h3>{gate.title}</h3><p>{gate.text}</p></div><span className={styles.gateMark} aria-label="Menunggu"><i />MENUNGGU</span></article>)}
+        </div>
+        <div className={styles.docsRow}>
+          <div>RELEASE GATES <code>docs/RELEASE_GATES_V11.md</code></div>
+          <div>BACKUP / RESTORE <code>docs/BACKUP_RESTORE_RUNBOOK_V11.md</code></div>
+          <div>IMPLEMENTATION MAP <code>docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md</code></div>
+        </div>
+      </section>
+
+      <footer className={styles.footer}><span>MOONWITNESS XII · LOCAL ENGINEERING REVIEW</span><span>MERCY FIRST · HUMANITY FIRST · EGO LAST</span></footer>
+    </main>
+  );
+}

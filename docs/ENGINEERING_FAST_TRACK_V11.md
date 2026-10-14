@@ -1,5 +1,7 @@
 # MoonWitness XII — V11 Fast-track engineering report
 
+> **Historical baseline; superseded.** This short report predates the current Auth integration, editor identity allowlist, migration chain, limiter, and HTTP-smoke checks. Its statuses and limitations below describe the earlier checkpoint only. Use [HANDOVER_V11.md](./HANDOVER_V11.md), [RELEASE_GATES_V11.md](./RELEASE_GATES_V11.md), and [Issue #3](https://github.com/bjo163/monwitness-xii/issues/3) for current evidence. Do not treat this file as a current architecture or release status report.
+
 ## What is verified
 - Vercel preview for dev commit a1ae3f9f: READY.
 - Neon development branch br-green-butterfly-b51kp4b1: 9 domains, 16 tables, 15 public editorial indices, 0 drafts/revisions/audits (read-only verified).

@@ -1,0 +1,354 @@
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import test from "node:test";
+import { readFile, readdir } from "node:fs/promises";
+
+const script = fileURLToPath(new URL("../scripts/smoke-http.mjs", import.meta.url));
+const nextConfig = await readFile(new URL("../next.config.js", import.meta.url), "utf8");
+const qualityWorkflow = await readFile(new URL("../.github/workflows/quality.yml", import.meta.url), "utf8");
+const vercelDeploymentPolicy = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const packageLock = JSON.parse(await readFile(new URL("../package-lock.json", import.meta.url), "utf8"));
+const dependabotConfig = await readFile(new URL("../.github/dependabot.yml", import.meta.url), "utf8");
+const smokeScript = await readFile(new URL("../scripts/smoke-http.mjs", import.meta.url), "utf8");
+const editorLoginPage = await readFile(new URL("../app/editor/login/page.jsx", import.meta.url), "utf8");
+const editorLoginView = await readFile(new URL("../app/editor/login/view.jsx", import.meta.url), "utf8");
+const archivePage = await readFile(new URL("../app/episodes/page.jsx", import.meta.url), "utf8");
+const handoverPage = await readFile(new URL("../app/handover/page.jsx", import.meta.url), "utf8");
+const handoverStyles = await readFile(new URL("../app/handover/handover.module.css", import.meta.url), "utf8");
+const handoverDoc = await readFile(new URL("../docs/HANDOVER_V11.md", import.meta.url), "utf8");
+const implementationChecklist = await readFile(new URL("../docs/GRAND_MASTER_PLAN_IMPLEMENTATION_CHECKLIST.md", import.meta.url), "utf8");
+const releaseGatesDoc = await readFile(new URL("../docs/RELEASE_GATES_V11.md", import.meta.url), "utf8");
+const migrationReconciliationDoc = await readFile(new URL("../docs/MIGRATION_LEDGER_RECONCILIATION_V11.md", import.meta.url), "utf8");
+const finalizationPlan = await readFile(new URL("../docs/FINALIZATION_V11_RELEASE_PLAN.md", import.meta.url), "utf8");
+const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+const changelog = await readFile(new URL("../CHANGELOG.md", import.meta.url), "utf8");
+const proxySource = await readFile(new URL("../proxy.js", import.meta.url), "utf8");
+const rootLayout = await readFile(new URL("../app/layout.jsx", import.meta.url), "utf8");
+const testsDirectory = new URL(".", import.meta.url);
+
+function runSmoke(env) {
+  return spawnSync(process.execPath, [script], {
+    encoding: "utf8",
+    env: { ...process.env, SMOKE_BASE_URL: "", SMOKE_PROFILE: "", ...env },
+  });
+}
+
+test("local HTTP smoke refuses non-loopback targets before making requests", () => {
+  const result = runSmoke({ SMOKE_PROFILE: "local", SMOKE_BASE_URL: "https://example.invalid" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /only permits loopback hosts/);
+});
+
+test("HTTP smoke rejects URLs containing credentials without echoing them", () => {
+  const result = runSmoke({ SMOKE_PROFILE: "preview", SMOKE_BASE_URL: "https://private-user:secret-value@example.invalid" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /must not contain credentials/);
+  assert.doesNotMatch(result.stderr, /private-user|secret-value/);
+});
+
+test("HTTP smoke rejects unsupported profiles before making requests", () => {
+  const result = runSmoke({ SMOKE_PROFILE: "other", SMOKE_BASE_URL: "http://localhost:3000" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /must be preview or local/);
+});
+
+test("global Next.js headers harden pages and static assets", () => {
+  assert.equal(vercelDeploymentPolicy.git.deploymentEnabled["codex/v11-release-readiness"], false);
+  assert.match(nextConfig, /source:\s*["']\/:path\*["']/);
+  assert.match(nextConfig, /X-Content-Type-Options["']?,\s*value:\s*["']nosniff/);
+  assert.match(nextConfig, /X-Frame-Options["']?,\s*value:\s*["']DENY/);
+  assert.match(nextConfig, /Referrer-Policy["']?,\s*value:\s*["']strict-origin-when-cross-origin/);
+  assert.match(nextConfig, /Permissions-Policy["']?,\s*value:\s*["']camera=\(\), microphone=\(\), geolocation=\(\)/);
+  assert.match(nextConfig, /const noStoreHeaders = \[\{ key: ["']Cache-Control["'], value: ["']no-store["'] \}\]/);
+  assert.match(nextConfig, /source:\s*["']\/api\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
+  assert.match(nextConfig, /source:\s*["']\/editor\/:path\*["'][\s\S]*?headers:\s*noStoreHeaders/);
+  assert.match(editorLoginPage, /export const dynamic\s*=\s*["']force-dynamic["']/);
+  assert.match(smokeScript, /\/editor\/login",\(r,b,t\)=>r\.status===200&&r\.headers\.get\("cache-control"\)==="no-store"&&hasStrictPageCsp\(r,b,t\)/);
+  assert.match(archivePage, /PUBLIC EDITORIAL INDEX/);
+  assert.doesNotMatch(archivePage, /DEVELOPMENT VAULT/);
+  assert.match(smokeScript, /\/episodes",\(r,b,t\)=>r\.status===200&&t\.includes\("PUBLIC EDITORIAL INDEX"\)&&t\.includes\(PUBLIC_ARCHIVE_NOTICE\)/);
+  assert.doesNotMatch(nextConfig, /Content-Security-Policy|unsafe-inline|process\.env\.NODE_ENV/);
+  assert.match(smokeScript, /SMOKE_EXPECT_CSP/);
+  assert.match(proxySource, /crypto\.randomUUID\(\)/);
+  assert.match(proxySource, /source:\s*["']\/\(\(\?!api\|_next\/static\|_next\/image\|favicon\.ico\|characters\/\)\.\*\)["']/);
+  assert.match(proxySource, /script-src 'self' 'nonce-\$\{nonce\}' 'strict-dynamic'/);
+  assert.match(proxySource, /fonts\.googleapis\.com/);
+  assert.match(proxySource, /fonts\.gstatic\.com/);
+  assert.match(proxySource, /style-src 'self' 'nonce-\$\{nonce\}' https:\/\/fonts\.googleapis\.com/);
+  assert.doesNotMatch(proxySource, /(?:script|style)-src[^,]*unsafe-inline/);
+  assert.match(rootLayout, /dynamic\s*=\s*["']force-dynamic["']/);
+  assert.match(smokeScript, /function hasStrictPageCsp/);
+  assert.match(smokeScript, /scriptNonce!==styleNonce/);
+  assert.match(smokeScript, /scriptPolicy\.includes\("'strict-dynamic'"\)/);
+  assert.equal((smokeScript.match(/api\/health",\(r,b\)=>r\.status===200&&r\.headers\.get\("content-security-policy"\)===null/g) ?? []).length, 2);
+  assert.match(smokeScript, /content-security-policy"\)===null&&r\.headers\.get\("content-type"/);
+  assert.match(smokeScript, /styleBlocks\.every/);
+  assert.match(smokeScript, /style-src\[\^;\]\*'unsafe-inline'/);
+  assert.equal(smokeScript.split('await check("/episodes/tick-tock-on-the-clock"').length - 1, 2);
+  assert.match(smokeScript, /checkFreshPageNonce\("\/"\)/);
+  assert.match(smokeScript, /scripts\.every/);
+  assert.match(handoverPage, /Every HTML page receives a fresh script CSP nonce/);
+  assert.match(handoverPage, /Script and style policies use per-request nonces/);
+  assert.doesNotMatch(nextConfig, /unsafe-eval/);
+});
+
+test("editor login explains owner provisioning and all editor-access requirements", () => {
+  assert.match(editorLoginView, /accounts are provisioned by the project owner/i);
+  assert.match(editorLoginView, /Neon Auth administrator role/);
+  assert.match(editorLoginView, /server-side editor allowlist/);
+  assert.match(handoverPage, /Editor writes require a verified email, an Auth admin role/);
+  assert.match(editorLoginView, /Verify email or set your password/);
+  assert.match(editorLoginView, /getEditorLoginAccessDecision/);
+  assert.match(editorLoginView, /role:data\?\.role,emailVerified:data\?\.emailVerified,canEdit:data\?\.canEdit/);
+  assert.match(editorLoginView, /verified email/);
+});
+
+test("local and Preview smoke enforce per-route Neon Auth methods", () => {
+  assert.equal((smokeScript.match(/api\/auth\/get-session",\(r\)=>r\.status===405&&r\.headers\.get\("allow"\)==="GET","POST"/g) ?? []).length, 2);
+  assert.equal((smokeScript.match(/api\/auth\/sign-in\/email",\(r\)=>r\.status===405&&r\.headers\.get\("allow"\)==="POST"/g) ?? []).length, 2);
+});
+
+test("local and Preview smoke verify that the Auth token route rejects signed-out requests", () => {
+  assert.equal((smokeScript.match(/api\/auth\/token",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===401\)\|\|\(r\.status===503&&b\?\.error==="Authentication is not configured"\)\)\)/g) ?? []).length, 2);
+  assert.equal(smokeScript.split('await check("/editor",').length - 1, 2, "both local and Preview profiles must verify anonymous editor denial");
+});
+
+test("local and Preview smoke enforce route-specific OPTIONS and HEAD behavior", () => {
+  assert.equal((smokeScript.match(/api\/auth\/sign-in\/email",\(r\)=>r\.status===204&&r\.headers\.get\("allow"\)==="POST","OPTIONS"/g) ?? []).length, 2);
+  assert.equal((smokeScript.match(/api\/auth\/get-session",\(r\)=>r\.status===405&&r\.headers\.get\("allow"\)==="GET","HEAD"/g) ?? []).length, 2);
+});
+
+test("local smoke checks public Archive detail projection and invalid-slug handling", () => {
+  assert.match(smokeScript, /api\/episodes\/tick-tock-on-the-clock",\(r,b\)=>r\.headers\.get\("cache-control"\)==="no-store"&&\(\(r\.status===404&&b\?\.error==="Not found"\)\|\|\(r\.status===503&&b\?\.error==="Archive unavailable"\)\)\)/);
+  assert.match(smokeScript, /api\/episodes\/INVALID%21",\(r,b\)=>r\.status===400&&r\.headers\.get\("cache-control"\)==="no-store"&&b\?\.error==="Invalid slug"/);
+});
+
+test("local smoke checks editor write responses are not cacheable", () => {
+  assert.match(smokeScript, /api\/editor\/drafts",\(r\)=>\[401,503\]\.includes\(r\.status\)&&r\.headers\.get\("cache-control"\)==="no-store","POST"/);
+  assert.match(smokeScript, /await check\("\/api\/auth\/sign-in\/email",\(r,b\)=>r\.status===403&&b\?\.error==="Cross-origin authentication request rejected","POST"\)/);
+  assert.match(smokeScript, /origin:"https:\/\/attacker\.example"/);
+  assert.match(smokeScript, /origin:parsedBase\.origin,"sec-fetch-site":"cross-site"/);
+  assert.match(smokeScript, /for\(const fetchSite of \["same-site","none","unknown"\]\)/);
+  assert.match(smokeScript, /headers:\{\.\.\.headers,\.\.\.extraHeaders\}/);
+});
+
+test("local handover reports current local evidence and keeps production NO-GO", () => {
+  assert.match(handoverPage, /title: "MoonWitness XII — Project Status"/);
+  assert.match(handoverPage, /PROJECT STATUS <span>V11/);
+  assert.doesNotMatch(handoverPage, /ENGINEERING HANDOVER/);
+  assert.match(handoverPage, /LOCAL REVIEW • NO-GO FOR PRODUCTION/);
+  assert.match(handoverPage, /134 \/ 134/);
+  assert.match(smokeScript, /t\.includes\("134 \/ 134"\)/);
+  assert.match(handoverPage, /40 \/ 40/);
+  assert.match(handoverPage, /baseline HTTP smoke/);
+  assert.match(handoverPage, /Earlier run · freshness follow-up below/);
+  assert.match(smokeScript, /t\.includes\("40 \/ 40"\)/);
+  assert.match(handoverPage, /NOT CONNECTED/);
+  assert.match(handoverPage, /This checkout is ahead of the remote PR head/);
+  assert.match(handoverPage, /3 ACTION GROUPS/);
+  assert.match(handoverPage, /semua 8 gate teknis tetap OPEN di release register dan produksi tetap NO-GO/);
+  assert.match(handoverPage, /Semua 8 gate teknis tetap terbuka; produksi tetap NO-GO/);
+  assert.match(handoverPage, /WAIT-01/);
+  assert.match(handoverPage, /Unggah dokumen rencana V11 dan V11\.2/);
+  assert.match(handoverPage, /Repo berisi prompt kerja dan checklist turunan, bukan rencana otoritatif/);
+  assert.match(handoverPage, /WAIT-02/);
+  assert.match(handoverPage, /Sediakan identitas admin dan target backup/);
+  assert.match(handoverPage, /Neon Auth dev masih membolehkan signup langsung.*tidak menyediakan MFA/);
+  assert.match(handoverPage, /Neon Free tidak menyediakan snapshot harian 30 hari/);
+  assert.match(handoverPage, /Belum ada restore data aplikasi atau RPO\/RTO yang teruji/);
+  assert.match(handoverPage, /WAIT-03/);
+  assert.match(handoverPage, /Lengkapi bukti sumber 15 cerita Archive/);
+  assert.match(handoverPage, /restart that existing server on port 3199; do not start another server or use another port/);
+  assert.match(handoverPage, /Local evidence · 13 Oct 2026/);
+  assert.match(handoverPage, /Node 22\.23\.3\/npm 10\.9\.9.*241 locked packages.*134\/134 tests.*initial HTTP smoke run was 40\/40.*latest run was 39\/40.*previous handover bundle/);
+  assert.doesNotMatch(handoverPage, /39 \/ 40|stale 129-test bundle|Local HTTP smoke must be rerun/);
+  assert.doesNotMatch(handoverPage, /Fresh exact tracked-tree reproduction at commit 2f43d14/);
+  assert.match(handoverPage, /Clean local run · Node 22\.23\.3/);
+  assert.match(smokeScript, /t\.includes\("Clean local run · Node 22\.23\.3"\)/);
+  assert.match(smokeScript, /t\.includes\("Node 22\.23\.3\/npm 10\.9\.9"\)/);
+  assert.match(smokeScript, /t\.includes\("latest run was 39\/40"\)/);
+  assert.match(smokeScript, /!t\.includes\("Node 26\.5\.0: 134\/134 tests"\)/);
+  assert.match(handoverPage, /draft and revision writes share a database quota, and every handler response is no-store/);
+  assert.match(handoverPage, /No live owner-auth test, exact-head remote CI\/Preview/);
+  assert.match(implementationChecklist, /P3-11 Add automated tests.*134 local tests/);
+  assert.match(changelog, /2026-10-13 — Require explicit approval for public Archive entries.*`0005_public_index_approval`.*`f839e9d`.*`cdc1cba`/s);
+  assert.match(changelog, /Verify the current checkout on the CI Node release.*`e77fce3`.*Node.js 22\.23\.3.*134\/134 tests.*40\/40/s);
+  assert.match(implementationChecklist, /P7-09 Release notes and changelog.*`CHANGELOG.md` records migration `0005_public_index_approval`.*default-deny behavior.*local verification/);
+  assert.match(implementationChecklist, /DoD-02 Tests pass.*Fresh archive of exact checkout `e77fce3` passes 134\/134 tests/);
+  assert.match(implementationChecklist, /Exact local CI-chain refresh \(`e77fce3`; 2026-10-13\).*241 locked packages.*fresh `npm ci`.*Node 22 passed 134\/134 tests, `db:check`, full audit.*actionlint.*production build/);
+  const p705Task = implementationChecklist.split("\n").find((line) => line.startsWith("| P7-05 Automated tests |"));
+  assert.match(p705Task, /134\/134/);
+  assert.doesNotMatch(p705Task, /133\/133/);
+  assert.match(implementationChecklist, /P3-09 HTTP smoke tests.*earlier baseline returned 40\/40.*expanded current-copy assertion now returns 39\/40.*all CSP, Auth, Archive, health, route, and art checks pass.*Refresh the same local server/);
+  assert.match(releaseGatesDoc, /current app proxy has no sign-in attempt limiter; the PostgreSQL quota protects editor draft\/revision writes only/);
+  assert.match(releaseGatesDoc, /installed `@neondatabase\/auth@0\.5\.0-beta` `NeonAuthConfig` exposes `baseUrl`, cookie settings, and logging; it has no `rateLimit` or `customRules` option/);
+  assert.match(handoverStyles, /@media\(max-width:620px\)\{[\s\S]*?\.nav\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(handoverStyles, /\.heroLinks\{display:grid;grid-template-columns:minmax\(0,1fr\);\}/);
+  assert.match(handoverStyles, /\.statusCard\{width:100%;max-width:100%;margin:0;padding:18px 16px;transform:none;\}/);
+  assert.match(handoverStyles, /\.limitsGrid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(handoverStyles, /\.limitCard\{display:grid;grid-template-columns:minmax\(0,1fr\) auto/);
+  assert.doesNotMatch(handoverPage, /Preview is live|Latest branch CI/);
+  assert.match(smokeScript, /"\/handover",\(r,b,t\)=>r\.status===200&&t\.includes\("LOCAL REVIEW • NO-GO FOR PRODUCTION"\)/);
+  assert.match(smokeScript, /t\.includes\("3 ACTION GROUPS"\).*t\.includes\("8 gate teknis tetap terbuka; produksi tetap NO-GO"\)/);
+  assert.match(smokeScript, /let smokeChecksTotal=0/);
+  assert.match(smokeScript, /let smokeChecksPassed=0/);
+  assert.match(smokeScript, /HTTP smoke checks: \$\{smokeChecksPassed\}\/\$\{smokeChecksTotal\} passed/);
+  const uiGateIds = [...handoverPage.matchAll(/\{ id: "(WAIT-\d{2})", title:/g)].map((match) => match[1]);
+  const docGateRows = [...releaseGatesDoc.matchAll(/^\| (G-[A-Z]{2,4}-\d{2}) \|.*\| OPEN \|/gm)].map((match) => match[1]);
+  assert.deepEqual(uiGateIds, ["WAIT-01", "WAIT-02", "WAIT-03"]);
+  assert.deepEqual(docGateRows, ["G-SEC-01", "G-AUTH-01", "G-AUTH-02", "G-DB-02", "G-DB-03", "G-ARC-01", "G-REL-01", "G-PLAN-01"], "detailed engineering release register remains separate from the owner-facing next steps");
+  const implementationTasks = implementationChecklist.split(/\r?\n/).filter((line) => /^\| [A-Z][A-Z0-9-]*-\d{2} \|/.exec(line));
+  const implementationTaskIds = implementationTasks.map((line) => line.split("|")[1].trim());
+  assert.ok(uiGateIds.every((id) => id.startsWith("WAIT-")), "owner-facing next steps use their own ID namespace");
+  assert.equal(uiGateIds.some((id) => implementationTaskIds.includes(id)), false, "owner-facing IDs must not collide with implementation task IDs");
+  assert.ok(implementationTasks.length >= 24, "prompt and release gaps must remain in the implementation tracker");
+  assert.equal(new Set(implementationTaskIds).size, implementationTaskIds.length, "implementation task IDs must be unique");
+  for (const line of implementationTasks) {
+    const columns = line.split("|").slice(1, -1).map((value) => value.trim());
+    assert.equal(columns.length, 10, `implementation task must include all ten required fields: ${line}`);
+    assert.ok(/^\[x\] DONE$|^\[ \] (IN PROGRESS|BLOCKED|TODO)$/.exec(columns[4]), `invalid task status: ${columns[4]}`);
+  }
+  assert.match(implementationChecklist, /Implementation-task IDs in this tracker are separate from the `G-`-prefixed release-gate IDs/);
+  const promptCrosswalk = implementationChecklist.split("### Attached master-prompt execution crosswalk")[1]?.split("## Story Archive, identity, and data integrity")[0] ?? "";
+  const promptItems = promptCrosswalk.split("|").map((cell) => cell.trim().split(" ")[0]).filter((cell) => cell.startsWith("P3-") || cell.startsWith("DoD-") || cell.startsWith("P7-"));
+  assert.equal(promptItems.length, 39);
+  assert.equal(new Set(promptItems).size, 39);
+  for (let index = 1; index <= 14; index += 1) {
+    assert.ok(promptItems.includes(`P3-${String(index).padStart(2, "0")}`));
+    assert.ok(promptItems.includes(`DoD-${String(index).padStart(2, "0")}`));
+  }
+  for (let index = 1; index <= 11; index += 1) assert.ok(promptItems.includes(`P7-${String(index).padStart(2, "0")}`));
+  assert.match(promptCrosswalk, /P7-01.*Not delivered to `dev` under the explicit local-only\/no-push instruction/);
+  assert.match(promptCrosswalk, /P7-11.*Keep NO-GO until every required gate is verified/);
+  assert.match(promptCrosswalk, /P3-07.*isolated Neon rehearsal covers only `0000`–`0002`/s);
+  assert.match(promptCrosswalk, /DoD-13.*No current exact-head Preview exists; user explicitly requested no deployment/);
+  assert.match(promptCrosswalk, /DoD-14.*Maintain NO-GO until all gates are verified and owner separately approves promotion/);
+  assert.match(implementationChecklist, /\| MOD-MIZ-01 \| Semantic Research \/ Mizan/);
+  assert.match(implementationChecklist, /\| MOD-CAB-01 \| CAB Mission Control/);
+  assert.match(implementationChecklist, /^\| DB-02 \| Database \|.*\| \[ \] IN PROGRESS \|.*`0003`–`0005`/m);
+  assert.match(releaseGatesDoc, /isolated Neon rehearsal proves migrations `0000`–`0002` only.*not been applied to a persistent Neon database or Neon-rehearsed/);
+  assert.match(releaseGatesDoc, /separate populated-fixture PGlite test automatically executes the reviewed reverse-DDL sequence.*not published downgrade scripts/);
+  assert.match(handoverDoc, /^### Earlier local implementation checkpoint — 2026-10-12 \(superseded by the current local-only follow-up above\)/m);
+  assert.match(handoverDoc, /^## Current review checkpoint — 2026-10-13/m);
+  assert.match(handoverDoc, /Latest local-only CI-chain checkpoint \(`e77fce3`; 2026-10-13\).*Node\.js 22\.23\.3.*SHA-256.*241 locked packages.*134\/134.*production build.*smoke runner passed 40\/40.*127\.0\.0\.1:3199/);
+  assert.match(handoverDoc, /Handover freshness follow-up \(commits `831f9de`, `55db969`, `c2ca014`, `8ab6753`\).*expanded smoke returns 39\/40.*previous bundle/);
+  assert.match(handoverDoc, /Local evidence-contract follow-up \(commits `277a4ff`, `779f97d`\).*single-server build → health check → HTTP-smoke lifecycle.*all 15 pending Archive rows/);
+  assert.ok(handoverDoc.includes("verified application source baseline is `ca975bb` on `codex/v11-release-readiness`; it contains"));
+  assert.ok(handoverDoc.includes("One local server listens at `127.0.0.1:3199`; no listener is open on 3000."));
+  assert.match(implementationChecklist, /Historical local-only code checkpoint.*`7ec6752`; superseded by the current checkpoint/);
+  assert.match(finalizationPlan, /dated planning snapshot.*do not mean the current release gates are closed/);
+  assert.match(finalizationPlan, /Production remains \*\*NO-GO\*\* until those current gates are verified/);
+  assert.match(releaseGatesDoc, /Historical local visual checkpoint .* handover page at `http:\/\/127\.0\.0\.1:3054\/handover`/);
+  assert.match(releaseGatesDoc, /Prior local checkpoint — superseded by the verification above/);
+  assert.match(releaseGatesDoc, /At checkpoint commit `81f8fe8`, the suite passed 125\/125 tests and CSP-required HTTP smoke 34\/34 on Node 26\.5\.0/);
+  assert.match(releaseGatesDoc, /fresh tracked-tree snapshot at `162693b`.*fresh install of 239 locked packages.*Node 26\.5\.0 \/ npm 11\.17\.0/);
+  assert.match(releaseGatesDoc, /## Current local release status — 2026-10-13/);
+  assert.match(releaseGatesDoc, /Exact local CI-chain verification \(`e77fce3`; 2026-10-13\).*environment files.*Node\.js 22\.23\.3.*241 locked packages.*134\/134.*production build.*smoke runner passed 40\/40.*127\.0\.0\.1:3199/);
+  assert.ok(releaseGatesDoc.includes("Superseded clean local checkpoint (`e2225a3`):** retained in git history. Current exact-source verification is recorded once above."));
+  assert.match(releaseGatesDoc, /Approved isolated Neon rehearsal of `0001`.*exact `0001` foreign-key DDL.*rollback restored `ON DELETE CASCADE`/);
+  assert.match(releaseGatesDoc, /Read-only Neon refresh \(2026-10-13\).*production and development branches both return an empty automatic-snapshot schedule.*`allow_sign_up=true`.*`verify_email_on_sign_up=false`.*`require_email_verification=false`/);
+  assert.match(releaseGatesDoc, /Current Neon Auth documentation review \(2026-10-13, read-only\).*production checklist.*email verification is off by default.*restricted sign-up is still forthcoming.*MFA roadmap/);
+  assert.match(readme, /current provider-policy evidence.*RELEASE_GATES_V11\.md#security-and-editor/);
+  assert.match(releaseGatesDoc, /Read-only dev database refresh \(2026-10-13\).*ready, non-default branch.*15 stories, all 15 `source_needed`.*no `drizzle\.__drizzle_migrations`.*revision FK `ON DELETE CASCADE`.*G-DB-02 remains open/);
+  assert.match(migrationReconciliationDoc, /Latest development preflight \(read-only, 2026-10-13\).*ready, non-default.*16 application tables.*15 rows, all 15 `source_needed`.*no `drizzle\.__drizzle_migrations`.*`ON DELETE CASCADE`.*No SQL writes/);
+  assert.match(releaseGatesDoc, /Supplemental clean local Node 24 reproduction \(`352467f`; Node 24\.19\.0\/npm 11\.17\.0\).*fresh install of 239 locked packages.*134\/134.*`db:check`.*full `npm audit` \(0 findings\).*`actionlint`.*production build/);
+  assert.match(releaseGatesDoc, /Previous runtime snapshot \(superseded by commit `5bae423`\)/);
+  assert.match(implementationChecklist, /offline driver-policy validation only; no configured Neon URL or remote branch was tested/);
+  assert.match(implementationChecklist, /`ENGINEERING_FAST_TRACK_V11\.md` and `FAST_TRACK_CHECKLIST_V11_1\.md`; both explicitly describe historical\/superseded snapshots, not the authoritative V11\/V11\.2 plan/);
+  assert.match(implementationChecklist, /Latest local-only workflow and UX evidence \(clean source snapshot `4607504`; evidence docs at `09d4147`; tracker crosswalk at `65cc398`\)/);
+  assert.match(implementationChecklist, /fresh `npm ci --no-audit --no-fund` on Node 22\.23\.3\/npm 10\.9\.4 \(241 packages\).*passed 129\/129 tests, `db:check`, full dependency audit \(0 findings\), `actionlint`, production build, and CSP-required HTTP smoke 40\/40/);
+  assert.match(implementationChecklist, /remote exact-head Preview\/CI and connected Archive count remain open/);
+  const fnd04Task = implementationTasks.find((line) => line.startsWith("| FND-04 |"));
+  assert.match(fnd04Task, /\| \[ \] IN PROGRESS \|/);
+  assert.match(fnd04Task, /current expanded smoke.*returns 39\/40.*previous bundle.*Refresh the existing server on the same port/i);
+  assert.match(fnd04Task, /connected Archive count, owner-authenticated paths, exact reviewed Preview, and GitHub Actions on local commits remain unverified/i);
+  assert.match(implementationChecklist, /production remains NO-GO/);
+  assert.match(releaseGatesDoc, /Editor mutation origin policy:/);
+  assert.match(releaseGatesDoc, /PGlite integration calls the actual authorizer and write handler/);
+  assert.match(releaseGatesDoc, /without adding a revision, audit event, actor row, or quota reservation/);
+  assert.match(releaseGatesDoc, /rejects identity\/TLS URL overrides and other unapproved query parameters, requires one TLS-enabled `sslmode`, permits Neon's optional `channel_binding=require`, rejects `PGOPTIONS`\/`PGREPLICATION`/);
+  assert.match(releaseGatesDoc, /Direct Studio `--host`\/`--port` and wrapper `--config`\/extra-argument overrides are refused/);
+  assert.match(handoverDoc, /Editor handler integration confirms rejected origin metadata adds no revision, audit event, actor row, or quota reservation/);
+  assert.match(handoverDoc, /Earlier local code checkpoint `7dc1d28`.*129\/129.*40\/40/s);
+  assert.match(handoverDoc, /At local checkpoint `75c7cc6`.*215 commits ahead of `origin\/codex\/v11-release-readiness` at `06e2a11`/);
+  assert.match(handoverDoc, /only commit after that snapshot was documentation-only/);
+  assert.match(handoverDoc, /promised authoritative Grand Master Plan V11\/V11\.2 is still not present/);
+  assert.match(releaseGatesDoc, /Earlier local code revalidation \(HEAD `7dc1d28`.*129\/129.*40\/40/);
+  assert.match(releaseGatesDoc, /Local checkpoint before this documentation correction \(`75c7cc6`\).*215 commits ahead.*contained documentation only/);
+  assert.match(releaseGatesDoc, /authoritative V11\/V11\.2 plan remain unavailable/);
+  assert.match(releaseGatesDoc, /Read-only GitHub review recorded PR #4 draft\/open with no reviews at remote head `06e2a119377e46a735714608becf96e095846553`/);
+  assert.match(releaseGatesDoc, /local merge-tree simulation reported add\/add conflicts/);
+  assert.ok(releaseGatesDoc.includes("in `app/page.jsx`, `app/style.css`, and `package.json`"));
+  assert.match(releaseGatesDoc, /existing Neon Auth transitive UI peer conflicts/);
+  assert.doesNotMatch(releaseGatesDoc, /127\.0\.0\.1:30(?:20|35|36)\/handover/);
+});
+
+test("handover automated-test metric matches the declared Node test suite size", async () => {
+  const testFiles = (await readdir(testsDirectory)).filter((file) => file.endsWith(".test.js"));
+  const testSources = await Promise.all(testFiles.map((file) => readFile(new URL(file, testsDirectory), "utf8")));
+  const declaredTests = testSources.reduce((total, source) => total + (source.match(/\btest\(/g) ?? []).length, 0);
+  const dashboardCount = Number(handoverPage.match(/value: "(\d+) \/ \d+", label: "automated tests"/)?.[1]);
+  assert.ok(Number.isFinite(dashboardCount), "handover must declare its automated-test count");
+  assert.equal(dashboardCount, declaredTests, "dashboard count must follow the actual declared test suite");
+});
+
+test("populated development migration runbook accounts for the entire current journal", () => {
+  assert.match(migrationReconciliationDoc, /After the `0000` row is independently confirmed[\s\S]*run `npm run db:migrate`/);
+  assert.match(migrationReconciliationDoc, /review the complete ordered plan[\s\S]*applying all remaining journal entries/);
+  assert.match(migrationReconciliationDoc, /npm run db:stamp-baseline/);
+  assert.match(migrationReconciliationDoc, /CONFIRM_BASELINE_STAMP = "br-green-butterfly-b51kp4b1"/);
+  assert.match(migrationReconciliationDoc, /one PostgreSQL `DO` statement[\s\S]*atomically creating the standard Drizzle ledger/);
+  assert.match(migrationReconciliationDoc, /branch-ID confirmation is an operator prompt only[\s\S]*does not cryptographically bind the URL to that branch/);
+  assert.match(migrationReconciliationDoc, /single-operator migration window[\s\S]*does not coordinate with another session's DDL/);
+  assert.match(migrationReconciliationDoc, /absence of `0005` approval columns/);
+  assert.match(migrationReconciliationDoc, /No approval to stamp persistent development has been given/);
+  assert.match(migrationReconciliationDoc, /`system\.editor_write_controls` has exactly one global row/);
+  assert.match(migrationReconciliationDoc, /PGlite fixture coverage but have not been applied to a persistent Neon database/);
+  assert.match(migrationReconciliationDoc, /`writes_frozen` is `false` after migrations/);
+  assert.match(migrationReconciliationDoc, /Local reverse-DDL rehearsal across migrations 0001–0005/);
+  assert.match(migrationReconciliationDoc, /15 synthetic published, `source_needed` story indexes and zero revisions/);
+  assert.match(migrationReconciliationDoc, /all 19 story rows[\s\S]*15 baseline stories' published[\s\S]*source_needed[\s\S]*statuses remain intact/);
+  assert.match(migrationReconciliationDoc, /PGlite reverse-DDL simulation, not a published downgrade command, Drizzle-ledger rollback workflow, or Neon rehearsal/);
+  assert.match(migrationReconciliationDoc, /No step in this document grants approval to write/);
+});
+
+test("README local visual and smoke instructions do not claim a session-specific server is running", () => {
+  assert.match(readme, /Project status \(13 October 2026\): LOCAL RELEASE REVIEW IN PROGRESS — NOT PRODUCTION-READY/);
+  assert.match(readme, /groups owner follow-ups into three action groups.*detailed release register still has eight open technical gates/);
+  assert.match(readme, /Local tests pass \(134\/134\).*baseline HTTP smoke passed 40\/40.*freshness assertion reports 39\/40.*previous bundle/);
+  assert.match(readme, /current local review, stay in the existing checkout on `codex\/v11-release-readiness`.*clean-clone steps below check out remote `dev`/);
+  assert.match(readme, /Local visual routes after starting the app/);
+  assert.match(readme, /icacls \.env\.local \/inheritance:r \/grant:r/);
+  assert.match(readme, /reuse the MoonWitness local server if one is already running.*opens no listener.*Only when no MoonWitness server is running/);
+  assert.match(readme, /if 3000 is occupied, choose one available port and use it for both commands/);
+  assert.match(readme, /Local pages do not imply a Preview or production deployment/);
+  assert.match(readme, /Do not pass a custom `--config` to a direct Drizzle command/);
+  assert.match(readme, /that file is outside the repository's default-config guard/);
+  assert.doesNotMatch(readme, /\]\(https?:\/\/(?:127\.0\.0\.1|localhost):\d+|are running/);
+});
+
+test("database readiness smoke never treats an app label as proof of the target environment", () => {
+  assert.match(smokeScript, /api\/health\/db",\(r,b\)=>r\.status===200&&b\?\.status==="ok"&&b\?\.database==="connected"&&!Object\.hasOwn\(b,"migration"\)/);
+});
+test("CI actions stay pinned to full SHAs and Dependabot tracks action updates", () => {
+  const actionReferences = [...qualityWorkflow.matchAll(/^\s*- uses:\s*(\S+)/gm)].map((match) => match[1]);
+  assert.ok(actionReferences.length > 0);
+  for (const reference of actionReferences) {
+    assert.match(reference, /^[^@]+@[a-f0-9]{40}$/, `${reference} must use a full commit SHA`);
+  }
+  assert.match(dependabotConfig, /package-ecosystem:\s*github-actions/);
+  assert.match(dependabotConfig, /interval:\s*weekly/);
+  assert.equal(packageJson.engines.node, ">=22.0.0");
+  assert.equal(packageLock.packages[""].engines.node, packageJson.engines.node);
+  assert.match(qualityWorkflow, /node-version:\s*'22'/);
+  const startServer = "npm run start -- --hostname 127.0.0.1 --port 3000";
+  assert.equal(qualityWorkflow.split(startServer).length - 1, 1, "CI owns exactly one loopback app server for HTTP smoke");
+  const buildIndex = qualityWorkflow.indexOf("npm run build");
+  const startIndex = qualityWorkflow.indexOf(startServer);
+  const smokeIndex = qualityWorkflow.indexOf("SMOKE_PROFILE=local SMOKE_BASE_URL=http://127.0.0.1:3000 SMOKE_EXPECT_CSP=1 npm run smoke:http");
+  assert.ok(buildIndex < startIndex && startIndex < smokeIndex, "CI builds before starting one server and smoking it");
+  assert.match(qualityWorkflow, /trap 'kill "\$server_pid" 2>\/dev\/null \|\| true' EXIT/);
+  assert.match(qualityWorkflow, /curl --fail --silent http:\/\/127\.0\.0\.1:3000\/api\/health/);
+});

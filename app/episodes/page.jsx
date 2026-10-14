@@ -1,41 +1,75 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { getDatabase } from "../../db/client";
 import { stories } from "../../db/schema";
-import { desc, eq } from "drizzle-orm";
+import { listPublicArchivePageEntries } from "../../lib/public-archive-query.js";
+import { getSourceProvenanceNotice, PUBLIC_ARCHIVE_NOTICE } from "../../lib/source-provenance.js";
+import { crew } from "../universe-data.js";
+import styles from "./archive.module.css";
+
+const crewArt = ["four-lah", "whalterwhite", "isrockfeel", "rock-soul"];
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function EpisodesPage() {
+  await connection();
   let episodes = [];
   let connectionIssue = false;
   try {
-    episodes = await getDatabase().select({
-      slug: stories.slug, title: stories.title, season: stories.season,
-      synopsis: stories.synopsis, originalSourceStatus: stories.originalSourceStatus,
-    }).from(stories).where(eq(stories.status, "published")).orderBy(desc(stories.createdAt)).limit(100);
+    episodes = await listPublicArchivePageEntries(getDatabase(), stories);
   } catch { connectionIssue = true; }
-  return <main style={{minHeight:"100vh",padding:"40px max(20px,5vw)",background:"#101529",color:"#f8fbff",fontFamily:"system-ui"}}>
-    <nav><Link href="/" style={{color:"#70edee"}}>← MOONWITNESS XII HOME</Link></nav>
-    <header style={{padding:"45px 0",borderBottom:"3px solid #53eaf2"}}>
-      <p style={{color:"#ffdc58",fontWeight:800}}>FIND LIGHT IN DARKNESS • STORY VAULT</p>
-      <h1 style={{fontSize:"clamp(38px,6vw,76px)",margin:"12px 0"}}>THE EPISODE ARCHIVE</h1>
-      <p style={{maxWidth:700}}>MoonWitness stories, The Batteries absurd comedy, witness journeys and AETHERION. Each entry below is an editorial index; full original scripts and comic pages are still being recovered.</p>
+  return <main className={styles.page}>
+    <nav className={styles.topbar} aria-label="Main navigation">
+      <Link href="/" className={styles.homeLink}>← MOONWITNESS XII</Link>
+      <span className={styles.issueTag}>PUBLIC EDITORIAL INDEX · ISSUE 001</span>
+    </nav>
+    <header className={styles.hero}>
+      <p className={styles.eyebrow}><span className={styles.spark} aria-hidden="true">✳</span> FIND LIGHT IN DARKNESS · STORY VAULT</p>
+      <h1 className={styles.title}>THE EPISODE ARCHIVE</h1>
+      <p className={styles.intro}>MoonWitness stories, The Batteries absurd comedy, witness journeys, and AETHERION. Each public entry is an editorial index; original scripts and comic pages are not reproduced here.</p>
+      <aside className={styles.provenanceNotice} role="note" aria-label="Archive source and rights status">
+        <span className={styles.noticeMark} aria-hidden="true">!</span>
+        <div><strong>PUBLIC LISTING REQUIRES EXPLICIT USE APPROVAL</strong><p>{PUBLIC_ARCHIVE_NOTICE}</p></div>
+      </aside>
     </header>
-    {connectionIssue?<section style={{padding:25,background:"#382535",marginTop:28}}>Archive database is temporarily unavailable. No private drafts are displayed.</section>:
-    <><p style={{color:"#c6ff5b",marginTop:26}}>{episodes.length} INDEXED EPISODES • DEVELOPMENT VAULT</p>
-    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:18,marginTop:22}}>
-      {episodes.map((e,i)=><article key={e.slug} style={{border:"2px solid #5de8ef",background:"#202b43",padding:20,boxShadow:"5px 5px #ff79bb"}}>
-        <div style={{fontSize:13,color:"#ffe05c",fontWeight:800}}>{e.season||"MOONWITNESS"} • #{i+1}</div>
-        <h2 style={{fontSize:24,lineHeight:1.2}}>{e.title}</h2>
-        <p style={{lineHeight:1.6}}>{e.synopsis}</p>
-        <small style={{color:"#a0b9ca"}}>ORIGINAL SOURCE: {e.originalSourceStatus?.replaceAll("_"," ").toUpperCase()}</small>
-      </article>)}
+    <section className={styles.crewSpotlight} aria-labelledby="crew-spotlight-title">
+      <div className={styles.crewSpotlightIntro}>
+        <p className={styles.crewEyebrow}>THE BATTERIES · CHARACTER FILES 001—004</p>
+        <h2 id="crew-spotlight-title">THE CREW KEEPS WATCH.</h2>
+        <p>Four recurring characters from the MoonWitness universe, each recognized by their gear, colors, and way of moving. Their faces stay hidden by design.</p>
+        <p className={styles.crewScope}>These are universe portraits, not claims that a specific character appears in an indexed story.</p>
+        <Link href="/team" className={styles.crewLink}>MEET THE CREW <span aria-hidden="true">↗</span></Link>
+      </div>
+      <div className={styles.crewGrid}>
+        {crew.map((member, index) => <article className={`${styles.crewCard} ${styles[member.tone]}`} key={member.name}>
+          <div className={styles.crewPortrait}>
+            <img src={`/characters/styles/faceless-visor/${crewArt[index]}--faceless-visor.webp`} alt="" aria-hidden="true" loading="lazy" />
+            <span aria-hidden="true">0{index + 1}</span>
+          </div>
+          <div className={styles.crewName}><strong>{member.name}</strong><span>{member.role}</span></div>
+        </article>)}
+      </div>
+    </section>
+    {connectionIssue?<section className={styles.retry} role="alert"><h2>THE VAULT IS TAKING A BREATHER</h2><p>Archive database is temporarily unavailable. No private drafts are displayed.</p><Link href="/episodes" className={styles.entryLink}>TRY AGAIN ↻</Link></section>:
+    <><p className={styles.countLine}><strong>{episodes.length}</strong> APPROVED INDEX ENTRIES</p>
+    {episodes.length === 0 && <section className={styles.pendingReview} role="status"><span aria-hidden="true">✳</span><div><h2>THE STORIES ARE IN REVIEW</h2><p>No entry is cleared for the public index yet. Stories stay private until their sources, credits, privacy, and exact public use are reviewed.</p></div></section>}
+    <div className={styles.grid}>
+      {episodes.map((e,i)=>{
+        const provenance=getSourceProvenanceNotice(e.originalSourceStatus);
+        return <article key={e.slug} className={styles.card}>
+        <div className={styles.cardMeta}><span>{e.season||"MOONWITNESS"}</span><span>FILE #{String(i+1).padStart(2,"0")}</span></div>
+        <h2 className={styles.cardTitle}>{e.title}</h2>
+        <p lang="id" className={styles.synopsis}>{e.synopsis}</p>
+        <div className={styles.status}><span className={styles.statusDot} aria-hidden="true" />{provenance.label}</div>
+        <p className={styles.noticeText}>{provenance.description}</p>
+        <Link href={`/episodes/${encodeURIComponent(e.slug)}`} className={styles.entryLink}>OPEN INDEX ENTRY →</Link>
+      </article>;
+      })}
     </div></>}
-    <footer style={{padding:"50px 0",marginTop:45,borderTop:"2px solid #444",textAlign:"center"}}>
-      <h2 style={{color:"#ffe05c"}}>COMEDY ON. SHALAWAT ON.</h2>
-      <p>Pelan-pelan ya, gue juga masih belajar. • Mercy First. Humanity First. Ego Last.</p>
-      <p style={{fontSize:28,color:"#6aeaf0"}}>Cahaya bulan menerangi AKUUU... 🌙</p>
+    <footer className={styles.footer}>
+      <p>COMEDY ON. SHALAWAT ON. · MERCY FIRST · HUMANITY FIRST · EGO LAST</p>
+      <p lang="id">Pelan-pelan ya, gue juga masih belajar. Cahaya bulan menerangi AKUUU... 🌙</p>
     </footer>
   </main>;
 }

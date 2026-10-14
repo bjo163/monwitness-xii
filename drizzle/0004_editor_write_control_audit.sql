@@ -1,0 +1,2 @@
+ALTER TABLE "system"."editor_write_controls" ADD COLUMN "changed_by" text DEFAULT 'migration' NOT NULL;--> statement-breakpoint
+ALTER TABLE "system"."editor_write_controls" ADD COLUMN "change_reason" text DEFAULT 'initialization' NOT NULL;
