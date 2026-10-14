@@ -95,11 +95,11 @@ test("global Next.js headers harden pages and static assets", () => {
 });
 
 test("editor login explains owner provisioning and all editor-access requirements", () => {
-  assert.match(editorLoginView, /owner-provisioned account/);
+  assert.match(editorLoginView, /accounts are provisioned by the project owner/i);
   assert.match(editorLoginView, /Neon Auth administrator role/);
   assert.match(editorLoginView, /server-side editor allowlist/);
   assert.match(handoverPage, /Editor writes require a verified email, an Auth admin role/);
-  assert.match(editorLoginView, /Provider registration is managed separately/);
+  assert.match(editorLoginView, /Verify email or set your password/);
   assert.match(editorLoginView, /getEditorLoginAccessDecision/);
   assert.match(editorLoginView, /role:data\?\.role,emailVerified:data\?\.emailVerified,canEdit:data\?\.canEdit/);
   assert.match(editorLoginView, /verified email/);
