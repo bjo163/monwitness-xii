@@ -7,6 +7,7 @@ import { readFile, readdir } from "node:fs/promises";
 const script = fileURLToPath(new URL("../scripts/smoke-http.mjs", import.meta.url));
 const nextConfig = await readFile(new URL("../next.config.js", import.meta.url), "utf8");
 const qualityWorkflow = await readFile(new URL("../.github/workflows/quality.yml", import.meta.url), "utf8");
+const vercelDeploymentPolicy = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const packageLock = JSON.parse(await readFile(new URL("../package-lock.json", import.meta.url), "utf8"));
 const dependabotConfig = await readFile(new URL("../.github/dependabot.yml", import.meta.url), "utf8");
@@ -54,6 +55,7 @@ test("HTTP smoke rejects unsupported profiles before making requests", () => {
 });
 
 test("global Next.js headers harden pages and static assets", () => {
+  assert.equal(vercelDeploymentPolicy.git.deploymentEnabled["codex/v11-release-readiness"], false);
   assert.match(nextConfig, /source:\s*["']\/:path\*["']/);
   assert.match(nextConfig, /X-Content-Type-Options["']?,\s*value:\s*["']nosniff/);
   assert.match(nextConfig, /X-Frame-Options["']?,\s*value:\s*["']DENY/);
